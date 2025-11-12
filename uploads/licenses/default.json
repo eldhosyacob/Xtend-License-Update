@@ -1,0 +1,35 @@
+{
+    "CreatedOn": "20250917",
+    "Licensee": {
+        "Name": "Xtend Technologies Pvt. Ltd.",
+        "Distributor": "",
+        "Dealer": "",
+        "Type": "Rental",
+        "AMCTill": "20251001",
+        "BillNo": "XT25-1002"
+    },
+    "System": {
+        "Type": "Desktop",
+        "OS": "Windows",
+        "IsVM": false,
+        "SerialID": "",
+        "UniqueID": ""
+    },
+    "Engine": {
+        "Build": "Xtend IVR",
+        "GracePeriod": 30,
+        "MaxPorts": "M=4000,*=4000",
+        "ValidStartTZ": 330,
+        "ValidEndTZ": 330,
+        "ValidCountries": 65
+    },
+    "Hardware": {
+        "Analog": {
+            "2303": "11110000",
+            "2304": "00001111"
+        }
+    },
+    "Features": {
+        "Script": {}
+    }
+}
