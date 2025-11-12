@@ -1,0 +1,9 @@
+{
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
+    "editor.minimap.enabled": false,
+    "html.hover.documentation": false,
+    "html.hover.references": false,
+    "scss.hover.documentation": false,
+    "scss.hover.references": false,
+}

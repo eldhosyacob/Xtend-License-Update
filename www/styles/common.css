@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+}
+
+.page-containers {
+  position: relative;
+  padding-left: 260px;
+  margin-top: 60px;
+  min-height: 100vh;
+  /* background-color: red; */
+}
+
+@media (max-width: 768px) {
+  .page-containers {
+    padding-left: 0;
+  }
+}
