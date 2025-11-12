@@ -1,3 +1,24 @@
+<?php
+// Get current page name from URL
+$current_page = basename($_SERVER['PHP_SELF'], '.php');
+
+// Define page titles
+$page_titles = [
+  'dashboard' => 'Dashboard',
+  'licenses' => 'Licenses',
+  'users' => 'Users',
+  'products' => 'Products',
+  'reports' => 'Reports',
+  'analytics' => 'Analytics',
+  'settings' => 'Settings',
+  'documentation' => 'Documentation',
+  'help' => 'Help Center'
+];
+
+// Get the page title, default to the current page name with first letter capitalized
+$page_title = isset($page_titles[$current_page]) ? $page_titles[$current_page] : ucfirst($current_page);
+?>
+
 <!-- Header -->
 <header class="header-container">
   <div class="header-left">
@@ -10,7 +31,7 @@
   </div>
 
   <div class="header-center">
-    <h1 class="page-title">Dashboard</h1>
+    <h1 class="page-title"><?php echo htmlspecialchars($page_title); ?></h1>
   </div>
 
   <div class="header-right">
@@ -79,7 +100,7 @@
     <div class="sidebar-section">
       <h3 class="sidebar-section-title">Main</h3>
       <ul class="sidebar-menu">
-        <li class="sidebar-menu-item active">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'dashboard') ? 'active' : ''; ?>">
           <a href="dashboard.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M8 3.293l6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6zm5-.793V1.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293l-2-2z"/>
@@ -87,7 +108,7 @@
             <span>Dashboard</span>
           </a>
         </li>
-        <li class="sidebar-menu-item">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'licenses') ? 'active' : ''; ?>">
           <a href="licenses.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
@@ -96,7 +117,7 @@
             <span>Licenses</span>
           </a>
         </li>
-        <li class="sidebar-menu-item">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'users') ? 'active' : ''; ?>">
           <a href="users.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
@@ -104,8 +125,8 @@
             <span>Users</span>
           </a>
         </li>
-        <li class="sidebar-menu-item">
-          <a href="#products" class="sidebar-link">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'products') ? 'active' : ''; ?>">
+          <a href="products.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.371 2.371 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976l2.61-3.045zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0zM1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5zM4 15h3v-5H4v5zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3zm3 0h-2v3h2v-3z"/>
             </svg>
@@ -118,24 +139,24 @@
     <div class="sidebar-section">
       <h3 class="sidebar-section-title">Management</h3>
       <ul class="sidebar-menu">
-        <li class="sidebar-menu-item">
-          <a href="#reports" class="sidebar-link">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'reports') ? 'active' : ''; ?>">
+          <a href="reports.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
             </svg>
             <span>Reports</span>
           </a>
         </li>
-        <li class="sidebar-menu-item">
-          <a href="#analytics" class="sidebar-link">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'analytics') ? 'active' : ''; ?>">
+          <a href="analytics.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M7.5 1.018a7 7 0 0 0-4.79 11.566L7.5 7.793V1.018zm1 0V7.5h6.482A7.001 7.001 0 0 0 8.5 1.018zM14.982 8.5H8.207l-4.79 4.79A7 7 0 0 0 14.982 8.5zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/>
             </svg>
             <span>Analytics</span>
           </a>
         </li>
-        <li class="sidebar-menu-item">
-          <a href="#settings" class="sidebar-link">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'settings') ? 'active' : ''; ?>">
+          <a href="settings.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
               <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319z"/>
@@ -149,16 +170,16 @@
     <div class="sidebar-section">
       <h3 class="sidebar-section-title">Support</h3>
       <ul class="sidebar-menu">
-        <li class="sidebar-menu-item">
-          <a href="#documentation" class="sidebar-link">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'documentation') ? 'active' : ''; ?>">
+          <a href="documentation.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
             </svg>
             <span>Documentation</span>
           </a>
         </li>
-        <li class="sidebar-menu-item">
-          <a href="#help" class="sidebar-link">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'help') ? 'active' : ''; ?>">
+          <a href="help.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
             </svg>
@@ -217,24 +238,6 @@
         $('#userDropdown').removeClass('active');
       }
     });
-
-    // Sidebar menu active state
-    // $('.sidebar-link').on('click', function(e) {
-    //   e.preventDefault();
-    //   $('.sidebar-menu-item').removeClass('active');
-    //   $(this).parent().addClass('active');
-
-    //   // Update page title in header
-    //   var pageTitle = $(this).find('span').text();
-    //   $('.page-title').text(pageTitle);
-
-    //   // Close sidebar on mobile after selection
-    //   if ($(window).width() <= 768) {
-    //     $('#sidebar').removeClass('active');
-    //     $('#sidebarOverlay').removeClass('active');
-    //     $('#hamburgerMenu').removeClass('active');
-    //   }
-    // });
 
     // Search functionality
     $('.search-btn').on('click', function() {
