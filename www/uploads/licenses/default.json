@@ -12,8 +12,8 @@
         "Type": "Desktop",
         "OS": "Windows",
         "IsVM": false,
-        "SerialID": "",
-        "UniqueID": ""
+        "SerialID": "104",
+        "UniqueID": "GBRX-X5Q2-DF8S-A584"
     },
     "Engine": {
         "Build": "Xtend IVR",

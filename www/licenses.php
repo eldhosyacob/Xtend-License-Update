@@ -89,6 +89,7 @@ $loaded = null; // no longer used
 $rawJson = '';  // no longer used
 $prefill = null; // holds fetched JSON to prefill the form
 $submitResult = null; // holds submission result data
+$commentValue = isset($_POST['comment']) ? (string)$_POST['comment'] : 'Comment';
 
 if ($method === 'POST' && $action === 'fetch_remote') {
     $url = trim((string)($_POST['remote_url'] ?? ''));
@@ -243,7 +244,10 @@ if ($method === 'POST' && $action === 'send') {
         $url = 'https://10.1.1.7/license.xqs?UploadFile()';
         $account = 'guest';
         $token = 'guest';
-        $info = 'Comment';
+        $info = trim((string)($_POST['comment'] ?? 'Comment'));
+        if ($info === '') {
+            $info = 'Comment';
+        }
 
         // Build curl command: curl -k -X POST -F account_name=guest -F secret_token=guest -F licensefile=@default.json "URL" -F info="Comment"
         $cmd = [
@@ -275,6 +279,7 @@ if ($method === 'POST' && $action === 'send') {
             'code' => $code,
             'out' => $out,
             'err' => $err,
+            'comment' => $info,
         ];
     }
 }
@@ -285,6 +290,7 @@ header('Content-Type: text/html; charset=utf-8');
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>License JSON Upload</title>
     <!-- <link rel="stylesheet" href="css/style.css">
     <link rel="shortcut icon" href="images/favicon.png" /> -->
@@ -313,6 +319,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <?php
                     $resultTag = $submitResult['resultTag'];
                     $errorTag = $submitResult['errorTag'];
+                    $sentComment = $submitResult['comment'] ?? '';
                     if ($resultTag !== '' || $errorTag !== ''):
                         $bg = ($resultTag === 'SUCCESS') ? '#ecfdf5' : '#fef2f2';
                         $border = ($resultTag === 'SUCCESS') ? '#a7f3d0' : '#fecaca';
@@ -326,6 +333,10 @@ header('Content-Type: text/html; charset=utf-8');
                             <div style="margin-top:4px;"><strong>Error:</strong> <?php echo h($errorTag); ?></div>
                         <?php endif; ?>
                     </div>
+                <?php endif; ?>
+                
+                <?php if ($sentComment !== ''): ?>
+                    <div style="margin-bottom:12px;"><strong>Comment sent:</strong> <?php echo h($sentComment); ?></div>
                 <?php endif; ?>
                 
                 <div style="margin-bottom:8px; font-weight:bold;">JSON sent</div>
@@ -449,6 +460,10 @@ header('Content-Type: text/html; charset=utf-8');
                         <input type="text" name="Hardware[Analog][<?php echo h($k); ?>]" value="<?php echo h($v); ?>" style="padding:8px; width:200px;">
                     </div>
                 <?php endforeach; ?>
+            </div>
+            <div style="margin-top:16px;">
+                <label style="display:block; font-weight:bold; margin-bottom:4px;">Comment</label>
+                <input type="text" name="comment" value="<?php echo h($commentValue); ?>" style="padding:8px; width:320px;">
             </div>
             <div style="margin-top:16px;">
                 <!-- <button type="submit" style="padding:10px 18px; background:#16a34a; color:white; border:none; border-radius:6px; cursor:pointer;">Generate JSON</button> -->
