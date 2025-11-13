@@ -35,23 +35,23 @@ $page_title = isset($page_titles[$current_page]) ? $page_titles[$current_page] :
   </div>
 
   <div class="header-right">
-    <div class="header-search">
+    <!-- <div class="header-search">
       <input type="text" placeholder="Search..." class="search-input">
       <button class="search-btn">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
         </svg>
       </button>
-    </div>
+    </div> -->
 
-    <div class="header-notifications">
+    <!-- <div class="header-notifications">
       <button class="notification-btn" aria-label="Notifications">
         <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
           <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
         </svg>
         <span class="notification-badge">3</span>
       </button>
-    </div>
+    </div> -->
 
     <div class="header-user">
       <button class="user-menu-btn" id="userMenuBtn">
@@ -98,7 +98,7 @@ $page_title = isset($page_titles[$current_page]) ? $page_titles[$current_page] :
 <aside class="sidebar-container" id="sidebar">
   <nav class="sidebar-nav">
     <div class="sidebar-section">
-      <h3 class="sidebar-section-title">Main</h3>
+      <!-- <h3 class="sidebar-section-title">Main</h3> -->
       <ul class="sidebar-menu">
         <li class="sidebar-menu-item <?php echo ($current_page == 'dashboard') ? 'active' : ''; ?>">
           <a href="dashboard.php" class="sidebar-link">
@@ -125,18 +125,19 @@ $page_title = isset($page_titles[$current_page]) ? $page_titles[$current_page] :
             <span>Users</span>
           </a>
         </li>
-        <li class="sidebar-menu-item <?php echo ($current_page == 'products') ? 'active' : ''; ?>">
-          <a href="products.php" class="sidebar-link">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'logout') ? 'active' : ''; ?>">
+          <a href="logout.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.371 2.371 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976l2.61-3.045zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0zM1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5zM4 15h3v-5H4v5zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3zm3 0h-2v3h2v-3z"/>
+              <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+              <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
             </svg>
-            <span>Products</span>
+            <span>Logout</span>
           </a>
         </li>
       </ul>
     </div>
 
-    <div class="sidebar-section">
+    <!-- <div class="sidebar-section">
       <h3 class="sidebar-section-title">Management</h3>
       <ul class="sidebar-menu">
         <li class="sidebar-menu-item <?php echo ($current_page == 'reports') ? 'active' : ''; ?>">
@@ -165,9 +166,9 @@ $page_title = isset($page_titles[$current_page]) ? $page_titles[$current_page] :
           </a>
         </li>
       </ul>
-    </div>
+    </div> -->
 
-    <div class="sidebar-section">
+    <!-- <div class="sidebar-section">
       <h3 class="sidebar-section-title">Support</h3>
       <ul class="sidebar-menu">
         <li class="sidebar-menu-item <?php echo ($current_page == 'documentation') ? 'active' : ''; ?>">
@@ -187,7 +188,7 @@ $page_title = isset($page_titles[$current_page]) ? $page_titles[$current_page] :
           </a>
         </li>
       </ul>
-    </div>
+    </div> -->
   </nav>
 
   <div class="sidebar-footer">

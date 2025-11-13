@@ -88,6 +88,7 @@ $errors = [];
 $loaded = null; // no longer used
 $rawJson = '';  // no longer used
 $prefill = null; // holds fetched JSON to prefill the form
+$submitResult = null; // holds submission result data
 
 if ($method === 'POST' && $action === 'fetch_remote') {
     $url = trim((string)($_POST['remote_url'] ?? ''));
@@ -255,11 +256,7 @@ if ($method === 'POST' && $action === 'send') {
             $url,
         ];
         [$code, $out, $err] = run_process($cmd);
-        header('Content-Type: text/html; charset=utf-8');
-        echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Submit Result</title>';
-        echo '<link rel="stylesheet" href="css/style.css">';
-        echo '</head><body style="font-family: Arial, sans-serif; padding:24px;">';
-        echo '<h2 style="margin-bottom:12px;">Result</h2>';
+        
         // Parse compact message from server response
         $resultTag = '';
         $errorTag = '';
@@ -269,27 +266,16 @@ if ($method === 'POST' && $action === 'send') {
         if (preg_match('/<error>(.*?)<\/error>/is', $out, $m)) {
             $errorTag = trim($m[1]);
         }
-        if ($resultTag !== '' || $errorTag !== '') {
-            $bg = ($resultTag === 'SUCCESS') ? '#ecfdf5' : '#fef2f2';
-            $border = ($resultTag === 'SUCCESS') ? '#a7f3d0' : '#fecaca';
-            $color = ($resultTag === 'SUCCESS') ? '#065f46' : '#7f1d1d';
-            echo '<div style="margin-bottom:12px; padding:12px 14px; border:1px solid ' . h($border) . '; background:' . h($bg) . '; color:' . h($color) . '; border-radius:8px;">';
-            if ($resultTag !== '') echo '<div><strong>Result:</strong> ' . h($resultTag) . '</div>';
-            if ($errorTag !== '') echo '<div style="margin-top:4px;"><strong>Error:</strong> ' . h($errorTag) . '</div>';
-            echo '</div>';
-        }
-        echo '<div style="margin-bottom:8px; font-weight:bold;">JSON sent</div>';
-        echo '<pre style="background:#0f172a; color:#e2e8f0; padding:16px; border-radius:8px; overflow:auto;">' . h($encoded) . '</pre>';
-        echo '<div style="margin-bottom:8px;">Exit code: ' . h((string)$code) . '</div>';
-        echo '<div style="margin:8px 0; font-weight:bold;">Server Response:</div>';
-        echo '<pre style="background:#0f172a; color:#e2e8f0; padding:16px; border-radius:8px; overflow:auto;">' . h($out) . '</pre>';
-        if ($err !== '') {
-            echo '<div style="margin:8px 0; font-weight:bold;">stderr:</div>';
-            echo '<pre style="background:#111827; color:#fecaca; padding:16px; border-radius:8px; overflow:auto;">' . h($err) . '</pre>';
-        }
-        echo '<div style="margin-top:16px;"><a href="license.php" style="color:#2563eb; text-decoration:none;">Back</a></div>';
-        echo '</body></html>';
-        exit;
+        
+        // Store result data instead of outputting immediately
+        $submitResult = [
+            'resultTag' => $resultTag,
+            'errorTag' => $errorTag,
+            'encoded' => $encoded,
+            'code' => $code,
+            'out' => $out,
+            'err' => $err,
+        ];
     }
 }
 
@@ -302,6 +288,9 @@ header('Content-Type: text/html; charset=utf-8');
     <title>License JSON Upload</title>
     <!-- <link rel="stylesheet" href="css/style.css">
     <link rel="shortcut icon" href="images/favicon.png" /> -->
+        <link rel="stylesheet" href="styles/users.css">
+        <link rel="stylesheet" href="styles/header-sidebar.css">
+        <link rel="stylesheet" href="styles/common.css">
     <style>
         /* Ensure page scrolls even if global CSS disables it */
         html, body { height: 100%; }
@@ -309,38 +298,52 @@ header('Content-Type: text/html; charset=utf-8');
     </style>
 </head>
 <body>
-    <div style="max-width:1000px; margin:24px auto; padding:24px 24px 80px 24px;">
-        <h2 style="margin-bottom:16px;">License JSON</h2>
-        <!-- <div style="margin-bottom:16px; border:1px dashed #cbd5e1; padding:12px; border-radius:8px; background:#f8fafc;">
-            <form method="post" style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
-                <input type="hidden" name="action" value="fetch_remote">
-                <div>
-                    <label style="display:block; font-weight:bold; margin-bottom:4px;">Fetch from URL (SVN/Web)</label>
-                    <input type="text" name="remote_url" placeholder="https://.../path/to/license.json" style="padding:8px; width:420px;">
-                </div>
-                <div>
-                    <label style="display:block; font-weight:bold; margin-bottom:4px;">Username (optional)</label>
-                    <input type="text" name="remote_user" style="padding:8px; width:180px;">
-                </div>
-                <div>
-                    <label style="display:block; font-weight:bold; margin-bottom:4px;">Password (optional)</label>
-                    <input type="password" name="remote_pass" style="padding:8px; width:180px;">
-                </div>
-                <div>
-                    <label style="display:block; font-weight:bold; margin-bottom:4px;">SVN binary path (optional)</label>
-                    <input type="text" name="remote_svn_bin" placeholder="e.g. C:\Program Files\Subversion\bin\svn.exe" style="padding:8px; width:320px;">
-                </div>
-                <div>
-                    <button type="submit" style="padding:9px 14px; background:#0ea5e9; color:#fff; border:none; border-radius:6px; cursor:pointer;">Load</button>
-                </div>
-            </form>
-            <div style="font-size:12px; color:#475569; margin-top:6px;">svn://src/xtendlic/dw/10028</div>
-        </div> -->
+    <div class="page-containers">
         <?php if ($errors): ?>
             <div style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:12px 16px; border-radius:8px; margin-bottom:16px;">
                 <?php foreach ($errors as $e): ?>
                     <div><?php echo h($e); ?></div>
                 <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($submitResult !== null): ?>
+            <div style="margin-bottom:24px; border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#ffffff;">
+                <h2 style="margin-bottom:16px; font-size:20px; font-weight:bold;">Result</h2>
+                <?php
+                    $resultTag = $submitResult['resultTag'];
+                    $errorTag = $submitResult['errorTag'];
+                    if ($resultTag !== '' || $errorTag !== ''):
+                        $bg = ($resultTag === 'SUCCESS') ? '#ecfdf5' : '#fef2f2';
+                        $border = ($resultTag === 'SUCCESS') ? '#a7f3d0' : '#fecaca';
+                        $color = ($resultTag === 'SUCCESS') ? '#065f46' : '#7f1d1d';
+                ?>
+                    <div style="margin-bottom:16px; padding:12px 14px; border:1px solid <?php echo h($border); ?>; background:<?php echo h($bg); ?>; color:<?php echo h($color); ?>; border-radius:8px;">
+                        <?php if ($resultTag !== ''): ?>
+                            <div><strong>Result:</strong> <?php echo h($resultTag); ?></div>
+                        <?php endif; ?>
+                        <?php if ($errorTag !== ''): ?>
+                            <div style="margin-top:4px;"><strong>Error:</strong> <?php echo h($errorTag); ?></div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+                
+                <div style="margin-bottom:8px; font-weight:bold;">JSON sent</div>
+                <pre style="background:#0f172a; color:#e2e8f0; padding:16px; border-radius:8px; overflow:auto; margin-bottom:16px;"><?php echo h($submitResult['encoded']); ?></pre>
+                
+                <!-- <div style="margin-bottom:8px;">Exit code: <?php echo h((string)$submitResult['code']); ?></div> -->
+                
+                <div style="margin:8px 0; font-weight:bold;">Server Response:</div>
+                <pre style="background:#0f172a; color:#e2e8f0; padding:16px; border-radius:8px; overflow:auto; margin-bottom:16px;"><?php echo h($submitResult['out']); ?></pre>
+                
+                <!-- <?php if ($submitResult['err'] !== ''): ?>
+                    <div style="margin:8px 0; font-weight:bold;">stderr:</div>
+                    <pre style="background:#111827; color:#fecaca; padding:16px; border-radius:8px; overflow:auto; margin-bottom:16px;"><?php echo h($submitResult['err']); ?></pre>
+                <?php endif; ?> -->
+                
+                <div style="margin-top:24px; text-align:center;">
+                    <a href="licenses.php" style="display:inline-block; padding:5px 18px; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer; text-decoration:none;">Back</a>
+                </div>
             </div>
         <?php endif; ?>
 
@@ -396,6 +399,7 @@ header('Content-Type: text/html; charset=utf-8');
             }
             $analogKeys = array_unique(array_merge(array_keys($defaults['Hardware']['Analog']), array_keys($analogFromPrefill)));
         ?>
+        <?php if ($submitResult === null): ?>
         <form method="post" style="display:block; margin-bottom:24px; border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#f8fafd;">
             <input type="hidden" name="action" value="generate">
             <h3 style="margin:8px 0 12px 0;">General</h3>
@@ -452,7 +456,9 @@ header('Content-Type: text/html; charset=utf-8');
                 <button type="submit" name="action" value="send" style="padding:10px 18px; background:#f59e0b; color:white; border:none; border-radius:6px; cursor:pointer; margin-left:8px;">Submit to Server</button>
             </div>
         </form>
+        <?php endif; ?>
     </div>
+    <?php include 'components/header-sidebar.php'; ?>
 </body>
 </html>
 
