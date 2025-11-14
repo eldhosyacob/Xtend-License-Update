@@ -2,8 +2,8 @@
     "CreatedOn": "20250917",
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
-        "Distributor": "",
-        "Dealer": "",
+        "Distributor": "Xtend",
+        "Dealer": "Jasim",
         "Type": "Rental",
         "AMCTill": "20251001",
         "BillNo": "XT25-1002"
@@ -12,8 +12,8 @@
         "Type": "Desktop",
         "OS": "Windows",
         "IsVM": false,
-        "SerialID": "104",
-        "UniqueID": "GBRX-X5Q2-DF8S-A584"
+        "SerialID": "117",
+        "UniqueID": "YG52-DZ2R-ZYFH-6F4E"
     },
     "Engine": {
         "Build": "Xtend IVR",

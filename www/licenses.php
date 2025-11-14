@@ -314,7 +314,7 @@ header('Content-Type: text/html; charset=utf-8');
         <?php endif; ?>
 
         <?php if ($submitResult !== null): ?>
-            <div style="margin-bottom:24px; border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#ffffff;">
+            <div style="margin:150px 10px; border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#ffffff;">
                 <h2 style="margin-bottom:16px; font-size:20px; font-weight:bold;">Result</h2>
                 <?php
                     $resultTag = $submitResult['resultTag'];
@@ -330,17 +330,24 @@ header('Content-Type: text/html; charset=utf-8');
                             <div><strong>Result:</strong> <?php echo h($resultTag); ?></div>
                         <?php endif; ?>
                         <?php if ($errorTag !== ''): ?>
-                            <div style="margin-top:4px;"><strong>Error:</strong> <?php echo h($errorTag); ?></div>
+                            <?php
+                                // Extract only the error message after "-> "
+                                $displayError = $errorTag;
+                                if (preg_match('/->\s*(.+)$/', $errorTag, $matches)) {
+                                    $displayError = trim($matches[1]);
+                                }
+                            ?>
+                            <div style="margin-top:4px;"><strong>Reason:</strong> <?php echo h($displayError); ?></div>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
                 
-                <?php if ($sentComment !== ''): ?>
+                <!-- <?php if ($sentComment !== ''): ?>
                     <div style="margin-bottom:12px;"><strong>Comment sent:</strong> <?php echo h($sentComment); ?></div>
-                <?php endif; ?>
+                <?php endif; ?> -->
                 
-                <div style="margin-bottom:8px; font-weight:bold;">JSON sent</div>
-                <pre style="background:#0f172a; color:#e2e8f0; padding:16px; border-radius:8px; overflow:auto; margin-bottom:16px;"><?php echo h($submitResult['encoded']); ?></pre>
+                <!-- <div style="margin-bottom:8px; font-weight:bold;">JSON sent</div>
+                <pre style="background:#0f172a; color:#e2e8f0; padding:16px; border-radius:8px; overflow:auto; margin-bottom:16px;"><?php echo h($submitResult['encoded']); ?></pre> -->
                 
                 <!-- <div style="margin-bottom:8px;">Exit code: <?php echo h((string)$submitResult['code']); ?></div> -->
                 

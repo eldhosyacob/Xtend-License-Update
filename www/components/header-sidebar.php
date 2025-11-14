@@ -117,6 +117,14 @@ $page_title = isset($page_titles[$current_page]) ? $page_titles[$current_page] :
             <span>Licenses</span>
           </a>
         </li>
+        <li class="sidebar-menu-item <?php echo ($current_page == 'reports') ? 'active' : ''; ?>">
+          <a href="reports.php" class="sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
+            </svg>
+            <span>Reports</span>
+          </a>
+        </li>
         <li class="sidebar-menu-item <?php echo ($current_page == 'users') ? 'active' : ''; ?>">
           <a href="users.php" class="sidebar-link">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
