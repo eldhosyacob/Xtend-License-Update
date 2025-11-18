@@ -171,6 +171,7 @@ function buildLicenseFromPost(array $post): array {
         if (is_bool($v)) return $v;
         $s = strtolower(trim((string)$v));
         return $s === 'true' || $s === '1' || $s === 'yes';
+        // Note: "No" will return false (which is correct)
     };
     $license = [
         'CreatedOn' => $str($post['CreatedOn'] ?? ''),
@@ -180,6 +181,7 @@ function buildLicenseFromPost(array $post): array {
             'Dealer' => $str($post['Licensee']['Dealer'] ?? ''),
             'Type' => $str($post['Licensee']['Type'] ?? ''),
             'AMCTill' => $str($post['Licensee']['AMCTill'] ?? ''),
+            'ValidTill' => $str($post['Licensee']['ValidTill'] ?? ''),
             'BillNo' => $str($post['Licensee']['BillNo'] ?? ''),
         ],
         'System' => [
@@ -368,18 +370,19 @@ header('Content-Type: text/html; charset=utf-8');
         <?php
             // Defaults per provided JSON
             $defaults = [
-                'CreatedOn' => '20250917',
+                'CreatedOn' => date('Ymd'), // Current date in YYYYMMDD format
                 'Licensee' => [
                     'Name' => 'Xtend Technologies Pvt. Ltd.',
                     'Distributor' => '',
                     'Dealer' => '',
-                    'Type' => 'Rental',
+                    'Type' => 'Purchase',
                     'AMCTill' => '20251001',
+                    'ValidTill' => '',
                     'BillNo' => 'XT25-1002',
                 ],
                 'System' => [
-                    'Type' => 'Desktop',
-                    'OS' => 'Windows',
+                    'Type' => 'Standalone',
+                    'OS' => 'Linux',
                     'IsVM' => 'false',
                     'SerialID' => '',
                     'UniqueID' => '',
@@ -418,64 +421,158 @@ header('Content-Type: text/html; charset=utf-8');
             $analogKeys = array_unique(array_merge(array_keys($defaults['Hardware']['Analog']), array_keys($analogFromPrefill)));
         ?>
         <?php if ($submitResult === null): ?>
-        <form method="post" style="display:block; margin-bottom:24px; border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#f8fafd;">
+        <form method="post" style="display:block; margin-bottom:24px; border:1px solid #e5e7eb; border-radius:12px; padding:24px; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
             <input type="hidden" name="action" value="generate">
-            <h3 style="margin:8px 0 12px 0;">General</h3>
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                <div>
-                    <label style="display:block; font-weight:bold; margin-bottom:4px;">CreatedOn</label>
-                    <input type="text" name="CreatedOn" value="<?php echo h($val(['CreatedOn'], $defaults['CreatedOn'])); ?>" style="padding:8px; width:220px;">
-                </div>
-            </div>
-            <h3 style="margin:16px 0 12px 0;">Licensee</h3>
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Licensee[Name]</label><input type="text" name="Licensee[Name]" value="<?php echo h($val(['Licensee','Name'], $defaults['Licensee']['Name'])); ?>" style="padding:8px; width:280px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Licensee[Distributor]</label><input type="text" name="Licensee[Distributor]" value="<?php echo h($val(['Licensee','Distributor'], $defaults['Licensee']['Distributor'])); ?>" style="padding:8px; width:220px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Licensee[Dealer]</label><input type="text" name="Licensee[Dealer]" value="<?php echo h($val(['Licensee','Dealer'], $defaults['Licensee']['Dealer'])); ?>" style="padding:8px; width:220px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Licensee[Type]</label><input type="text" name="Licensee[Type]" value="<?php echo h($val(['Licensee','Type'], $defaults['Licensee']['Type'])); ?>" style="padding:8px; width:180px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Licensee[AMCTill]</label><input type="text" name="Licensee[AMCTill]" value="<?php echo h($val(['Licensee','AMCTill'], $defaults['Licensee']['AMCTill'])); ?>" style="padding:8px; width:180px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Licensee[BillNo]</label><input type="text" name="Licensee[BillNo]" value="<?php echo h($val(['Licensee','BillNo'], $defaults['Licensee']['BillNo'])); ?>" style="padding:8px; width:180px;"></div>
-            </div>
-            <h3 style="margin:16px 0 12px 0;">System</h3>
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">System[Type]</label><input type="text" name="System[Type]" value="<?php echo h($val(['System','Type'], $defaults['System']['Type'])); ?>" style="padding:8px; width:180px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">System[OS]</label><input type="text" name="System[OS]" value="<?php echo h($val(['System','OS'], $defaults['System']['OS'])); ?>" style="padding:8px; width:180px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">System[IsVM]</label>
-                    <select name="System[IsVM]" style="padding:8px; width:120px;">
-                        <?php $isvm = (string)$val(['System','IsVM'], $defaults['System']['IsVM']); ?>
-                        <option value="false" <?php echo ($isvm === 'false' || $isvm === '0') ? 'selected' : ''; ?>>false</option>
-                        <option value="true" <?php echo ($isvm === 'true' || $isvm === '1') ? 'selected' : ''; ?>>true</option>
-                    </select>
-                </div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">System[SerialID]</label><input type="text" name="System[SerialID]" value="<?php echo h($val(['System','SerialID'], $defaults['System']['SerialID'])); ?>" style="padding:8px; width:220px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">System[UniqueID]</label><input type="text" name="System[UniqueID]" value="<?php echo h($val(['System','UniqueID'], $defaults['System']['UniqueID'])); ?>" style="padding:8px; width:220px;"></div>
-            </div>
-            <h3 style="margin:16px 0 12px 0;">Engine</h3>
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Engine[Build]</label><input type="text" name="Engine[Build]" value="<?php echo h($val(['Engine','Build'], $defaults['Engine']['Build'])); ?>" style="padding:8px; width:220px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Engine[GracePeriod]</label><input type="number" name="Engine[GracePeriod]" value="<?php echo h((string)$val(['Engine','GracePeriod'], $defaults['Engine']['GracePeriod'])); ?>" style="padding:8px; width:160px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Engine[MaxPorts]</label><input type="text" name="Engine[MaxPorts]" value="<?php echo h($val(['Engine','MaxPorts'], $defaults['Engine']['MaxPorts'])); ?>" style="padding:8px; width:220px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Engine[ValidStartTZ]</label><input type="number" name="Engine[ValidStartTZ]" value="<?php echo h((string)$val(['Engine','ValidStartTZ'], $defaults['Engine']['ValidStartTZ'])); ?>" style="padding:8px; width:160px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Engine[ValidEndTZ]</label><input type="number" name="Engine[ValidEndTZ]" value="<?php echo h((string)$val(['Engine','ValidEndTZ'], $defaults['Engine']['ValidEndTZ'])); ?>" style="padding:8px; width:160px;"></div>
-                <div><label style="display:block; font-weight:bold; margin-bottom:4px;">Engine[ValidCountries]</label><input type="number" name="Engine[ValidCountries]" value="<?php echo h((string)$val(['Engine','ValidCountries'], $defaults['Engine']['ValidCountries'])); ?>" style="padding:8px; width:160px;"></div>
-            </div>
-            <h3 style="margin:16px 0 12px 0;">Hardware → Analog</h3>
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                <?php foreach ($analogKeys as $k): $v = $val(['Hardware','Analog',$k], $defaults['Hardware']['Analog'][$k] ?? ''); ?>
+            
+            <!-- General Section -->
+            <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+                <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">General</h3>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
                     <div>
-                        <label style="display:block; font-weight:bold; margin-bottom:4px;">Hardware[Analog][<?php echo h($k); ?>]</label>
-                        <input type="text" name="Hardware[Analog][<?php echo h($k); ?>]" value="<?php echo h($v); ?>" style="padding:8px; width:200px;">
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">CreatedOn</label>
+                        <input type="text" name="CreatedOn" value="<?php echo h($val(['CreatedOn'], date('Ymd'))); ?>" style="width:25%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
                     </div>
-                <?php endforeach; ?>
+                </div>
             </div>
-            <div style="margin-top:16px;">
-                <label style="display:block; font-weight:bold; margin-bottom:4px;">Comment</label>
-                <input type="text" name="comment" value="<?php echo h($commentValue); ?>" style="padding:8px; width:320px;">
+            
+            <!-- Licensee Section -->
+            <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+                <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">Licensee</h3>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[Name]</label>
+                        <input type="text" name="Licensee[Name]" value="<?php echo h($val(['Licensee','Name'], $defaults['Licensee']['Name'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[Distributor]</label>
+                        <input type="text" name="Licensee[Distributor]" value="<?php echo h($val(['Licensee','Distributor'], $defaults['Licensee']['Distributor'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[Dealer]</label>
+                        <input type="text" name="Licensee[Dealer]" value="<?php echo h($val(['Licensee','Dealer'], $defaults['Licensee']['Dealer'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[Type]</label>
+                        <select name="Licensee[Type]" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                            <?php $licenseeType = (string)$val(['Licensee','Type'], $defaults['Licensee']['Type']); ?>
+                            <option value="Rental" <?php echo ($licenseeType === 'Rental') ? 'selected' : ''; ?>>Rental</option>
+                            <option value="Purchase" <?php echo ($licenseeType === 'Purchase') ? 'selected' : ''; ?>>Purchase</option>
+                            <option value="Permanent" <?php echo ($licenseeType === 'Permanent') ? 'selected' : ''; ?>>Permanent</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[AMCTill]</label>
+                        <input type="text" name="Licensee[AMCTill]" value="<?php echo h($val(['Licensee','AMCTill'], $defaults['Licensee']['AMCTill'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[ValidTill]</label>
+                        <input type="date" name="Licensee[ValidTill]" value="<?php echo h($val(['Licensee','ValidTill'], $defaults['Licensee']['ValidTill'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[BillNo]</label>
+                        <input type="text" name="Licensee[BillNo]" value="<?php echo h($val(['Licensee','BillNo'], $defaults['Licensee']['BillNo'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                </div>
             </div>
-            <div style="margin-top:16px;">
-                <!-- <button type="submit" style="padding:10px 18px; background:#16a34a; color:white; border:none; border-radius:6px; cursor:pointer;">Generate JSON</button> -->
-                <button type="submit" name="download" value="1" style="padding:10px 18px; background:#0ea5e9; color:white; border:none; border-radius:6px; cursor:pointer; margin-left:8px;">Download JSON</button>
-                <button type="submit" name="action" value="send" style="padding:10px 18px; background:#f59e0b; color:white; border:none; border-radius:6px; cursor:pointer; margin-left:8px;">Submit to Server</button>
+            
+            <!-- System Section -->
+            <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+                <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">System</h3>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[Type]</label>
+                        <select name="System[Type]" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                            <?php $systemType = (string)$val(['System','Type'], $defaults['System']['Type']); ?>
+                            <option value="Desktop" <?php echo ($systemType === 'Desktop') ? 'selected' : ''; ?>>Desktop</option>
+                            <option value="Standalone" <?php echo ($systemType === 'Standalone') ? 'selected' : ''; ?>>Standalone</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[OS]</label>
+                        <select name="System[OS]" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                            <?php $systemOS = (string)$val(['System','OS'], $defaults['System']['OS']); ?>
+                            <option value="Windows" <?php echo ($systemOS === 'Windows') ? 'selected' : ''; ?>>Windows</option>
+                            <option value="Linux" <?php echo ($systemOS === 'Linux') ? 'selected' : ''; ?>>Linux</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IsVM]</label>
+                        <select name="System[IsVM]" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                            <?php 
+                            $isvm = (string)$val(['System','IsVM'], $defaults['System']['IsVM']); 
+                            // Handle both old format (true/false) and new format (Yes/No)
+                            $isvmNormalized = strtolower($isvm);
+                            $isSelected = ($isvmNormalized === 'true' || $isvmNormalized === 'true' || $isvmNormalized === '1');
+                            ?>
+                            <option value="false" <?php echo !$isSelected ? 'selected' : ''; ?>>false</option>
+                            <option value="true" <?php echo $isSelected ? 'selected' : ''; ?>>true</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[SerialID]</label>
+                        <input type="text" name="System[SerialID]" value="<?php echo h($val(['System','SerialID'], $defaults['System']['SerialID'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[UniqueID]</label>
+                        <input type="text" name="System[UniqueID]" value="<?php echo h($val(['System','UniqueID'], $defaults['System']['UniqueID'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Engine Section -->
+            <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+                <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">Engine</h3>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[Build]</label>
+                        <input type="text" name="Engine[Build]" value="<?php echo h($val(['Engine','Build'], $defaults['Engine']['Build'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[GracePeriod]</label>
+                        <input type="number" name="Engine[GracePeriod]" value="<?php echo h((string)$val(['Engine','GracePeriod'], $defaults['Engine']['GracePeriod'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[MaxPorts]</label>
+                        <input type="text" name="Engine[MaxPorts]" value="<?php echo h($val(['Engine','MaxPorts'], $defaults['Engine']['MaxPorts'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[ValidStartTZ]</label>
+                        <input type="number" name="Engine[ValidStartTZ]" value="<?php echo h((string)$val(['Engine','ValidStartTZ'], $defaults['Engine']['ValidStartTZ'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[ValidEndTZ]</label>
+                        <input type="number" name="Engine[ValidEndTZ]" value="<?php echo h((string)$val(['Engine','ValidEndTZ'], $defaults['Engine']['ValidEndTZ'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[ValidCountries]</label>
+                        <input type="number" name="Engine[ValidCountries]" value="<?php echo h((string)$val(['Engine','ValidCountries'], $defaults['Engine']['ValidCountries'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hardware → Analog Section -->
+            <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+                <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">Hardware</h3>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:8px;">
+                    <?php foreach ($analogKeys as $k): $v = $val(['Hardware','Analog',$k], $defaults['Hardware']['Analog'][$k] ?? ''); ?>
+                        <div>
+                            <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Hardware[Analog][<?php echo h($k); ?>]</label>
+                            <input type="text" name="Hardware[Analog][<?php echo h($k); ?>]" value="<?php echo h($v); ?>" style="width:50%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <!-- Comment Section -->
+            <div style="margin-bottom:24px;">
+                <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Comment</label>
+                <input type="text" name="comment" value="<?php echo h($commentValue); ?>" style="width:25%; max-width:500px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            
+            <!-- Action Buttons -->
+            <div style="margin-top:24px; padding-top:20px; border-top:2px solid #f1f5f9; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+                <button type="submit" name="download" value="1" style="padding:12px 24px; background:#0ea5e9; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; transition:background-color 0.2s, transform 0.1s; box-shadow:0 1px 2px rgba(0,0,0,0.1);" onmouseover="this.style.background='#0284c7'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#0ea5e9'; this.style.transform='translateY(0)';" onmousedown="this.style.transform='translateY(0)';" onmouseup="this.style.transform='translateY(-1px)';">Download JSON</button>
+                <button type="submit" name="action" value="send" style="padding:12px 24px; background:#f59e0b; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; transition:background-color 0.2s, transform 0.1s; box-shadow:0 1px 2px rgba(0,0,0,0.1);" onmouseover="this.style.background='#d97706'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#f59e0b'; this.style.transform='translateY(0)';" onmousedown="this.style.transform='translateY(0)';" onmouseup="this.style.transform='translateY(-1px)';">Submit to Server</button>
             </div>
         </form>
         <?php endif; ?>
