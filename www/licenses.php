@@ -6,6 +6,13 @@
 
 declare(strict_types=1);
 
+// $rawDate = $val(['Licensee','ValidTill'], $defaults['Licensee']['ValidTill']); 
+// $formatted = '';
+
+// if (!empty($rawDate)) {
+//     $formatted = date('Y-m-d', strtotime($rawDate)); // convert to Y-m-d
+// }
+
 // Configuration
 $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'licenses';
 if (!is_dir($uploadDir)) {
@@ -419,6 +426,8 @@ header('Content-Type: text/html; charset=utf-8');
                 if (!is_array($analogFromPrefill)) $analogFromPrefill = [];
             }
             $analogKeys = array_unique(array_merge(array_keys($defaults['Hardware']['Analog']), array_keys($analogFromPrefill)));
+
+
         ?>
         <?php if ($submitResult === null): ?>
         <form method="post" style="display:block; margin-bottom:24px; border:1px solid #e5e7eb; border-radius:12px; padding:24px; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
@@ -466,7 +475,7 @@ header('Content-Type: text/html; charset=utf-8');
                     </div>
                     <div>
                         <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[ValidTill]</label>
-                        <input type="date" name="Licensee[ValidTill]" value="<?php echo h($val(['Licensee','ValidTill'], $defaults['Licensee']['ValidTill'])); ?>" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                        <input type="text" name="Licensee[ValidTill]" value="<?php echo h($val(['Licensee','ValidTill'], $defaults['Licensee']['ValidTill'])); ?>" placeholder="YYYYMMDD" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
                     </div>
                     <div>
                         <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[BillNo]</label>

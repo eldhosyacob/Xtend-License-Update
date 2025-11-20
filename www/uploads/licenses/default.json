@@ -1,11 +1,12 @@
 {
-    "CreatedOn": "20251115",
+    "CreatedOn": "20251120",
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
         "Distributor": "",
         "Dealer": "",
         "Type": "Purchase",
         "AMCTill": "20251001",
+        "ValidTill": "",
         "BillNo": "XT25-1002"
     },
     "System": {
