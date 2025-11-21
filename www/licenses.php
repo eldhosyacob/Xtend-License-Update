@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
+require_once('config/auth_check.php');
+
 // Simple license JSON uploader and editor
 // - Step 1: Upload JSON file
 // - Step 2: Edit values in a generated form (all keys as inputs)
 // - Step 3: Submit to save JSON on the server
 
-declare(strict_types=1);
 
 // $rawDate = $val(['Licensee','ValidTill'], $defaults['Licensee']['ValidTill']); 
 // $formatted = '';

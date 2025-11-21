@@ -50,7 +50,7 @@ if (!$db) {
         // Password_hash is incorrect
         echo json_encode([
             'success' => false,
-            'message' => 'Username or password_hash incorrect'
+            'message' => 'Incorrect Username or Password'
         ]);
     }
 

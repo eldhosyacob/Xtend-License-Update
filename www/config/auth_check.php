@@ -6,6 +6,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
     session_destroy();
-    header('Location: login.php');
+    header('Location: index.php');
     exit;
 }
