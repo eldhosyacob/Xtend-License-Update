@@ -1,3 +1,7 @@
+<?php
+// Check if user is authenticated
+require_once('config/auth_check.php');
+?>
 <!DOCTYPE html>
 <html>
 
