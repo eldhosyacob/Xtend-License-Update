@@ -1,20 +1,21 @@
 {
-    "CreatedOn": "20251121",
+    "CreatedOn": "20251128",
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
-        "Distributor": "",
-        "Dealer": "",
+        "Distributor": "IVR",
+        "Dealer": "asif",
         "Type": "Purchase",
         "AMCTill": "20251001",
-        "ValidTill": "",
+        "ValidTill": "20251130",
         "BillNo": "XT25-1002"
     },
     "System": {
         "Type": "Standalone",
         "OS": "Linux",
         "IsVM": false,
-        "SerialID": "",
-        "UniqueID": ""
+        "SerialID": "128",
+        "UniqueID": "8AGL-2RSU-H8CK-BECE",
+        "UpdateNow": "yes"
     },
     "Engine": {
         "Build": "Xtend IVR",
@@ -31,6 +32,6 @@
         }
     },
     "Features": {
-        "Script": {}
+        "Script": "test"
     }
 }

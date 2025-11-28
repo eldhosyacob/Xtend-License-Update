@@ -1,0 +1,249 @@
+.heading {
+  margin: 100px 0px 20px 0px;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'Roboto', sans-serif;
+  color: #d9543d;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 0px #957dad,
+    1px 2px 0px #957dad,
+    1px 3px 0px #957dad,
+    1px 4px 0px #957dad,
+    1px 5px 0px #957dad,
+    1px 6px 0px #957dad,
+    1px 10px 5px rgba(16, 16, 16, 0.5),
+    /* 1px 15px 10px rgba(16, 16, 16, 0.4), */
+    /* 1px 20px 30px rgba(16, 16, 16, 0.3), */
+    1px 25px 50px rgba(16, 16, 16, 0.2);
+}
+
+/* Error Message Box */
+.error-message {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+/* Result Container */
+.result-container {
+  margin: 150px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.result-header {
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Status Box */
+.status-box {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+.status-box.success {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.status-box.failure {
+  background: #fef2f2;
+  color: #7f1d1d;
+  border-color: #fecaca;
+}
+
+.error-detail {
+  margin-top: 4px;
+}
+
+.response-label {
+  margin: 8px 0;
+  font-weight: bold;
+}
+
+.code-block {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px;
+  border-radius: 8px;
+  overflow: auto;
+  margin-bottom: 16px;
+}
+
+.back-button-container {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.back-button {
+  display: inline-block;
+  padding: 5px 18px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* Form Container */
+.license-form {
+  display: block;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Sections */
+.form-section {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.section-header {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.grid-layout-hardware {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+/* Inputs */
+.input-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.input-field,
+.select-field {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.select-field {
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.input-field:focus,
+.select-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-field:blur,
+.select-field:blur {
+  border-color: #cbd5e1;
+  box-shadow: none;
+}
+
+/* Specific Widths */
+.input-width-25 {
+  width: 25%;
+}
+
+.input-width-50 {
+  width: 50%;
+}
+
+.input-comment {
+  width: 25%;
+  max-width: 500px;
+}
+
+/* Comment Section */
+.comment-section {
+  margin-bottom: 24px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid #f1f5f9;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-submit {
+  background: linear-gradient(to bottom right, #EF4765, #FF9A5A);
+  border: 0;
+  border-radius: 12px;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 2.5;
+  outline: transparent;
+  padding: 0 2rem;
+  text-align: center;
+  text-decoration: none;
+  transition: box-shadow .2s ease-in-out;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+
+}
+
+.btn-submit:not([disabled]):focus {
+  box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 101, 0.5), .125rem .125rem 1rem rgba(255, 154, 90, 0.5);
+}
+
+.btn-submit:not([disabled]):hover {
+  box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 101, 0.5), .125rem .125rem 1rem rgba(255, 154, 90, 0.5);
+}
+
+.submit-button:hover {
+  background: #d97706;
+  transform: translateY(-1px);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}
+
+.submit-button:focus {
+  /* Maintain focus style if needed, though not explicitly in inline JS */
+}

@@ -86,8 +86,7 @@ if ($pdo) {
         </div>
       </div>
 
-      <a href="reports.php?status=active" class="stat-card stat-card-success"
-        style="text-decoration: none; color: inherit; display: block;">
+      <div class="stat-card stat-card-success">
         <div class="stat-icon">
           <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
@@ -106,10 +105,9 @@ if ($pdo) {
             <span>8% from last month</span>
           </div>
         </div>
-      </a>
+      </div>
 
-      <a href="reports.php?status=expiring" class="stat-card stat-card-warning"
-        style="text-decoration: none; color: inherit; display: block;">
+      <div class="stat-card stat-card-warning">
         <div class="stat-icon">
           <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor">
             <path
@@ -123,10 +121,9 @@ if ($pdo) {
             <span>Next 30 days</span>
           </div>
         </div>
-      </a>
+      </div>
 
-      <a href="reports.php?status=expired" class="stat-card stat-card-danger"
-        style="text-decoration: none; color: inherit; display: block;">
+      <div class="stat-card stat-card-danger">
         <div class="stat-icon">
           <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
@@ -145,7 +142,7 @@ if ($pdo) {
             <span>3 this week</span>
           </div>
         </div>
-      </a>
+      </div>
     </div>
 
     <!-- Charts and Activity Section -->

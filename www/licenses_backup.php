@@ -106,7 +106,7 @@ $loaded = null; // no longer used
 $rawJson = '';  // no longer used
 $prefill = null; // holds fetched JSON to prefill the form
 $submitResult = null; // holds submission result data
-$commentValue = isset($_POST['comment']) ? (string) $_POST['comment'] : 'Comment';
+$commentValue = isset($_POST['comment']) ? (string) $_POST['comment'] : '';
 
 if ($method === 'POST' && $action === 'fetch_remote') {
   $url = trim((string) ($_POST['remote_url'] ?? ''));
@@ -209,7 +209,6 @@ function buildLicenseFromPost(array $post): array
       'IsVM' => isset($post['System']['IsVM']) ? $boolFrom($post['System']['IsVM']) : false,
       'SerialID' => $str($post['System']['SerialID'] ?? ''),
       'UniqueID' => $str($post['System']['UniqueID'] ?? ''),
-      'UpdateNow' => $str($post['System']['UpdateNow'] ?? ''),
     ],
     'Engine' => [
       'Build' => $str($post['Engine']['Build'] ?? ''),
@@ -225,7 +224,7 @@ function buildLicenseFromPost(array $post): array
       ],
     ],
     'Features' => [
-      'Script' => $str($post['Features']['Script'] ?? ''),
+      'Script' => new stdClass(), // empty object
     ],
   ];
   if (isset($post['Hardware']['Analog']) && is_array($post['Hardware']['Analog'])) {
@@ -300,93 +299,6 @@ if ($method === 'POST' && $action === 'send') {
       $errorTag = trim($m[1]);
     }
 
-    // Only insert to database if resultTag is 'SUCCESS'
-    if (strtoupper($resultTag) === 'SUCCESS') {
-      require_once('config/database.php');
-      $db = getDatabaseConnection();
-
-      if ($db) {
-        try {
-          $getPostVal = function ($key, $default = '') {
-            return isset($_POST[$key]) ? trim($_POST[$key]) : $default;
-          };
-
-          $getNestedPostVal = function ($parent, $key, $default = '') {
-            return isset($_POST[$parent][$key]) ? trim($_POST[$parent][$key]) : $default;
-          };
-
-          $created_on = $getPostVal('CreatedOn');
-          $licensee_name = $getNestedPostVal('Licensee', 'Name');
-          $licensee_distributor = $getNestedPostVal('Licensee', 'Distributor');
-          $licensee_dealer = $getNestedPostVal('Licensee', 'Dealer');
-          $licensee_type = $getNestedPostVal('Licensee', 'Type');
-          $licensee_amctill = $getNestedPostVal('Licensee', 'AMCTill');
-          $licensee_validtill = $getNestedPostVal('Licensee', 'ValidTill');
-          $licensee_billno = $getNestedPostVal('Licensee', 'BillNo');
-          $system_type = $getNestedPostVal('System', 'Type');
-          $system_os = $getNestedPostVal('System', 'OS');
-          $system_isvm = $getNestedPostVal('System', 'IsVM');
-          $system_serialid = $getNestedPostVal('System', 'SerialID');
-          $system_uniqueid = $getNestedPostVal('System', 'UniqueID');
-          $system_updatenow = $getNestedPostVal('System', 'UpdateNow');
-          $engine_build = $getNestedPostVal('Engine', 'Build');
-          $engine_graceperiod = $getNestedPostVal('Engine', 'GracePeriod');
-          $engine_maxports = $getNestedPostVal('Engine', 'MaxPorts');
-          $engine_validstarttz = $getNestedPostVal('Engine', 'ValidStartTZ');
-          $engine_validendtz = $getNestedPostVal('Engine', 'ValidEndTZ');
-          $engine_validcountries = $getNestedPostVal('Engine', 'ValidCountries');
-          $hardware_analog2303 = isset($_POST['Hardware']['Analog']['2303']) ? $_POST['Hardware']['Analog']['2303'] : '';
-          $hardware_analog2304 = isset($_POST['Hardware']['Analog']['2304']) ? $_POST['Hardware']['Analog']['2304'] : '';
-          $features_script = $getNestedPostVal('Features', 'Script');
-          $comment = $getPostVal('comment');
-
-          $sql = "INSERT INTO license_details (
-                            created_on, licensee_name, licensee_distributor, licensee_dealer, licensee_type, 
-                            licensee_amctill, licensee_validtill, licensee_billno, system_type, system_os, 
-                            system_isvm, system_serialid, system_uniqueid, system_updatenow, engine_build, 
-                            engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, 
-                            engine_validcountries, hardware_analog2303, hardware_analog2304, features_script, comment
-                        ) VALUES (
-                            :created_on, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
-                            :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
-                            :system_isvm, :system_serialid, :system_uniqueid, :system_updatenow, :engine_build,
-                            :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz,
-                            :engine_validcountries, :hardware_analog2303, :hardware_analog2304, :features_script, :comment
-                        )";
-
-          $stmt = $db->prepare($sql);
-          $stmt->execute([
-            ':created_on' => $created_on,
-            ':licensee_name' => $licensee_name,
-            ':licensee_distributor' => $licensee_distributor,
-            ':licensee_dealer' => $licensee_dealer,
-            ':licensee_type' => $licensee_type,
-            ':licensee_amctill' => $licensee_amctill,
-            ':licensee_validtill' => $licensee_validtill,
-            ':licensee_billno' => $licensee_billno,
-            ':system_type' => $system_type,
-            ':system_os' => $system_os,
-            ':system_isvm' => $system_isvm,
-            ':system_serialid' => $system_serialid,
-            ':system_uniqueid' => $system_uniqueid,
-            ':system_updatenow' => $system_updatenow,
-            ':engine_build' => $engine_build,
-            ':engine_graceperiod' => $engine_graceperiod,
-            ':engine_maxports' => $engine_maxports,
-            ':engine_validstarttz' => $engine_validstarttz,
-            ':engine_validendtz' => $engine_validendtz,
-            ':engine_validcountries' => $engine_validcountries,
-            ':hardware_analog2303' => $hardware_analog2303,
-            ':hardware_analog2304' => $hardware_analog2304,
-            ':features_script' => $features_script,
-            ':comment' => $comment
-          ]);
-        } catch (PDOException $e) {
-          error_log('Database insert failed: ' . $e->getMessage());
-        }
-      }
-    }
-
     // Store result data instead of outputting immediately
     $submitResult = [
       'resultTag' => $resultTag,
@@ -414,7 +326,6 @@ header('Content-Type: text/html; charset=utf-8');
   <link rel="stylesheet" href="styles/users.css">
   <link rel="stylesheet" href="styles/header-sidebar.css">
   <link rel="stylesheet" href="styles/common.css">
-  <link rel="stylesheet" href="styles/licenses.css">
   <style>
     /* Ensure page scrolls even if global CSS disables it */
     html,
@@ -430,7 +341,6 @@ header('Content-Type: text/html; charset=utf-8');
 
 <body>
   <div class="page-containers">
-    <div class="heading">APPLY LICENSE</div>
     <?php if ($errors): ?>
       <div
         style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:12px 16px; border-radius:8px; margin-bottom:16px;">
@@ -441,7 +351,7 @@ header('Content-Type: text/html; charset=utf-8');
     <?php endif; ?>
 
     <?php if ($submitResult !== null): ?>
-      <div style="margin: 100px 10px; border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#ffffff;">
+      <div style="margin:150px 10px; border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#ffffff;">
         <h2 style="margin-bottom:16px; font-size:20px; font-weight:bold;">Result</h2>
         <?php
         $resultTag = $submitResult['resultTag'];
@@ -514,7 +424,6 @@ header('Content-Type: text/html; charset=utf-8');
         'IsVM' => 'false',
         'SerialID' => '',
         'UniqueID' => '',
-        'UpdateNow' => '',
       ],
       'Engine' => [
         'Build' => 'Xtend IVR',
@@ -529,9 +438,6 @@ header('Content-Type: text/html; charset=utf-8');
           '2303' => '11110000',
           '2304' => '00001111',
         ],
-      ],
-      'Features' => [
-        'Script' => '',
       ],
     ];
 
@@ -557,7 +463,7 @@ header('Content-Type: text/html; charset=utf-8');
 
     ?>
     <?php if ($submitResult === null): ?>
-      <form method="post" id="licenseForm"
+      <form method="post"
         style="display:block; margin-bottom:24px; border:1px solid #e5e7eb; border-radius:12px; padding:24px; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
         <input type="hidden" name="action" value="generate">
 
@@ -570,7 +476,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">CreatedOn</label>
-              <input type="text" name="CreatedOn" required value="<?php echo h($val(['CreatedOn'], date('Ymd'))); ?>"
+              <input type="text" name="CreatedOn" value="<?php echo h($val(['CreatedOn'], date('Ymd'))); ?>"
                 style="width:25%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -587,7 +493,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[Name]</label>
-              <input type="text" name="Licensee[Name]" required
+              <input type="text" name="Licensee[Name]"
                 value="<?php echo h($val(['Licensee', 'Name'], $defaults['Licensee']['Name'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -596,7 +502,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[Distributor]</label>
-              <input type="text" name="Licensee[Distributor]" required
+              <input type="text" name="Licensee[Distributor]"
                 value="<?php echo h($val(['Licensee', 'Distributor'], $defaults['Licensee']['Distributor'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -605,7 +511,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[Dealer]</label>
-              <input type="text" name="Licensee[Dealer]" required
+              <input type="text" name="Licensee[Dealer]"
                 value="<?php echo h($val(['Licensee', 'Dealer'], $defaults['Licensee']['Dealer'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -614,7 +520,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[Type]</label>
-              <select name="Licensee[Type]" required
+              <select name="Licensee[Type]"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -628,7 +534,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[AMCTill]</label>
-              <input type="text" name="Licensee[AMCTill]" required
+              <input type="text" name="Licensee[AMCTill]"
                 value="<?php echo h($val(['Licensee', 'AMCTill'], $defaults['Licensee']['AMCTill'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -637,7 +543,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[ValidTill]</label>
-              <input type="text" name="Licensee[ValidTill]" required
+              <input type="text" name="Licensee[ValidTill]"
                 value="<?php echo h($val(['Licensee', 'ValidTill'], $defaults['Licensee']['ValidTill'])); ?>"
                 placeholder="YYYYMMDD"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
@@ -647,7 +553,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[BillNo]</label>
-              <input type="text" name="Licensee[BillNo]" required
+              <input type="text" name="Licensee[BillNo]"
                 value="<?php echo h($val(['Licensee', 'BillNo'], $defaults['Licensee']['BillNo'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -665,7 +571,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[Type]</label>
-              <select name="System[Type]" required
+              <select name="System[Type]"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -678,7 +584,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[OS]</label>
-              <select name="System[OS]" required
+              <select name="System[OS]"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -690,7 +596,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IsVM]</label>
-              <select name="System[IsVM]" required
+              <select name="System[IsVM]"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -707,7 +613,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[SerialID]</label>
-              <input type="text" name="System[SerialID]" required
+              <input type="text" name="System[SerialID]"
                 value="<?php echo h($val(['System', 'SerialID'], $defaults['System']['SerialID'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -716,17 +622,8 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[UniqueID]</label>
-              <input type="text" name="System[UniqueID]" required
+              <input type="text" name="System[UniqueID]"
                 value="<?php echo h($val(['System', 'UniqueID'], $defaults['System']['UniqueID'])); ?>"
-                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
-                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
-                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
-            </div>
-            <div>
-              <label
-                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[UpdateNow]</label>
-              <input type="text" name="System[UpdateNow]" required
-                value="<?php echo h($val(['System', 'UpdateNow'], $defaults['System']['UpdateNow'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -743,7 +640,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[Build]</label>
-              <input type="text" name="Engine[Build]" required
+              <input type="text" name="Engine[Build]"
                 value="<?php echo h($val(['Engine', 'Build'], $defaults['Engine']['Build'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -752,7 +649,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[GracePeriod]</label>
-              <input type="number" name="Engine[GracePeriod]" required
+              <input type="number" name="Engine[GracePeriod]"
                 value="<?php echo h((string) $val(['Engine', 'GracePeriod'], $defaults['Engine']['GracePeriod'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -761,7 +658,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[MaxPorts]</label>
-              <input type="text" name="Engine[MaxPorts]" required
+              <input type="text" name="Engine[MaxPorts]"
                 value="<?php echo h($val(['Engine', 'MaxPorts'], $defaults['Engine']['MaxPorts'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -770,7 +667,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[ValidStartTZ]</label>
-              <input type="number" name="Engine[ValidStartTZ]" required
+              <input type="number" name="Engine[ValidStartTZ]"
                 value="<?php echo h((string) $val(['Engine', 'ValidStartTZ'], $defaults['Engine']['ValidStartTZ'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -779,7 +676,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[ValidEndTZ]</label>
-              <input type="number" name="Engine[ValidEndTZ]" required
+              <input type="number" name="Engine[ValidEndTZ]"
                 value="<?php echo h((string) $val(['Engine', 'ValidEndTZ'], $defaults['Engine']['ValidEndTZ'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -788,7 +685,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Engine[ValidCountries]</label>
-              <input type="number" name="Engine[ValidCountries]" required
+              <input type="number" name="Engine[ValidCountries]"
                 value="<?php echo h((string) $val(['Engine', 'ValidCountries'], $defaults['Engine']['ValidCountries'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -808,7 +705,7 @@ header('Content-Type: text/html; charset=utf-8');
               <div>
                 <label
                   style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Hardware[Analog][<?php echo h($k); ?>]</label>
-                <input type="text" name="Hardware[Analog][<?php echo h($k); ?>]" required value="<?php echo h($v); ?>"
+                <input type="text" name="Hardware[Analog][<?php echo h($k); ?>]" value="<?php echo h($v); ?>"
                   style="width:50%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                   onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                   onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -817,28 +714,10 @@ header('Content-Type: text/html; charset=utf-8');
           </div>
         </div>
 
-        <!-- Features Section -->
-        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
-          <h3
-            style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">
-            Features</h3>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
-            <div>
-              <label
-                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Features[Script]</label>
-              <input type="text" name="Features[Script]" required
-                value="<?php echo h($val(['Features', 'Script'], '')); ?>"
-                style="width:25%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
-                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
-                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
-            </div>
-          </div>
-        </div>
-
         <!-- Comment Section -->
         <div style="margin-bottom:24px;">
           <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Comment</label>
-          <input type="text" name="comment" required value="<?php echo h($commentValue); ?>"
+          <input type="text" name="comment" value="<?php echo h($commentValue); ?>"
             style="width:25%; max-width:500px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
             onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
             onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -847,43 +726,18 @@ header('Content-Type: text/html; charset=utf-8');
         <!-- Action Buttons -->
         <div
           style="margin-top:24px; padding-top:20px; border-top:2px solid #f1f5f9; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
-          <!-- <button type="submit" name="download" value="1"
-            style="padding:12px 24px; background:#0ea5e9; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; transition:background-color 0.2s, transform 0.1s; box-shadow:0 1px 2px rgba(0,0,0,0.1);"
-            onmouseover="this.style.background='#0284c7'; this.style.transform='translateY(-1px)';"
-            onmouseout="this.style.background='#0ea5e9'; this.style.transform='translateY(0)';"
-            onmousedown="this.style.transform='translateY(0)';"
-            onmouseup="this.style.transform='translateY(-1px)';">Download JSON</button> -->
-          <button type="submit" name="action" class="btn-submit" value="send">Submit</button>
-          <!-- style="padding:12px 24px; background:#f59e0b; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; transition:background-color 0.2s, transform 0.1s; box-shadow:0 1px 2px rgba(0,0,0,0.1);"
+          <!-- <button type="submit" name="download" value="1" style="padding:12px 24px; background:#0ea5e9; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; transition:background-color 0.2s, transform 0.1s; box-shadow:0 1px 2px rgba(0,0,0,0.1);" onmouseover="this.style.background='#0284c7'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#0ea5e9'; this.style.transform='translateY(0)';" onmousedown="this.style.transform='translateY(0)';" onmouseup="this.style.transform='translateY(-1px)';">Download JSON</button> -->
+          <button type="submit" name="action" value="send"
+            style="padding:12px 24px; background:#f59e0b; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; transition:background-color 0.2s, transform 0.1s; box-shadow:0 1px 2px rgba(0,0,0,0.1);"
             onmouseover="this.style.background='#d97706'; this.style.transform='translateY(-1px)';"
             onmouseout="this.style.background='#f59e0b'; this.style.transform='translateY(0)';"
             onmousedown="this.style.transform='translateY(0)';"
-            onmouseup="this.style.transform='translateY(-1px)';">Submit</button> -->
+            onmouseup="this.style.transform='translateY(-1px)';">Submit</button>
         </div>
       </form>
     <?php endif; ?>
   </div>
   <?php include 'components/header-sidebar.php'; ?>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const form = document.getElementById('licenseForm');
-      if (form) {
-        form.addEventListener('submit', function (e) {
-          const btn = e.submitter;
-          // Check if the submitter is the 'Submit' button (name='action', value='send')
-          if (btn && btn.name === 'action' && btn.value === 'send') {
-            btn.innerText = 'Submitting...';
-            // Disable the button after a microtask to ensure the form submission includes the button's value
-            setTimeout(() => {
-              btn.disabled = true;
-              btn.style.opacity = '0.7';
-              btn.style.cursor = 'not-allowed';
-            }, 0);
-          }
-        });
-      }
-    });
-  </script>
 </body>
 
 </html>

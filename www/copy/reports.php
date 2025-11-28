@@ -85,20 +85,15 @@ require_once('config/auth_check.php');
 
   <script>
     let currentPage = 1;
-    let totalPages = 1;
     const limit = 10;
-    let currentStatus = '';
+    let totalPages = 1;
 
     document.addEventListener('DOMContentLoaded', function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      currentStatus = urlParams.get('status') || '';
       fetchReports(currentPage);
     });
 
     function searchReports() {
       currentPage = 1;
-      // Clear status filter on new search to allow searching all records
-      currentStatus = '';
       fetchReports(currentPage);
     }
 
@@ -112,13 +107,7 @@ require_once('config/auth_check.php');
         const serial = document.getElementById('searchSerial').value;
         const unique = document.getElementById('searchUnique').value;
 
-        let url = `api/reports.php?page=${page}&limit=${limit}&serial_id=${encodeURIComponent(serial)}&unique_id=${encodeURIComponent(unique)}`;
-
-        if (currentStatus) {
-          url += `&status=${encodeURIComponent(currentStatus)}`;
-        }
-
-        const response = await fetch(url);
+        const response = await fetch(`api/reports.php?page=${page}&limit=${limit}&serial_id=${encodeURIComponent(serial)}&unique_id=${encodeURIComponent(unique)}`);
         const result = await response.json();
 
         document.querySelector('#reportsTable').style.opacity = '1';
@@ -145,12 +134,9 @@ require_once('config/auth_check.php');
             <td colspan="6">
               <div class="empty-state">
                 <svg width="64" height="64" viewBox="0 0 16 16" fill="currentColor">
-                  <path
-                    d="M5 10.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
-                  <path
-                    d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z" />
-                  <path
-                    d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z" />
+                  <path d="M5 10.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                  <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+                  <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
                 </svg>
                 <p>No reports found</p>
               </div>
@@ -223,13 +209,13 @@ require_once('config/auth_check.php');
         const uniqueIdDisplay = (row.system_uniqueid && row.system_uniqueid !== 'UNKNOWN') ? row.system_uniqueid : '-';
 
         tr.innerHTML = `
-          <td class="text-center">${startCount + index + 1}</td>
-          <td>${dateDisplay || '-'}</td>
-          <td class="validity-cell">${formattedValidTill}</td>
-          <td class="code-cell">${row.system_serialid || '-'}</td>
-          <td class="code-cell">${uniqueIdDisplay}</td>
-          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-        `;
+                    <td class="text-center">${startCount + index + 1}</td>
+                    <td>${dateDisplay || '-'}</td>
+                    <td class="validity-cell">${formattedValidTill}</td>
+                    <td class="code-cell">${row.system_serialid || '-'}</td>
+                    <td class="code-cell">${uniqueIdDisplay}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                `;
         tbody.appendChild(tr);
       });
     }
@@ -268,11 +254,7 @@ require_once('config/auth_check.php');
 
     function showError(message) {
       const tbody = document.querySelector('#reportsTable tbody');
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6" class="error-state">${message}</td>
-        </tr>
-      `;
+      tbody.innerHTML = `<tr><td colspan="6" class="error-state">${message}</td></tr>`;
       document.getElementById('paginationControls').style.display = 'none';
     }
   </script>
