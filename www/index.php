@@ -9,6 +9,7 @@ require_once('config/login_redirect.php');
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Xtend License | Login</title>
+  <link rel="shortcut icon" href="images/favicon.png" />
   <link rel="stylesheet" href="styles/login.css">
 </head>
 
@@ -40,18 +41,69 @@ require_once('config/login_redirect.php');
         <p class="helper-text">Having trouble signing in? Contact your administrator.</p>
       </section>
       <aside class="login-illustration" aria-hidden="true">
-        <div class="license-graphic">
-          <svg viewBox="0 0 320 200" role="img">
-            <title>License Illustration</title>
-            <rect x="15" y="25" width="290" height="150" rx="16" class="card-bg" />
-            <rect x="35" y="50" width="120" height="20" rx="4" class="card-line" />
-            <rect x="35" y="80" width="160" height="20" rx="4" class="card-line" />
-            <rect x="35" y="110" width="180" height="20" rx="4" class="card-line" />
-            <rect x="35" y="140" width="140" height="20" rx="4" class="card-line" />
-            <circle cx="245" cy="130" r="32" class="card-stamp" />
-            <path d="M222 95 l23 23 45-45" class="card-check" />
-          </svg>
-          <!-- <p>Secure license management at a glance.</p> -->
+        <div class="license-image">
+          <img src="images/login-icon.png" alt="Login Icon">
+          <!-- <svg viewBox="0 0 800 600" role="img" xmlns="http://www.w3.org/2000/svg">
+            <title>Modern License Management</title>
+            <defs>
+              <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="15" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+              <linearGradient id="serverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:0.9" />
+                <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:0.8" />
+              </linearGradient>
+              <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+
+            <path d="M400 500 L100 350 L400 200 L700 350 Z" fill="rgba(255,255,255,0.05)" />
+            <path d="M400 520 L100 370 L400 220 L700 370 Z" fill="rgba(255,255,255,0.03)" />
+            <g transform="translate(200, 280)">
+              <path d="M0 40 L60 10 L120 40 L60 70 Z" fill="#e2e8f0" />
+              <path d="M0 40 L60 70 V 170 L0 140 Z" fill="#cbd5e1" />
+              <path d="M120 40 L60 70 V 170 L120 140 Z" fill="#94a3b8" />
+              <circle cx="20" cy="60" r="3" fill="#10b981" />
+              <circle cx="20" cy="75" r="3" fill="#10b981" />
+              <circle cx="20" cy="90" r="3" fill="#ef4444" />
+            </g>
+
+            <g transform="translate(340, 220)">
+              <path d="M60 0 L120 30 V 90 C 120 140, 60 170, 60 170 C 60 170, 0 140, 0 90 V 30 Z" fill="url(#blueGrad)"
+                filter="url(#softGlow)" />
+              <path d="M60 10 L110 35 V 85 C 110 125, 60 150, 60 150 C 60 150, 10 125, 10 85 V 35 Z"
+                fill="rgba(255,255,255,0.2)" />
+              <path d="M40 80 L55 95 L85 55" stroke="white" stroke-width="8" stroke-linecap="round"
+                stroke-linejoin="round" fill="none" />
+            </g>
+
+            <g transform="translate(520, 300)">
+              <rect x="0" y="0" width="80" height="60" rx="4" fill="rgba(255,255,255,0.9)" transform="skewY(-15)" />
+              <rect x="10" y="10" width="60" height="5" rx="2" fill="#cbd5e1" transform="skewY(-15)" />
+              <rect x="10" y="25" width="40" height="5" rx="2" fill="#cbd5e1" transform="skewY(-15)" />
+
+              <g transform="translate(20, -40)">
+                <rect x="0" y="0" width="80" height="60" rx="4" fill="rgba(255,255,255,0.9)" transform="skewY(-15)" />
+                <rect x="10" y="10" width="60" height="5" rx="2" fill="#3b82f6" transform="skewY(-15)" />
+                <rect x="10" y="25" width="40" height="5" rx="2" fill="#93c5fd" transform="skewY(-15)" />
+              </g>
+            </g>
+
+            <path d="M260 300 Q 340 350 400 390" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="5,5"
+              fill="none" />
+            <path d="M540 320 Q 460 360 400 390" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="5,5"
+              fill="none" />
+
+            <circle cx="300" cy="320" r="4" fill="#fff">
+              <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="480" cy="340" r="3" fill="#fff">
+              <animate attributeName="opacity" values="0;1;0" dur="2s" begin="1s" repeatCount="indefinite" />
+            </circle>
+          </svg> -->
         </div>
       </aside>
     </div>
@@ -59,8 +111,8 @@ require_once('config/login_redirect.php');
 
   <script src="plugins/jquery-3.7.1.min.js"></script>
   <script>
-    $(document).ready(function() {
-      $('#loginForm').on('submit', function(e) {
+    $(document).ready(function () {
+      $('#loginForm').on('submit', function (e) {
         e.preventDefault();
 
         const username = $('#username').val().trim();
@@ -90,7 +142,7 @@ require_once('config/login_redirect.php');
             username: username,
             password: password
           },
-          success: function(response) {
+          success: function (response) {
             console.log("login ajax 1:", response);
             if (response.success) {
               window.location.href = 'dashboard.php';
@@ -99,7 +151,7 @@ require_once('config/login_redirect.php');
               $('#loginBtn').prop('disabled', false).text('Sign In');
             }
           },
-          error: function(xhr, status, error) {
+          error: function (xhr, status, error) {
             console.log("login ajax error:", xhr.responseText);
             showError('An error occurred. Please try again.');
             $('#loginBtn').prop('disabled', false).text('Sign In');

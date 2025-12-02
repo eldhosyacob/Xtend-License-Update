@@ -46,9 +46,9 @@ body {
   padding: 8px 12px;
   border: 1px solid rgb(207, 201, 201);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 10x;
   color: var(--text-dark);
-  width: 200px;
+  width: 150px;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -177,7 +177,7 @@ td {
 .text-center {
   text-align: center;
   font-weight: 600;
-  color: var(--text-light);
+  color: #616871
 }
 
 .validity-cell {

@@ -23,6 +23,7 @@ if ($db) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Users</title>
+  <link rel="shortcut icon" href="images/favicon.png" />
   <link rel="stylesheet" href="styles/users.css">
   <link rel="stylesheet" href="styles/header-sidebar.css">
   <link rel="stylesheet" href="styles/common.css">
@@ -40,16 +41,16 @@ if ($db) {
       <table class="users-table">
         <thead>
           <tr class="users-table-header" style="background-color: #f34134;">
-            <th>ID</th>
+            <th>Sl No</th>
             <th>Username</th>
             <th>Full Name</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <?php foreach ($users as $user): ?>
+          <?php foreach ($users as $index => $user): ?>
             <tr>
-              <td><?php echo htmlspecialchars($user['id']); ?></td>
+              <td><?php echo $index + 1; ?></td>
               <td><?php echo htmlspecialchars($user['username']); ?></td>
               <td><?php echo htmlspecialchars($user['full_name']); ?></td>
               <td>

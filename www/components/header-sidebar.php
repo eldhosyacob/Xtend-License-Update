@@ -159,13 +159,21 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <!-- Logout Modal -->
-<div id="logoutModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
-  <div style="background-color:#fff; margin:15% auto; padding:30px; border-radius:12px; width:400px; max-width:90%; text-align:center; box-shadow:0 4px 8px rgba(0,0,0,0.2);">
+<div id="logoutModal"
+  style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
+  <div
+    style="background-color:#fff; margin:15% auto; padding:30px; border-radius:12px; width:400px; max-width:90%; text-align:center; box-shadow:0 4px 8px rgba(0,0,0,0.2);">
     <h2 style="margin-bottom:20px; color:#333; font-size:24px;">Confirm Logout</h2>
     <p style="margin-bottom:30px; color:#666; font-size:16px;">Are you sure you want to logout?</p>
     <div style="display:flex; gap:10px; justify-content:center;">
-      <button onclick="hideLogoutModal()" style="padding:10px 30px; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:500; background-color:#6c757d; color:white; transition:background-color 0.3s;" onmouseover="this.style.backgroundColor='#5a6268'" onmouseout="this.style.backgroundColor='#6c757d'">Cancel</button>
-      <button onclick="confirmLogout()" style="padding:10px 30px; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:500; background-color:#dc3545; color:white; transition:background-color 0.3s;" onmouseover="this.style.backgroundColor='#c82333'" onmouseout="this.style.backgroundColor='#dc3545'">Logout</button>
+      <button onclick="hideLogoutModal()"
+        style="padding:10px 30px; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:500; background-color:#6c757d; color:white; transition:background-color 0.3s;"
+        onmouseover="this.style.backgroundColor='#5a6268'"
+        onmouseout="this.style.backgroundColor='#6c757d'">Cancel</button>
+      <button onclick="confirmLogout()"
+        style="padding:10px 30px; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:500; background-color:#dc3545; color:white; transition:background-color 0.3s;"
+        onmouseover="this.style.backgroundColor='#c82333'"
+        onmouseout="this.style.backgroundColor='#dc3545'">Logout</button>
     </div>
   </div>
 </div>

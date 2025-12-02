@@ -126,10 +126,10 @@ try {
   $totalRecords = $countStmt->fetchColumn();
 
   // Fetch required fields with pagination
-  $sql = "SELECT created_on, licensee_validtill, system_serialid, system_uniqueid 
+  $sql = "SELECT id, created_on, licensee_validtill, system_serialid, system_uniqueid, engine_graceperiod 
             FROM license_details 
             $whereSql
-            ORDER BY created_on DESC 
+            ORDER BY id DESC 
             LIMIT :limit OFFSET :offset";
 
   $stmt = $db->prepare($sql);

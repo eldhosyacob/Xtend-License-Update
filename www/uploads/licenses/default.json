@@ -1,26 +1,26 @@
 {
-    "CreatedOn": "20251128",
+    "CreatedOn": "2025-12-01",
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
-        "Distributor": "IVR",
-        "Dealer": "asif",
-        "Type": "Purchase",
-        "AMCTill": "20251001",
-        "ValidTill": "20251130",
-        "BillNo": "XT25-1002"
+        "Distributor": "Telture",
+        "Dealer": "Deepak",
+        "Type": "Rental",
+        "AMCTill": "2025-12-01",
+        "ValidTill": "2025-12-02",
+        "BillNo": "XT25-1001-DEC"
     },
     "System": {
         "Type": "Standalone",
-        "OS": "Linux",
+        "OS": "Windows",
         "IsVM": false,
-        "SerialID": "128",
-        "UniqueID": "8AGL-2RSU-H8CK-BECE",
-        "UpdateNow": "yes"
+        "SerialID": "3214",
+        "UniqueID": "FUL6-MS4N-GF9A-7768",
+        "UpdateNow": "Yes"
     },
     "Engine": {
         "Build": "Xtend IVR",
-        "GracePeriod": 30,
-        "MaxPorts": "M=4000,*=4000",
+        "GracePeriod": 10,
+        "MaxPorts": "M=40,*=40",
         "ValidStartTZ": 330,
         "ValidEndTZ": 330,
         "ValidCountries": 65
@@ -32,6 +32,6 @@
         }
     },
     "Features": {
-        "Script": "test"
+        "Script": ""
     }
 }

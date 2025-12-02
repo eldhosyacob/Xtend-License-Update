@@ -40,6 +40,7 @@ if ($pdo) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Dashboard</title>
+  <link rel="shortcut icon" href="images/favicon.png" />
   <link rel="stylesheet" href="styles/dashboard.css">
   <link rel="stylesheet" href="styles/header-sidebar.css">
   <link rel="stylesheet" href="styles/common.css">
@@ -66,7 +67,7 @@ if ($pdo) {
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-      <div class="stat-card stat-card-primary">
+      <a href="users.php" class="stat-card stat-card-primary" style="text-decoration: none; color: inherit; display: block;">
         <div class="stat-icon">
           <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor">
             <path
@@ -84,7 +85,7 @@ if ($pdo) {
             <span>12% from last month</span>
           </div>
         </div>
-      </div>
+      </a>
 
       <a href="reports.php?status=active" class="stat-card stat-card-success"
         style="text-decoration: none; color: inherit; display: block;">

@@ -82,8 +82,8 @@
 
 .users-table th,
 .users-table td {
-  padding: 12px 15px;
-  text-align: left;
+  padding: 12px 5px;
+  text-align: center;
   border-bottom: 1px solid #eee;
 }
 
