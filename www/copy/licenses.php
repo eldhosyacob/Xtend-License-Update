@@ -120,14 +120,23 @@ if ($method === 'GET' && $editId) {
 
       if ($row) {
         $prefill = [
-          'CreatedOn' => $row['created_on'],
+          // 'CreatedOn' => $row['created_on'],
+          'CreatedOn' => $row['created_on']
+            ? date('Ymd', strtotime($row['created_on']))
+            : '',
           'Licensee' => [
             'Name' => $row['licensee_name'],
             'Distributor' => $row['licensee_distributor'],
             'Dealer' => $row['licensee_dealer'],
             'Type' => $row['licensee_type'],
-            'AMCTill' => $row['licensee_amctill'],
-            'ValidTill' => $row['licensee_validtill'],
+            // 'AMCTill' => $row['licensee_amctill'],
+            // 'ValidTill' => $row['licensee_validtill'],
+            'AMCTill' => $row['licensee_amctill']
+              ? date('Ymd', strtotime($row['licensee_amctill']))
+              : '',
+            'ValidTill' => $row['licensee_validtill']
+              ? date('Ymd', strtotime($row['licensee_validtill']))
+              : '',
             'BillNo' => $row['licensee_billno'],
           ],
           'System' => [
@@ -907,13 +916,29 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
 
         <!-- Features Section -->
-        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+        <!-- <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
           <h3
             style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">
             Features</h3>
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
             <div>
               <label onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+          </div>
+        </div> -->
+        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+          <h3
+            style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">
+            Features</h3>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Features[Script]</label>
+              <input type="text" name="Features[Script]" required
+                value="<?php echo h($val(['Features', 'Script'], $defaults['Features']['Script'])); ?>"
+                style="width:25%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
           </div>
         </div>

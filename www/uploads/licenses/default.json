@@ -1,26 +1,26 @@
 {
-    "CreatedOn": "2025-12-01",
+    "CreatedOn": "20251202",
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
-        "Distributor": "Telture",
-        "Dealer": "Deepak",
-        "Type": "Rental",
-        "AMCTill": "2025-12-01",
-        "ValidTill": "2025-12-02",
-        "BillNo": "XT25-1001-DEC"
+        "Distributor": "Eldhos Yacob",
+        "Dealer": "Xtend",
+        "Type": "Purchase",
+        "AMCTill": "20261202",
+        "ValidTill": "20251231",
+        "BillNo": "XT25-1002"
     },
     "System": {
-        "Type": "Standalone",
+        "Type": "Desktop",
         "OS": "Windows",
         "IsVM": false,
-        "SerialID": "3214",
-        "UniqueID": "FUL6-MS4N-GF9A-7768",
-        "UpdateNow": "Yes"
+        "SerialID": "200",
+        "UniqueID": "YG52-DZ2R-ZYFH-6F4E",
+        "UpdateNow": "No"
     },
     "Engine": {
         "Build": "Xtend IVR",
-        "GracePeriod": 10,
-        "MaxPorts": "M=40,*=40",
+        "GracePeriod": 30,
+        "MaxPorts": "M=4000,*=4000",
         "ValidStartTZ": 330,
         "ValidEndTZ": 330,
         "ValidCountries": 65
@@ -32,6 +32,6 @@
         }
     },
     "Features": {
-        "Script": ""
+        "Script": "test"
     }
 }

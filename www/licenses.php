@@ -120,14 +120,23 @@ if ($method === 'GET' && $editId) {
 
       if ($row) {
         $prefill = [
-          'CreatedOn' => $row['created_on'],
+          // 'CreatedOn' => $row['created_on'],
+          'CreatedOn' => $row['created_on']
+            ? date('Ymd', strtotime($row['created_on']))
+            : '',
           'Licensee' => [
             'Name' => $row['licensee_name'],
             'Distributor' => $row['licensee_distributor'],
             'Dealer' => $row['licensee_dealer'],
             'Type' => $row['licensee_type'],
-            'AMCTill' => $row['licensee_amctill'],
-            'ValidTill' => $row['licensee_validtill'],
+            // 'AMCTill' => $row['licensee_amctill'],
+            // 'ValidTill' => $row['licensee_validtill'],
+            'AMCTill' => $row['licensee_amctill']
+              ? date('Ymd', strtotime($row['licensee_amctill']))
+              : '',
+            'ValidTill' => $row['licensee_validtill']
+              ? date('Ymd', strtotime($row['licensee_validtill']))
+              : '',
             'BillNo' => $row['licensee_billno'],
           ],
           'System' => [
@@ -455,6 +464,26 @@ if ($method === 'POST' && $action === 'send') {
 
           $stmt = $db->prepare($sql);
           $stmt->execute($params);
+
+          // Get the license ID (either from edit or last insert)
+          $licenseId = $editId ? $editId : $db->lastInsertId();
+
+          // Insert comment into comments table if comment is not empty
+          if (!empty($comment) && $licenseId) {
+            try {
+              $commentStmt = $db->prepare("
+                INSERT INTO comments (license_id, comment, commented_by, created_at) 
+                VALUES (:license_id, :comment, :commented_by, NOW())
+              ");
+              $commentStmt->execute([
+                ':license_id' => $licenseId,
+                ':comment' => $comment,
+                ':commented_by' => $_SESSION['full_name'] ?? 'Unknown'
+              ]);
+            } catch (PDOException $e) {
+              error_log('Comment insert failed: ' . $e->getMessage());
+            }
+          }
         } catch (PDOException $e) {
           error_log('Database insert/update failed: ' . $e->getMessage());
         }
@@ -907,13 +936,29 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
 
         <!-- Features Section -->
-        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+        <!-- <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
           <h3
             style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">
             Features</h3>
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
             <div>
               <label onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+          </div>
+        </div> -->
+        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+          <h3
+            style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">
+            Features</h3>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Features[Script]</label>
+              <input type="text" name="Features[Script]" required
+                value="<?php echo h($val(['Features', 'Script'], $defaults['Features']['Script'])); ?>"
+                style="width:25%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
           </div>
         </div>
@@ -928,7 +973,7 @@ header('Content-Type: text/html; charset=utf-8');
               onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             <?php if ($editId): ?>
               <div style="cursor:pointer; color:#64748b; display:flex; align-items:center;" onclick="showCommentPopup()"
-                title="View Existing Comment">
+                title="View Previous Comments">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -952,11 +997,10 @@ header('Content-Type: text/html; charset=utf-8');
   <div id="commentPopup"
     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
     <div
-      style="background:white; padding:24px; border-radius:12px; max-width:400px; width:90%; box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
-      <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b;">Existing Comment</h3>
-      <p id="existingCommentText"
-        style="color:#475569; font-size:14px; line-height:1.5; margin-bottom:24px; white-space: pre-wrap; word-break: break-word;">
-      </p>
+      style="background:white; padding:24px; border-radius:12px; max-width:800px; width:90%; box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+      <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b;">Comment History</h3>
+      <div id="existingCommentText" style="margin-bottom:24px; max-height:500px; overflow-y:auto;">
+      </div>
       <div style="text-align:right;">
         <button type="button" onclick="closeCommentPopup()"
           style="padding:8px 16px; background:#e2e8f0; color:#475569; border:none; border-radius:6px; cursor:pointer; font-weight:500; transition:background-color 0.2s;">Close</button>
@@ -966,10 +1010,55 @@ header('Content-Type: text/html; charset=utf-8');
 
   <?php include 'components/header-sidebar.php'; ?>
   <script>
-    function showCommentPopup() {
-      const comment = <?php echo json_encode($commentValue); ?>;
-      document.getElementById('existingCommentText').innerText = comment;
-      document.getElementById('commentPopup').style.display = 'flex';
+    async function showCommentPopup() {
+      const licenseId = '<?php echo h($editId); ?>';
+      if (!licenseId) return;
+
+      try {
+        const response = await fetch(`api/comments.php?license_id=${licenseId}`);
+        const comments = await response.json();
+
+        let html = '';
+        if (comments.length === 0) {
+          html = '<p style="color:#94a3b8; font-style:italic; text-align:center; padding:20px;">No previous comments</p>';
+        } else {
+          html = `
+            <table style="width:100%; border-collapse:collapse; font-size:14px;">
+              <thead>
+                <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
+                  <th style="padding:12px 8px; text-align:left; font-weight:600; color:#475569; width:50px;">Sl No</th>
+                  <th style="padding:12px 8px; text-align:left; font-weight:600; color:#475569; width:150px;">Commented By</th>
+                  <th style="padding:12px 8px; text-align:left; font-weight:600; color:#475569; width:150px;">Date/Time</th>
+                  <th style="padding:12px 8px; text-align:left; font-weight:600; color:#475569;">Comment</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          comments.forEach((comment, index) => {
+            html += `
+              <tr style="border-bottom:1px solid #e2e8f0;">
+                <td style="padding:12px 8px; color:#64748b;">${index + 1}</td>
+                <td style="padding:12px 8px; color:#1e293b; font-weight:500;">${comment.commented_by || 'Unknown'}</td>
+                <td style="padding:12px 8px; color:#64748b; font-size:12px;">${comment.formatted_date || comment.created_at}</td>
+                <td style="padding:12px 8px; color:#475569;">${comment.comment}</td>
+              </tr>
+            `;
+          });
+
+          html += `
+              </tbody>
+            </table>
+          `;
+        }
+
+        document.getElementById('existingCommentText').innerHTML = html;
+        document.getElementById('commentPopup').style.display = 'flex';
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+        document.getElementById('existingCommentText').innerHTML = '<p style="color:#ef4444; text-align:center; padding:20px;">Error loading comments</p>';
+        document.getElementById('commentPopup').style.display = 'flex';
+      }
     }
 
     function closeCommentPopup() {
