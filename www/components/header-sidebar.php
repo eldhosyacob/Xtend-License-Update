@@ -83,54 +83,60 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
 
 <!-- Sidebar -->
 <aside class="sidebar-container" id="sidebar">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <nav class="sidebar-nav">
     <div class="sidebar-section">
       <ul class="sidebar-menu">
         <li class="sidebar-menu-item <?php echo ($current_page == 'dashboard') ? 'active' : ''; ?>">
           <a href="dashboard.php" class="sidebar-link">
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+            <!-- <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path
                 d="M8 3.293l6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6zm5-.793V1.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293l-2-2z" />
-            </svg>
+            </svg> -->
+            <i class="fa-solid fa-house" style="color:#d1d1d1"></i>
             <span>Dashboard</span>
           </a>
         </li>
         <li class="sidebar-menu-item <?php echo ($current_page == 'licenses') ? 'active' : ''; ?>">
           <a href="licenses.php" class="sidebar-link">
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+            <!-- <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
               <path
                 d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z" />
-            </svg>
+            </svg> -->
+            <i class="fa-solid fa-id-card" style="color:#71cbae"></i>
             <span>Licenses</span>
           </a>
         </li>
         <li class="sidebar-menu-item <?php echo ($current_page == 'users') ? 'active' : ''; ?>">
           <a href="users.php" class="sidebar-link">
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+            <!-- <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path
                 d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
-            </svg>
+            </svg> -->
+            <i class="fa-solid fa-users" style="color:#668cd3"></i>
             <span>Users</span>
           </a>
         </li>
         <li class="sidebar-menu-item <?php echo ($current_page == 'reports') ? 'active' : ''; ?>">
           <a href="reports.php" class="sidebar-link">
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+            <!-- <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path
                 d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z" />
-            </svg>
+            </svg> -->
+            <i class="fa-solid fa-chart-simple" style="color:#c19149"></i>
             <span>Reports</span>
           </a>
         </li>
         <li class="sidebar-menu-item <?php echo ($current_page == 'logout') ? 'active' : ''; ?>">
           <a href="#" onclick="showLogoutModal(); return false;" class="sidebar-link">
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+            <!-- <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path fill-rule="evenodd"
                 d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z" />
               <path fill-rule="evenodd"
                 d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z" />
-            </svg>
+            </svg> -->
+            <i class="fa-solid fa-right-from-bracket" style="color:#d95555"></i>
             <span>Logout</span>
           </a>
         </li>

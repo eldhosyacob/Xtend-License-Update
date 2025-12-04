@@ -46,14 +46,25 @@ require_once('config/auth_check.php');
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
+          <!-- <tbody>
             <tr>
               <td colspan="8" class="loading-state">
                 <div class="loading-spinner"></div>
                 Loading reports...
               </td>
             </tr>
+          </tbody> -->
+          <tbody>
+            <tr>
+              <td colspan="8" class="loading-cell">
+                <div class="loading-state">
+                  <div class="loading-spinner"></div>
+                  Loading reports...
+                </div>
+              </td>
+            </tr>
           </tbody>
+
         </table>
       </div>
 

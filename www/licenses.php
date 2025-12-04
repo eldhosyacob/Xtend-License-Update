@@ -2,20 +2,7 @@
 declare(strict_types=1);
 require_once('config/auth_check.php');
 
-// Simple license JSON uploader and editor
-// - Step 1: Upload JSON file
-// - Step 2: Edit values in a generated form (all keys as inputs)
-// - Step 3: Submit to save JSON on the server
 
-
-// $rawDate = $val(['Licensee','ValidTill'], $defaults['Licensee']['ValidTill']); 
-// $formatted = '';
-
-// if (!empty($rawDate)) {
-//     $formatted = date('Y-m-d', strtotime($rawDate)); // convert to Y-m-d
-// }
-
-// Configuration
 $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'licenses';
 if (!is_dir($uploadDir)) {
   @mkdir($uploadDir, 0775, true);
@@ -828,15 +815,7 @@ header('Content-Type: text/html; charset=utf-8');
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
-            <!-- <div>
-              <label
-                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[UpdateNow]</label>
-              <input type="text" name="System[UpdateNow]" required
-                value="<?php echo h($val(['System', 'UpdateNow'], $defaults['System']['UpdateNow'])); ?>"
-                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
-                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
-                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
-            </div> -->
+
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[UpdateNow]</label>
@@ -936,16 +915,6 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
 
         <!-- Features Section -->
-        <!-- <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
-          <h3
-            style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">
-            Features</h3>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
-            <div>
-              <label onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
-            </div>
-          </div>
-        </div> -->
         <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
           <h3
             style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">

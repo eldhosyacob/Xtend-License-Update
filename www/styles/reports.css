@@ -22,7 +22,7 @@
 
 body {
   background-color: var(--bg-page);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; */
 }
 
 /* Header Section */
@@ -177,7 +177,7 @@ td {
 .text-center {
   text-align: center;
   font-weight: 600;
-  color: #616871
+  color: #616871;
 }
 
 .validity-cell {
@@ -221,25 +221,25 @@ td {
   color: #6b7280;
 }
 
-/* Loading, Empty, Error States */
-.loading-state,
-.empty-state,
-.error-state {
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding: 64px 32px;
-  color: var(--text-light);
 
+.loading-cell {
+  padding: 0;
 }
 
 .loading-state {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   gap: 16px;
+  text-align: center;
+  padding: 64px 32px;
+  color: var(--text-light);
+  width: 100%;
+  min-height: 200px;
 }
 
+/* Spinner */
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -255,11 +255,15 @@ td {
   }
 }
 
+
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
+  text-align: center;
+  padding: 64px 32px;
+  color: var(--text-light);
 }
 
 .empty-state svg {
@@ -275,6 +279,10 @@ td {
 }
 
 .error-state {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 64px 32px;
   color: var(--danger-color);
   font-weight: 500;
 }

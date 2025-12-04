@@ -66,7 +66,7 @@
 
 /* Logo */
 .xtend-logo {
-  background: url("../images/xtend-logo.png");
+  /* background: url("../images/xtend-logo.png"); */
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -178,7 +178,7 @@
 .user-menu-btn {
   background: none;
   border: none;
-  color: #fff;
+  color: #c6c6c6;
   background-color: #27282a;
   cursor: pointer;
   display: flex;
@@ -278,6 +278,7 @@
   /* background-color: #34495e; */
   background-color: #27282a;
   color: #ecf0f1;
+  font-family: monospace;
   overflow-y: auto;
   transition: transform 0.3s ease;
   z-index: 999;
@@ -450,6 +451,7 @@
 
 /* ===== RESPONSIVE STYLES ===== */
 @media (max-width: 768px) {
+
   /* Hide search on mobile */
   .header-search {
     display: none;
