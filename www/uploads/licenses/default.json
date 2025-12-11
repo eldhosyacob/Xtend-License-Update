@@ -1,20 +1,20 @@
 {
-    "CreatedOn": "20251202",
+    "CreatedOn": "20251206",
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
-        "Distributor": "Eldhos Yacob",
-        "Dealer": "Xtend",
+        "Distributor": "Eldhos",
+        "Dealer": "Jasim",
         "Type": "Purchase",
-        "AMCTill": "20261202",
-        "ValidTill": "20251231",
+        "AMCTill": "20261207",
+        "ValidTill": "20260101",
         "BillNo": "XT25-1002"
     },
     "System": {
         "Type": "Desktop",
         "OS": "Windows",
         "IsVM": false,
-        "SerialID": "200",
-        "UniqueID": "YG52-DZ2R-ZYFH-6F4E",
+        "SerialID": "1310",
+        "UniqueID": "77MX-WJDS-NEZY-9HB2",
         "UpdateNow": "No"
     },
     "Engine": {
@@ -32,6 +32,6 @@
         }
     },
     "Features": {
-        "Script": "test"
+        "Script": "test ivr"
     }
 }

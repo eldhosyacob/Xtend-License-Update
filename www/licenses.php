@@ -532,7 +532,8 @@ header('Content-Type: text/html; charset=utf-8');
     <?php endif; ?>
 
     <?php if ($submitResult !== null): ?>
-      <div style="margin: 100px 10px; border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#ffffff;">
+      <div
+        style="margin: auto; margin-top:50px; width:800px; border:1px solid #e5e7eb; border-radius:8px; padding:25px; background:#ffffff;">
         <h2 style="margin-bottom:16px; font-size:20px; font-weight:bold;">Result</h2>
         <?php
         $resultTag = $submitResult['resultTag'];
@@ -972,7 +973,7 @@ header('Content-Type: text/html; charset=utf-8');
       </div>
       <div style="text-align:right;">
         <button type="button" onclick="closeCommentPopup()"
-          style="padding:8px 16px; background:#e2e8f0; color:#475569; border:none; border-radius:6px; cursor:pointer; font-weight:500; transition:background-color 0.2s;">Close</button>
+          style="padding:8px 16px; background:#f16767; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:background-color 0.2s;">Close</button>
       </div>
     </div>
   </div>

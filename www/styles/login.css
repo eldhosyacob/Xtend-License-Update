@@ -150,14 +150,14 @@ body {
 }
 
 /* Glowing border */
-.login-form button::before {
+/* .login-form button::before {
   content: "";
   position: absolute;
   top: -2px;
   left: -2px;
   width: calc(100% + 4px);
-  height: calc(100% + 4px);
-  /* background: linear-gradient(45deg,
+  height: calc(100% + 4px); */
+/* background: linear-gradient(45deg,
       #ff0000,
       #ff7300,
       #fffb00,
@@ -167,12 +167,47 @@ body {
       #7a00ff,
       #ff00c8,
       #ff0000); */
-  background: linear-gradient(to right in oklch, #f63b35 0%, #f63b35 3%, #1265f0 7%, #477dff 17%, #2caf4f 20%, #72bb44 25%, #ffe523 27%, #ffcc25 30%, #ea4335 33%, #ea4335 45%, #1265f0 49%, #477dff 68%, #34a853 72%, #2caf4f 79%, #ffe523 82%, #ffcc25 87%, #f63b35 90%, #f63b35 100%);
+/* background: linear-gradient(to right in oklch, #f63b35 0%, #f63b35 3%, #1265f0 7%, #477dff 17%, #2caf4f 20%, #72bb44 25%, #ffe523 27%, #ffcc25 30%, #ea4335 33%, #ea4335 45%, #1265f0 49%, #477dff 68%, #34a853 72%, #2caf4f 79%, #ffe523 82%, #ffcc25 87%, #f63b35 90%, #f63b35 100%);
   background-size: 400%;
   z-index: -1;
   filter: blur(4px);
   border-radius: 14px;
+  animation: glowing-login-btn 20s linear infinite; */
+/* } */
+.login-form button::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+
+  background: linear-gradient(to right in oklch,
+      #f63b35 0%, #f63b35 3%, #1265f0 7%, #477dff 17%, #2caf4f 20%,
+      #72bb44 25%, #ffe523 27%, #ffcc25 30%, #ea4335 33%, #ea4335 45%,
+      #1265f0 49%, #477dff 68%, #34a853 72%, #2caf4f 79%, #ffe523 82%,
+      #ffcc25 87%, #f63b35 90%, #f63b35 100%);
+
+  background-size: 400%;
+  filter: blur(1px);
+  border-radius: 14px;
   animation: glowing-login-btn 20s linear infinite;
+  z-index: -1;
+}
+
+/* Animation */
+@keyframes glowing-login-btn {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Button inner background */
