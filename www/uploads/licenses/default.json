@@ -1,37 +1,37 @@
 {
-    "CreatedOn": "20251206",
+    "CreatedOn": "20251217",
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
-        "Distributor": "Eldhos",
-        "Dealer": "Jasim",
+        "Distributor": "IVR",
+        "Dealer": "Xtend",
         "Type": "Purchase",
-        "AMCTill": "20261207",
-        "ValidTill": "20260101",
+        "AMCTill": "20261217",
+        "ValidTill": "20251225",
         "BillNo": "XT25-1002"
     },
     "System": {
-        "Type": "Desktop",
-        "OS": "Windows",
+        "Type": "Standalone",
+        "OS": "Linux",
         "IsVM": false,
-        "SerialID": "1310",
-        "UniqueID": "77MX-WJDS-NEZY-9HB2",
+        "SerialID": "107",
+        "UniqueID": "8AGL-2RSU-H8CK-BECE",
         "UpdateNow": "No"
     },
     "Engine": {
         "Build": "Xtend IVR",
         "GracePeriod": 30,
-        "MaxPorts": "M=4000,*=4000",
+        "MaxPorts": "M=5,*=5",
         "ValidStartTZ": 330,
         "ValidEndTZ": 330,
         "ValidCountries": 65
     },
     "Hardware": {
         "Analog": {
-            "2303": "11110000",
-            "2304": "00001111"
+            "22221": "11111111",
+            "33331": "11111111"
         }
     },
     "Features": {
-        "Script": "test ivr"
+        "Script": "testing"
     }
 }

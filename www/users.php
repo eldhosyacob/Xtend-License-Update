@@ -34,7 +34,7 @@ if ($db) {
   <div class="users-page-container page-containers">
     <div class="page-header-actions">
       <div class="gradient-text">User Management</div>
-      <button class="btn-primary" id="addUserBtn">Add New User</button>
+      <button class="btn-primary" id="addUserBtn">Add User</button>
     </div>
 
     <div class="users-table-container">
@@ -71,7 +71,7 @@ if ($db) {
   <div id="userModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2 id="modalTitle" class="gradient-text">Add New User</h2>
+      <h2 id="modalTitle" class="gradient-text">Add User</h2>
       <form id="userForm">
         <input type="hidden" id="userId" name="user_id">
 

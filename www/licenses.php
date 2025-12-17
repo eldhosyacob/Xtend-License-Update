@@ -137,17 +137,22 @@ if ($method === 'GET' && $editId) {
           'Engine' => [
             'Build' => $row['engine_build'],
             'GracePeriod' => $row['engine_graceperiod'],
-            'MaxPorts' => $row['engine_maxports'],
+            'MaxPorts' => (preg_match('/^M=(.*?),/', $row['engine_maxports'], $m) ? $m[1] : $row['engine_maxports']),
             'ValidStartTZ' => $row['engine_validstarttz'],
             'ValidEndTZ' => $row['engine_validendtz'],
             'ValidCountries' => $row['engine_validcountries'],
           ],
           'Hardware' => [
             'Analog' => [
-              '2303' => $row['hardware_analog2303'],
-              '2304' => $row['hardware_analog2304'],
+              // '2303' => $row['hardware_analog2303'],
+              // '2304' => $row['hardware_analog2304'],
+              // Reconstruct the JSON structure using the saved device_ids
             ],
           ],
+          'device_id1' => $row['device_id1'],
+          'ports_enabled_deviceid1' => $row['ports_enabled_deviceid1'],
+          'device_id2' => $row['device_id2'],
+          'ports_enabled_deviceid2' => $row['ports_enabled_deviceid2'],
           'Features' => [
             'Script' => $row['features_script'],
           ],
@@ -266,24 +271,29 @@ function buildLicenseFromPost(array $post): array
     'Engine' => [
       'Build' => $str($post['Engine']['Build'] ?? ''),
       'GracePeriod' => (int) ($post['Engine']['GracePeriod'] ?? 0),
-      'MaxPorts' => $str($post['Engine']['MaxPorts'] ?? ''),
+      'MaxPorts' => (($val = $str($post['Engine']['MaxPorts'] ?? '')) && strpos($val, 'M=') === 0 ? $val : "M={$val},*={$val}"),
       'ValidStartTZ' => (int) ($post['Engine']['ValidStartTZ'] ?? 0),
       'ValidEndTZ' => (int) ($post['Engine']['ValidEndTZ'] ?? 0),
       'ValidCountries' => (int) ($post['Engine']['ValidCountries'] ?? 0),
     ],
     'Hardware' => [
-      'Analog' => [
-        // Allow arbitrary key pairs sent as Hardware[Analog][key]=value
-      ],
+      'Analog' => [],
     ],
     'Features' => [
       'Script' => $str($post['Features']['Script'] ?? ''),
     ],
   ];
-  if (isset($post['Hardware']['Analog']) && is_array($post['Hardware']['Analog'])) {
-    foreach ($post['Hardware']['Analog'] as $k => $v) {
-      $license['Hardware']['Analog'][$str($k)] = $str($v);
-    }
+
+  $d1 = $str($post['device_id1'] ?? '');
+  $p1 = $str($post['ports_enabled_deviceid1'] ?? '');
+  if ($d1 !== '') {
+    $license['Hardware']['Analog'][$d1] = $p1;
+  }
+
+  $d2 = $str($post['device_id2'] ?? '');
+  $p2 = $str($post['ports_enabled_deviceid2'] ?? '');
+  if ($d2 !== '') {
+    $license['Hardware']['Analog'][$d2] = $p2;
   }
   return $license;
 }
@@ -384,11 +394,16 @@ if ($method === 'POST' && $action === 'send') {
           $engine_build = $getNestedPostVal('Engine', 'Build');
           $engine_graceperiod = $getNestedPostVal('Engine', 'GracePeriod');
           $engine_maxports = $getNestedPostVal('Engine', 'MaxPorts');
+          if (strpos($engine_maxports, 'M=') !== 0) {
+            $engine_maxports = "M={$engine_maxports},*={$engine_maxports}";
+          }
           $engine_validstarttz = $getNestedPostVal('Engine', 'ValidStartTZ');
           $engine_validendtz = $getNestedPostVal('Engine', 'ValidEndTZ');
           $engine_validcountries = $getNestedPostVal('Engine', 'ValidCountries');
-          $hardware_analog2303 = isset($_POST['Hardware']['Analog']['2303']) ? $_POST['Hardware']['Analog']['2303'] : '';
-          $hardware_analog2304 = isset($_POST['Hardware']['Analog']['2304']) ? $_POST['Hardware']['Analog']['2304'] : '';
+          $device_id1 = $getPostVal('device_id1');
+          $ports_enabled_deviceid1 = $getPostVal('ports_enabled_deviceid1');
+          $device_id2 = $getPostVal('device_id2');
+          $ports_enabled_deviceid2 = $getPostVal('ports_enabled_deviceid2');
           $features_script = $getNestedPostVal('Features', 'Script');
           $comment = $getPostVal('comment');
           $editId = $_POST['edit_id'] ?? '';
@@ -414,8 +429,12 @@ if ($method === 'POST' && $action === 'send') {
             ':engine_validstarttz' => $engine_validstarttz,
             ':engine_validendtz' => $engine_validendtz,
             ':engine_validcountries' => $engine_validcountries,
-            ':hardware_analog2303' => $hardware_analog2303,
-            ':hardware_analog2304' => $hardware_analog2304,
+            ':device_id1' => $device_id1,
+            ':ports_enabled_deviceid1' => $ports_enabled_deviceid1,
+            ':device_id2' => $device_id2,
+            ':ports_enabled_deviceid2' => $ports_enabled_deviceid2,
+            // ':hardware_analog2303' => $hardware_analog2303,
+            // ':hardware_analog2304' => $hardware_analog2304,
             ':features_script' => $features_script,
             ':comment' => $comment
           ];
@@ -428,9 +447,12 @@ if ($method === 'POST' && $action === 'send') {
                               system_os = :system_os, system_isvm = :system_isvm, system_serialid = :system_serialid,
                               system_uniqueid = :system_uniqueid, system_updatenow = :system_updatenow, engine_build = :engine_build,
                               engine_graceperiod = :engine_graceperiod, engine_maxports = :engine_maxports,
+
                               engine_validstarttz = :engine_validstarttz, engine_validendtz = :engine_validendtz,
-                              engine_validcountries = :engine_validcountries, hardware_analog2303 = :hardware_analog2303,
-                              hardware_analog2304 = :hardware_analog2304, features_script = :features_script, comment = :comment
+                              engine_validcountries = :engine_validcountries, 
+                              device_id1 = :device_id1, ports_enabled_deviceid1 = :ports_enabled_deviceid1,
+                              device_id2 = :device_id2, ports_enabled_deviceid2 = :ports_enabled_deviceid2,
+                              features_script = :features_script, comment = :comment
                           WHERE id = :id";
             $params[':id'] = $editId;
           } else {
@@ -439,13 +461,13 @@ if ($method === 'POST' && $action === 'send') {
                               licensee_amctill, licensee_validtill, licensee_billno, system_type, system_os, 
                               system_isvm, system_serialid, system_uniqueid, system_updatenow, engine_build, 
                               engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, 
-                              engine_validcountries, hardware_analog2303, hardware_analog2304, features_script, comment
+                              engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, features_script, comment
                           ) VALUES (
                               :created_on, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
                               :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
                               :system_isvm, :system_serialid, :system_uniqueid, :system_updatenow, :engine_build,
                               :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz,
-                              :engine_validcountries, :hardware_analog2303, :hardware_analog2304, :features_script, :comment
+                              :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :features_script, :comment
                           )";
           }
 
@@ -612,15 +634,14 @@ header('Content-Type: text/html; charset=utf-8');
       'Engine' => [
         'Build' => 'Xtend IVR',
         'GracePeriod' => 30,
-        'MaxPorts' => 'M=4000,*=4000',
+        'MaxPorts' => '',
         'ValidStartTZ' => 330,
         'ValidEndTZ' => 330,
         'ValidCountries' => 65,
       ],
       'Hardware' => [
         'Analog' => [
-          '2303' => '11110000',
-          '2304' => '00001111',
+          '' => '',
         ],
       ],
       'Features' => [
@@ -645,9 +666,42 @@ header('Content-Type: text/html; charset=utf-8');
       if (!is_array($analogFromPrefill))
         $analogFromPrefill = [];
     }
-    $analogKeys = array_unique(array_merge(array_keys($defaults['Hardware']['Analog']), array_keys($analogFromPrefill)));
+    // Determine default device IDs and Ports
+    $d1_val = '';
+    $p1_val = '';
+    $d2_val = '';
+    $p2_val = '';
 
+    // Override from prefill (DB or Remote)
+    if (is_array($prefill)) {
+      // From DB Columns (if loading edit)
+      if (isset($prefill['device_id1']))
+        $d1_val = $prefill['device_id1'];
+      if (isset($prefill['ports_enabled_deviceid1']))
+        $p1_val = $prefill['ports_enabled_deviceid1'];
+      if (isset($prefill['device_id2']))
+        $d2_val = $prefill['device_id2'];
+      if (isset($prefill['ports_enabled_deviceid2']))
+        $p2_val = $prefill['ports_enabled_deviceid2'];
 
+      // Fallback or override from Hardware structure (e.g. remote fetch calls or legacy structure)
+      // If we fetched from remote JSON, we might have keys in Hardware->Analog
+      // We map the first key to Device1, second to Device2 if they exist and DB columns were empty/null (not typical for edit, but typical for fetch)
+      // Since we prioritize DB edit vs fetch, let's treat fetch as overriding defaults ONLY if we are not in 'edit mode' per se... 
+      // But $prefill is used for both.
+      // Let's assume if 'Hardware'->'Analog' has data and DB columns are not set (which they won't be if it's a fresh remote fetch), we map them.
+      if (isset($prefill['Hardware']['Analog']) && is_array($prefill['Hardware']['Analog']) && !isset($prefill['device_id1'])) {
+        $keys = array_keys($prefill['Hardware']['Analog']);
+        if (isset($keys[0])) {
+          $d1_val = $keys[0];
+          $p1_val = $prefill['Hardware']['Analog'][$keys[0]];
+        }
+        if (isset($keys[1])) {
+          $d2_val = $keys[1];
+          $p2_val = $prefill['Hardware']['Analog'][$keys[1]];
+        }
+      }
+    }
     ?>
     <?php if ($submitResult === null): ?>
       <form method="post" id="licenseForm"
@@ -664,8 +718,9 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">CreatedOn</label>
-              <input type="text" name="CreatedOn" required value="<?php echo h($val(['CreatedOn'], date('Ymd'))); ?>"
-                style="width:25%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+              <input type="text" name="CreatedOn" required readonly
+                value="<?php echo h($val(['CreatedOn'], date('Ymd'))); ?>"
+                style="width:25%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background-color: #f1f5f9; cursor: not-allowed; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
@@ -900,18 +955,54 @@ header('Content-Type: text/html; charset=utf-8');
           <h3
             style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">
             Hardware</h3>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:8px;">
-            <?php foreach ($analogKeys as $k):
-              $v = $val(['Hardware', 'Analog', $k], $defaults['Hardware']['Analog'][$k] ?? ''); ?>
-              <div>
-                <label
-                  style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Hardware[Analog][<?php echo h($k); ?>]</label>
-                <input type="text" name="Hardware[Analog][<?php echo h($k); ?>]" required value="<?php echo h($v); ?>"
-                  style="width:50%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
-                  onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
-                  onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
+            <!-- Device 1 -->
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID
+                1</label>
+              <input type="text" name="device_id1" value="<?php echo h($d1_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID 1
+                [PortsEnabled]</label>
+              <input type="text" maxlength="8" name="ports_enabled_deviceid1" id="ports_enabled_deviceid1"
+                value="<?php echo h($p1_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="validatePorts(this); this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+              <div id="error_ports_enabled_deviceid1"
+                style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
+                Must be exactly 8 characters of 0 and 1.
               </div>
-            <?php endforeach; ?>
+            </div>
+            <br>
+            <br>
+            <!-- Device 2 -->
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID
+                2</label>
+              <input type="text" name="device_id2" value="<?php echo h($d2_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID 2
+                [PortsEnabled]</label>
+              <input type="text" maxlength="8" name="ports_enabled_deviceid2" id="ports_enabled_deviceid2"
+                value="<?php echo h($p2_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="validatePorts(this); this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+              <div id="error_ports_enabled_deviceid2"
+                style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
+                Must be exactly 8 characters of 0 and 1.
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1041,10 +1132,49 @@ header('Content-Type: text/html; charset=utf-8');
       }
     });
 
+    function validatePorts(input) {
+      const val = input.value.trim();
+      const errorDiv = document.getElementById('error_' + input.name);
+
+      // If empty, we consider it valid (optional) unless we want to enforce mandatory. 
+      // User request strictly says "should have only 8 characters with 0 and 1".
+      // Assuming if filled, it must be correct.
+      if (val === '') {
+        if (errorDiv) errorDiv.style.display = 'none';
+        return true;
+      }
+
+      // Check for exactly 8 characters consisting of 0 or 1
+      const regex = /^[01]{8}$/;
+      if (!regex.test(val)) {
+        if (errorDiv) errorDiv.style.display = 'block';
+        return false;
+      } else {
+        if (errorDiv) errorDiv.style.display = 'none';
+        return true;
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       const form = document.getElementById('licenseForm');
       if (form) {
         form.addEventListener('submit', function (e) {
+          // Validate Ports before submission
+          const p1 = document.getElementById('ports_enabled_deviceid1');
+          const p2 = document.getElementById('ports_enabled_deviceid2');
+
+          let valid1 = true;
+          let valid2 = true;
+
+          if (p1) valid1 = validatePorts(p1);
+          if (p2) valid2 = validatePorts(p2);
+
+          if (!valid1 || !valid2) {
+            e.preventDefault();
+            alert('Please correct the errors in Hardware PortsEnabled fields.');
+            return;
+          }
+
           const btn = e.submitter;
           // Check if the submitter is the 'Submit' button (name='action', value='send')
           if (btn && btn.name === 'action' && btn.value === 'send') {
