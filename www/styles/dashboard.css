@@ -42,7 +42,7 @@
 
 .welcome-title {
   margin: 0 0 8px 0;
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
@@ -73,7 +73,7 @@
 /* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
   margin-bottom: 30px;
   margin-left: 30px;
@@ -133,8 +133,8 @@
 }
 
 .stat-icon {
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,7 +156,7 @@
 }
 
 .stat-label {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
@@ -165,7 +165,7 @@
 }
 
 .stat-value {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 800;
   color: #1e293b;
   margin-bottom: 12px;
@@ -223,7 +223,7 @@
 
 .card-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #1e293b;
 }
@@ -254,7 +254,7 @@
 }
 
 .btn-link {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #3b82f6;
   text-decoration: none;
@@ -317,14 +317,14 @@
 }
 
 .activity-title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 4px;
 }
 
 .activity-description {
-  font-size: 13px;
+  font-size: 11px;
   color: #64748b;
   line-height: 1.5;
 }
@@ -359,7 +359,7 @@
 }
 
 .section-title {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: #7257b3;
   margin: 0 0 20px 0;
@@ -456,14 +456,14 @@
 
 .action-title {
   margin: 0 0 6px 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #1e293b;
 }
 
 .action-description {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   color: #64748b;
   line-height: 1.4;
 }

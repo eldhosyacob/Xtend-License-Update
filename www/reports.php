@@ -38,6 +38,7 @@ require_once('config/auth_check.php');
             <tr>
               <th>Sl No</th>
               <th>Date Created</th>
+              <th>Dealer</th>
               <th>License Validity</th>
               <th>Serial ID</th>
               <th>Unique ID</th>
@@ -56,7 +57,7 @@ require_once('config/auth_check.php');
           </tbody> -->
           <tbody>
             <tr>
-              <td colspan="8" class="loading-cell">
+              <td colspan="9" class="loading-cell">
                 <div class="loading-state">
                   <div class="loading-spinner"></div>
                   Loading reports...
@@ -126,7 +127,8 @@ require_once('config/auth_check.php');
         const serial = document.getElementById('searchSerial').value;
         const unique = document.getElementById('searchUnique').value;
 
-        let url = `api/reports.php?page=${page}&limit=${limit}&serial_id=${encodeURIComponent(serial)}&unique_id=${encodeURIComponent(unique)}`;
+
+        let url = `api/reports.php?page=${page}&limit=${limit}&serial_id=${encodeURIComponent(serial)}&unique_id=${encodeURIComponent(unique)}&_t=${new Date().getTime()}`;
 
         if (currentStatus) {
           url += `&status=${encodeURIComponent(currentStatus)}`;
@@ -156,7 +158,7 @@ require_once('config/auth_check.php');
       if (data.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8">
+            <td colspan="9">
               <div class="empty-state">
                 <svg width="64" height="64" viewBox="0 0 16 16" fill="currentColor">
                   <path
@@ -239,6 +241,7 @@ require_once('config/auth_check.php');
         tr.innerHTML = `
           <td class="text-center">${startCount + index + 1}</td>
           <td>${dateDisplay || '-'}</td>
+          <td>${row.licensee_dealer || '-'}</td>
           <td class="validity-cell">${formattedValidTill}</td>
           <td class="code-cell">${row.system_serialid || '-'}</td>
           <td class="code-cell">${uniqueIdDisplay}</td>
@@ -292,7 +295,7 @@ require_once('config/auth_check.php');
       const tbody = document.querySelector('#reportsTable tbody');
       tbody.innerHTML = `
         <tr>
-          <td colspan="8" class="error-state">${message}</td>
+          <td colspan="9" class="error-state">${message}</td>
         </tr>
       `;
       document.getElementById('paginationControls').style.display = 'none';

@@ -126,7 +126,7 @@ try {
   $totalRecords = $countStmt->fetchColumn();
 
   // Fetch required fields with pagination
-  $sql = "SELECT id, created_on, licensee_validtill, system_serialid, system_uniqueid, engine_graceperiod 
+  $sql = "SELECT id, created_on, licensee_dealer, licensee_validtill, system_serialid, system_uniqueid, engine_graceperiod 
             FROM license_details 
             $whereSql
             ORDER BY id DESC 

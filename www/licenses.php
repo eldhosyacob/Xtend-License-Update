@@ -293,7 +293,11 @@ function buildLicenseFromPost(array $post): array
   $d2 = $str($post['device_id2'] ?? '');
   $p2 = $str($post['ports_enabled_deviceid2'] ?? '');
   if ($d2 !== '') {
-    $license['Hardware']['Analog'][$d2] = $p2;
+    if (isset($license['Hardware']['Analog'][$d2])) {
+      $license['Hardware']['Analog'][$d2 . '_DUPLICATE_KEY_MARKER_'] = $p2;
+    } else {
+      $license['Hardware']['Analog'][$d2] = $p2;
+    }
   }
   return $license;
 }
@@ -301,6 +305,7 @@ function buildLicenseFromPost(array $post): array
 if ($method === 'POST' && $action === 'generate') {
   $license = buildLicenseFromPost($_POST);
   $encoded = json_encode($license, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+  $encoded = str_replace('_DUPLICATE_KEY_MARKER_"', '"', $encoded);
   if (isset($_POST['download']) && $_POST['download'] === '1') {
     header('Content-Type: application/json; charset=utf-8');
     header('Content-Disposition: attachment; filename="license.json"');
@@ -313,6 +318,7 @@ if ($method === 'POST' && $action === 'generate') {
 if ($method === 'POST' && $action === 'send') {
   $license = buildLicenseFromPost($_POST);
   $encoded = json_encode($license, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+  $encoded = str_replace('_DUPLICATE_KEY_MARKER_"', '"', $encoded);
   // Write to a temp json file
   $tmpDir = $uploadDir;
   if (!is_dir($tmpDir)) {
@@ -543,7 +549,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 <body>
   <div class="page-containers">
-    <div class="heading">APPLY LICENSE</div>
+    <div class="heading"><?php echo $editId ? 'UPDATE LICENSE' : 'APPLY LICENSE'; ?></div>
     <?php if ($errors): ?>
       <div
         style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:12px 16px; border-radius:8px; margin-bottom:16px;">
@@ -618,7 +624,7 @@ header('Content-Type: text/html; charset=utf-8');
         'Name' => 'Xtend Technologies Pvt. Ltd.',
         'Distributor' => '',
         'Dealer' => '',
-        'Type' => 'Purchase',
+        'Type' => 'Rental',
         'AMCTill' => date('Ymd', strtotime($createdOn . ' +1 year')),
         'ValidTill' => '',
         'BillNo' => 'XT25-1002',
@@ -777,7 +783,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[AMCTill]</label>
-              <input type="text" name="Licensee[AMCTill]" required
+              <input type="text" maxlength="8" name="Licensee[AMCTill]" required
                 value="<?php echo h($val(['Licensee', 'AMCTill'], $defaults['Licensee']['AMCTill'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -786,7 +792,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Licensee[ValidTill]</label>
-              <input type="text" name="Licensee[ValidTill]" required
+              <input type="text" maxlength="8" name="Licensee[ValidTill]" required
                 value="<?php echo h($val(['Licensee', 'ValidTill'], $defaults['Licensee']['ValidTill'])); ?>"
                 placeholder="YYYYMMDD"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
@@ -960,7 +966,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID
                 1</label>
-              <input type="text" name="device_id1" value="<?php echo h($d1_val); ?>"
+              <input type="number" name="device_id1" required value="<?php echo h($d1_val); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -968,7 +974,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID 1
                 [PortsEnabled]</label>
-              <input type="text" maxlength="8" name="ports_enabled_deviceid1" id="ports_enabled_deviceid1"
+              <input type="text" maxlength="8" required name="ports_enabled_deviceid1" id="ports_enabled_deviceid1"
                 value="<?php echo h($p1_val); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -978,13 +984,12 @@ header('Content-Type: text/html; charset=utf-8');
                 Must be exactly 8 characters of 0 and 1.
               </div>
             </div>
-            <br>
-            <br>
+            <!-- <p></p> -->
             <!-- Device 2 -->
             <div>
               <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID
                 2</label>
-              <input type="text" name="device_id2" value="<?php echo h($d2_val); ?>"
+              <input type="number" name="device_id2" value="<?php echo h($d2_val); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -1058,11 +1063,12 @@ header('Content-Type: text/html; charset=utf-8');
   <div id="commentPopup"
     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
     <div
-      style="background:white; padding:24px; border-radius:12px; max-width:800px; width:90%; box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
-      <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b;">Comment History</h3>
-      <div id="existingCommentText" style="margin-bottom:24px; max-height:500px; overflow-y:auto;">
+      style="background:white; padding:24px; border-radius:12px; max-width:800px; max-height: 60vh; width:90%; box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); display: flex; flex-direction: column;">
+      <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; flex-shrink: 0;">Comment History
+      </h3>
+      <div id="existingCommentText" style="margin-bottom:24px; overflow-y:auto; flex: 1; min-height: 0;">
       </div>
-      <div style="text-align:right;">
+      <div style="text-align:right; flex-shrink: 0;">
         <button type="button" onclick="closeCommentPopup()"
           style="padding:8px 16px; background:#f16767; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:background-color 0.2s;">Close</button>
       </div>

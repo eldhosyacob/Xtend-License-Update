@@ -91,6 +91,13 @@ body {
   color: #0f172a;
 }
 
+.welcome-text {
+  background: conic-gradient(#23074d, #cc5333);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .subtext {
   margin: 12px 0 0;
   color: #475569;
@@ -103,7 +110,7 @@ body {
 }
 
 .error-message {
-  padding: 12px;
+  padding: 8px;
   /* margin-bottom: 16px; */
   background-color: #fee2e2;
   border: 1px solid #ef4444;

@@ -22,7 +22,9 @@ require_once('config/login_redirect.php');
             <img src="images/xtend-logo.png" alt="Xtend Logo">
             <div>
               <!-- <p class="brand-label">Xtend License Portal</p> -->
-              <h3>Welcome Back!</h3>
+              <div class="welcome-text"
+                style="font-size: 18px; font-weight: 650; background-color:conic-gradient(#553c9a, #ee4b2b, #00c2cb, #553c9a)">
+                Welcome Back!</div>
             </div>
           </div>
           <!-- <p class="subtext">Manage licenses, track activations, and stay compliant.</p> -->
@@ -112,6 +114,12 @@ require_once('config/login_redirect.php');
   <script src="plugins/jquery-3.7.1.min.js"></script>
   <script>
     $(document).ready(function () {
+      // Check for URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('error') === 'session_expired') {
+        showError('Your session has expired');
+      }
+
       $('#loginForm').on('submit', function (e) {
         e.preventDefault();
 
