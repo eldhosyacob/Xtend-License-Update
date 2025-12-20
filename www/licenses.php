@@ -132,7 +132,13 @@ if ($method === 'GET' && $editId) {
             'IsVM' => $row['system_isvm'],
             'SerialID' => $row['system_serialid'],
             'UniqueID' => $row['system_uniqueid'],
-            'UpdateNow' => $row['system_updatenow'],
+            'BuildType' => $row['system_build_type'],
+            'IPSettings' => [
+              'Type' => $row['system_ipsettings_type'],
+              'IP' => $row['system_ipsettings_ip'],
+              'Gateway' => $row['system_ipsettings_gateway'],
+              'Dns' => $row['system_ipsettings_dns'],
+            ],
           ],
           'Engine' => [
             'Build' => $row['engine_build'],
@@ -148,6 +154,13 @@ if ($method === 'GET' && $editId) {
               // '2304' => $row['hardware_analog2304'],
               // Reconstruct the JSON structure using the saved device_ids
             ],
+          ],
+          'Centralization' => [
+            'LiveStatusUrl' => $row['centralization_livestatusurl'],
+            'UploadFileUrl' => $row['centralization_uploadfileurl'],
+            'SettingsUrl' => $row['centralization_settingsurl'],
+            'UserTrunkMappingUrl' => $row['centralization_usertrunkmappingurl'],
+            'PhoneBookUrl' => $row['centralization_phonebookurl'],
           ],
           'device_id1' => $row['device_id1'],
           'ports_enabled_deviceid1' => $row['ports_enabled_deviceid1'],
@@ -266,7 +279,13 @@ function buildLicenseFromPost(array $post): array
       'IsVM' => isset($post['System']['IsVM']) ? $boolFrom($post['System']['IsVM']) : false,
       'SerialID' => $str($post['System']['SerialID'] ?? ''),
       'UniqueID' => $str($post['System']['UniqueID'] ?? ''),
-      'UpdateNow' => $str($post['System']['UpdateNow'] ?? ''),
+      'BuildType' => $str($post['System']['BuildType'] ?? ''),
+      'IPSettings' => [
+        'Type' => $str($post['System']['IPSettings']['Type'] ?? ''),
+        'IP' => $str($post['System']['IPSettings']['IP'] ?? ''),
+        'Gateway' => $str($post['System']['IPSettings']['Gateway'] ?? ''),
+        'Dns' => $str($post['System']['IPSettings']['Dns'] ?? ''),
+      ],
     ],
     'Engine' => [
       'Build' => $str($post['Engine']['Build'] ?? ''),
@@ -278,6 +297,13 @@ function buildLicenseFromPost(array $post): array
     ],
     'Hardware' => [
       'Analog' => [],
+    ],
+    'Centralization' => [
+      'LiveStatusUrl' => $str($post['Centralization']['LiveStatusUrl'] ?? ''),
+      'UploadFileUrl' => $str($post['Centralization']['UploadFileUrl'] ?? ''),
+      'SettingsUrl' => $str($post['Centralization']['SettingsUrl'] ?? ''),
+      'UserTrunkMappingUrl' => $str($post['Centralization']['UserTrunkMappingUrl'] ?? ''),
+      'PhoneBookUrl' => $str($post['Centralization']['PhoneBookUrl'] ?? ''),
     ],
     'Features' => [
       'Script' => $str($post['Features']['Script'] ?? ''),
@@ -396,7 +422,7 @@ if ($method === 'POST' && $action === 'send') {
           $system_isvm = $getNestedPostVal('System', 'IsVM');
           $system_serialid = $getNestedPostVal('System', 'SerialID');
           $system_uniqueid = $getNestedPostVal('System', 'UniqueID');
-          $system_updatenow = $getNestedPostVal('System', 'UpdateNow');
+          $system_build_type = $getNestedPostVal('System', 'BuildType');
           $engine_build = $getNestedPostVal('Engine', 'Build');
           $engine_graceperiod = $getNestedPostVal('Engine', 'GracePeriod');
           $engine_maxports = $getNestedPostVal('Engine', 'MaxPorts');
@@ -410,6 +436,21 @@ if ($method === 'POST' && $action === 'send') {
           $ports_enabled_deviceid1 = $getPostVal('ports_enabled_deviceid1');
           $device_id2 = $getPostVal('device_id2');
           $ports_enabled_deviceid2 = $getPostVal('ports_enabled_deviceid2');
+
+          // New System IPSettings fields
+          // Need to fix retrieval for deeper nested keys or just access $_POST directly
+          $system_ipsettings_type = isset($_POST['System']['IPSettings']['Type']) ? trim($_POST['System']['IPSettings']['Type']) : '';
+          $system_ipsettings_ip = isset($_POST['System']['IPSettings']['IP']) ? trim($_POST['System']['IPSettings']['IP']) : '';
+          $system_ipsettings_gateway = isset($_POST['System']['IPSettings']['Gateway']) ? trim($_POST['System']['IPSettings']['Gateway']) : '';
+          $system_ipsettings_dns = isset($_POST['System']['IPSettings']['Dns']) ? trim($_POST['System']['IPSettings']['Dns']) : '';
+
+          // New Centralization fields
+          $centralization_livestatusurl = $getNestedPostVal('Centralization', 'LiveStatusUrl');
+          $centralization_uploadfileurl = $getNestedPostVal('Centralization', 'UploadFileUrl');
+          $centralization_settingsurl = $getNestedPostVal('Centralization', 'SettingsUrl');
+          $centralization_usertrunkmappingurl = $getNestedPostVal('Centralization', 'UserTrunkMappingUrl');
+          $centralization_phonebookurl = $getNestedPostVal('Centralization', 'PhoneBookUrl');
+
           $features_script = $getNestedPostVal('Features', 'Script');
           $comment = $getPostVal('comment');
           $editId = $_POST['edit_id'] ?? '';
@@ -428,7 +469,7 @@ if ($method === 'POST' && $action === 'send') {
             ':system_isvm' => $system_isvm,
             ':system_serialid' => $system_serialid,
             ':system_uniqueid' => $system_uniqueid,
-            ':system_updatenow' => $system_updatenow,
+            ':system_build_type' => $system_build_type,
             ':engine_build' => $engine_build,
             ':engine_graceperiod' => $engine_graceperiod,
             ':engine_maxports' => $engine_maxports,
@@ -439,6 +480,18 @@ if ($method === 'POST' && $action === 'send') {
             ':ports_enabled_deviceid1' => $ports_enabled_deviceid1,
             ':device_id2' => $device_id2,
             ':ports_enabled_deviceid2' => $ports_enabled_deviceid2,
+
+            ':system_ipsettings_type' => $system_ipsettings_type,
+            ':system_ipsettings_ip' => $system_ipsettings_ip,
+            ':system_ipsettings_gateway' => $system_ipsettings_gateway,
+            ':system_ipsettings_dns' => $system_ipsettings_dns,
+
+            ':centralization_livestatusurl' => $centralization_livestatusurl,
+            ':centralization_uploadfileurl' => $centralization_uploadfileurl,
+            ':centralization_settingsurl' => $centralization_settingsurl,
+            ':centralization_usertrunkmappingurl' => $centralization_usertrunkmappingurl,
+            ':centralization_phonebookurl' => $centralization_phonebookurl,
+
             // ':hardware_analog2303' => $hardware_analog2303,
             // ':hardware_analog2304' => $hardware_analog2304,
             ':features_script' => $features_script,
@@ -451,13 +504,19 @@ if ($method === 'POST' && $action === 'send') {
                               licensee_dealer = :licensee_dealer, licensee_type = :licensee_type, licensee_amctill = :licensee_amctill,
                               licensee_validtill = :licensee_validtill, licensee_billno = :licensee_billno, system_type = :system_type,
                               system_os = :system_os, system_isvm = :system_isvm, system_serialid = :system_serialid,
-                              system_uniqueid = :system_uniqueid, system_updatenow = :system_updatenow, engine_build = :engine_build,
+                              system_uniqueid = :system_uniqueid, system_build_type = :system_build_type, 
+                              system_ipsettings_type = :system_ipsettings_type, system_ipsettings_ip = :system_ipsettings_ip,
+                              system_ipsettings_gateway = :system_ipsettings_gateway, system_ipsettings_dns = :system_ipsettings_dns,
+                              engine_build = :engine_build,
                               engine_graceperiod = :engine_graceperiod, engine_maxports = :engine_maxports,
 
                               engine_validstarttz = :engine_validstarttz, engine_validendtz = :engine_validendtz,
                               engine_validcountries = :engine_validcountries, 
                               device_id1 = :device_id1, ports_enabled_deviceid1 = :ports_enabled_deviceid1,
                               device_id2 = :device_id2, ports_enabled_deviceid2 = :ports_enabled_deviceid2,
+                              centralization_livestatusurl = :centralization_livestatusurl, centralization_uploadfileurl = :centralization_uploadfileurl,
+                              centralization_settingsurl = :centralization_settingsurl, centralization_usertrunkmappingurl = :centralization_usertrunkmappingurl,
+                              centralization_phonebookurl = :centralization_phonebookurl,
                               features_script = :features_script, comment = :comment
                           WHERE id = :id";
             $params[':id'] = $editId;
@@ -465,15 +524,23 @@ if ($method === 'POST' && $action === 'send') {
             $sql = "INSERT INTO license_details (
                               created_on, licensee_name, licensee_distributor, licensee_dealer, licensee_type, 
                               licensee_amctill, licensee_validtill, licensee_billno, system_type, system_os, 
-                              system_isvm, system_serialid, system_uniqueid, system_updatenow, engine_build, 
+                              system_isvm, system_serialid, system_uniqueid, system_build_type, 
+                              system_ipsettings_type, system_ipsettings_ip, system_ipsettings_gateway, system_ipsettings_dns,
+                              engine_build, 
                               engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, 
-                              engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, features_script, comment
+                              engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, 
+                              centralization_livestatusurl, centralization_uploadfileurl, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
+                              features_script, comment
                           ) VALUES (
                               :created_on, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
                               :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
-                              :system_isvm, :system_serialid, :system_uniqueid, :system_updatenow, :engine_build,
+                              :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, 
+                              :system_ipsettings_type, :system_ipsettings_ip, :system_ipsettings_gateway, :system_ipsettings_dns,
+                              :engine_build,
                               :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz,
-                              :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :features_script, :comment
+                              :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, 
+                              :centralization_livestatusurl, :centralization_uploadfileurl, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
+                              :features_script, :comment
                           )";
           }
 
@@ -635,7 +702,13 @@ header('Content-Type: text/html; charset=utf-8');
         'IsVM' => 'false',
         'SerialID' => '',
         'UniqueID' => '',
-        'UpdateNow' => 'No',
+        'BuildType' => 'sharekhan',
+        'IPSettings' => [
+          'Type' => 'Static',
+          'IP' => '10.20.40.121/24',
+          'Gateway' => '10.100.100.1',
+          'Dns' => '8.8.8.8',
+        ],
       ],
       'Engine' => [
         'Build' => 'Xtend IVR',
@@ -649,6 +722,13 @@ header('Content-Type: text/html; charset=utf-8');
         'Analog' => [
           '' => '',
         ],
+      ],
+      'Centralization' => [
+        'LiveStatusUrl' => 'http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()',
+        'UploadFileUrl' => 'http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()',
+        'SettingsUrl' => 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings()',
+        'UserTrunkMappingUrl' => 'http://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()',
+        'PhoneBookUrl' => 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()',
       ],
       'Features' => [
         'Script' => '',
@@ -878,17 +958,53 @@ header('Content-Type: text/html; charset=utf-8');
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
 
+
             <div>
               <label
-                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[UpdateNow]</label>
-              <select name="System[UpdateNow]" required
-                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[BuildType]</label>
+              <input type="text" name="System[BuildType]" required
+                value="<?php echo h($val(['System', 'BuildType'], $defaults['System']['BuildType'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
-                <?php $systemUpdateNow = (string) $val(['System', 'UpdateNow'], $defaults['System']['UpdateNow']); ?>
-                <option value="Yes" <?php echo ($systemUpdateNow === 'Yes') ? 'selected' : ''; ?>>Yes</option>
-                <option value="No" <?php echo ($systemUpdateNow === 'No') ? 'selected' : ''; ?>>No</option>
-              </select>
+            </div>
+
+            <!-- System IPSettings Fields -->
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IPSettings][Type]</label>
+              <input type="text" name="System[IPSettings][Type]" required
+                value="<?php echo h($val(['System', 'IPSettings', 'Type'], $defaults['System']['IPSettings']['Type'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IPSettings][IP]</label>
+              <input type="text" name="System[IPSettings][IP]" required
+                value="<?php echo h($val(['System', 'IPSettings', 'IP'], $defaults['System']['IPSettings']['IP'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IPSettings][Gateway]</label>
+              <input type="text" name="System[IPSettings][Gateway]" required
+                value="<?php echo h($val(['System', 'IPSettings', 'Gateway'], $defaults['System']['IPSettings']['Gateway'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IPSettings][Dns]</label>
+              <input type="text" name="System[IPSettings][Dns]" required
+                value="<?php echo h($val(['System', 'IPSettings', 'Dns'], $defaults['System']['IPSettings']['Dns'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
           </div>
         </div>
@@ -1007,6 +1123,60 @@ header('Content-Type: text/html; charset=utf-8');
                 style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
                 Must be exactly 8 characters of 0 and 1.
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Centralization Section -->
+        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #f1f5f9;">
+          <h3
+            style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">
+            Centralization</h3>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[LiveStatusUrl]</label>
+              <input type="text" name="Centralization[LiveStatusUrl]" required
+                value="<?php echo h($val(['Centralization', 'LiveStatusUrl'], $defaults['Centralization']['LiveStatusUrl'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[UploadFileUrl]</label>
+              <input type="text" name="Centralization[UploadFileUrl]" required
+                value="<?php echo h($val(['Centralization', 'UploadFileUrl'], $defaults['Centralization']['UploadFileUrl'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[SettingsUrl]</label>
+              <input type="text" name="Centralization[SettingsUrl]" required
+                value="<?php echo h($val(['Centralization', 'SettingsUrl'], $defaults['Centralization']['SettingsUrl'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[UserTrunkMappingUrl]</label>
+              <input type="text" name="Centralization[UserTrunkMappingUrl]" required
+                value="<?php echo h($val(['Centralization', 'UserTrunkMappingUrl'], $defaults['Centralization']['UserTrunkMappingUrl'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[PhoneBookUrl]</label>
+              <input type="text" name="Centralization[PhoneBookUrl]" required
+                value="<?php echo h($val(['Centralization', 'PhoneBookUrl'], $defaults['Centralization']['PhoneBookUrl'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
           </div>
         </div>

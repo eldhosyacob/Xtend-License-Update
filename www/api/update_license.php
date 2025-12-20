@@ -55,7 +55,7 @@ try {
   $system_isvm = getNestedPostVal('System', 'IsVM');
   $system_serialid = getNestedPostVal('System', 'SerialID');
   $system_uniqueid = getNestedPostVal('System', 'UniqueID');
-  $system_updatenow = date('Y-m-d H:i:s'); // Current timestamp
+  $system_build_type = getNestedPostVal('System', 'BuildType', 'sharekhan');
 
   // Engine
   $engine_build = getNestedPostVal('Engine', 'Build');
@@ -73,6 +73,13 @@ try {
   // Features
   $features_script = getNestedPostVal('Features', 'Script');
 
+  // Centralization
+  $centralization_livestatusurl = getNestedPostVal('Centralization', 'LiveStatusUrl');
+  $centralization_uploadfileurl = getNestedPostVal('Centralization', 'UploadFileUrl');
+  $centralization_settingsurl = getNestedPostVal('Centralization', 'SettingsUrl');
+  $centralization_usertrunkmappingurl = getNestedPostVal('Centralization', 'UserTrunkMappingUrl');
+  $centralization_phonebookurl = getNestedPostVal('Centralization', 'PhoneBookUrl');
+
   // Comment
   $comment = getPostVal('comment');
 
@@ -80,18 +87,20 @@ try {
   $sql = "INSERT INTO license_details (
         created_on, 
         licensee_name, licensee_distributor, licensee_dealer, licensee_type, licensee_amctill, licensee_validtill, licensee_billno,
-        system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_updatenow,
+        system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type,
         engine_build, engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, engine_validcountries,
         hardware_analog2303, hardware_analog2304,
         features_script,
+        centralization_livestatusurl, centralization_uploadfileurl, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
         comment
     ) VALUES (
         :created_on,
         :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type, :licensee_amctill, :licensee_validtill, :licensee_billno,
-        :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_updatenow,
+        :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type,
         :engine_build, :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz, :engine_validcountries,
         :hardware_analog2303, :hardware_analog2304,
         :features_script,
+        :centralization_livestatusurl, :centralization_uploadfileurl, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
         :comment
     )";
 
@@ -111,7 +120,7 @@ try {
     ':system_isvm' => $system_isvm,
     ':system_serialid' => $system_serialid,
     ':system_uniqueid' => $system_uniqueid,
-    ':system_updatenow' => $system_updatenow,
+    ':system_build_type' => $system_build_type,
     ':engine_build' => $engine_build,
     ':engine_graceperiod' => $engine_graceperiod,
     ':engine_maxports' => $engine_maxports,
@@ -121,6 +130,11 @@ try {
     ':hardware_analog2303' => $hardware_analog2303,
     ':hardware_analog2304' => $hardware_analog2304,
     ':features_script' => $features_script,
+    ':centralization_livestatusurl' => $centralization_livestatusurl,
+    ':centralization_uploadfileurl' => $centralization_uploadfileurl,
+    ':centralization_settingsurl' => $centralization_settingsurl,
+    ':centralization_usertrunkmappingurl' => $centralization_usertrunkmappingurl,
+    ':centralization_phonebookurl' => $centralization_phonebookurl,
     ':comment' => $comment
   ]);
 

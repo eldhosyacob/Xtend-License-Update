@@ -1,37 +1,50 @@
 {
-    "CreatedOn": "20251217",
+    "CreatedOn": "20251220",
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
-        "Distributor": "Xtend",
-        "Dealer": "RENI TEST",
+        "Distributor": "Eldhos Yacob",
+        "Dealer": "Xtend",
         "Type": "Rental",
-        "AMCTill": "20261217",
-        "ValidTill": "20251231",
+        "AMCTill": "20261220",
+        "ValidTill": "20251229",
         "BillNo": "XT25-1002"
     },
     "System": {
         "Type": "Standalone",
         "OS": "Linux",
         "IsVM": false,
-        "SerialID": "6580",
-        "UniqueID": "4SYV-GAA2-VHV3-388B",
-        "UpdateNow": "Yes"
+        "SerialID": "109",
+        "UniqueID": "GBRX-X5Q2-DF8S-A584",
+        "BuildType": "sharekhan build",
+        "IPSettings": {
+            "Type": "dynamic",
+            "IP": "10.20.40.121/25",
+            "Gateway": "10.100.100.2",
+            "Dns": "8.8.8.7"
+        }
     },
     "Engine": {
         "Build": "Xtend IVR",
         "GracePeriod": 30,
-        "MaxPorts": "M=8,*=8",
+        "MaxPorts": "M=16,*=16",
         "ValidStartTZ": 330,
         "ValidEndTZ": 330,
         "ValidCountries": 65
     },
     "Hardware": {
         "Analog": {
-            "82184": "11111111",
-            "82184": "11111111"
+            "22222": "11111111",
+            "33333": "11111111"
         }
     },
+    "Centralization": {
+        "LiveStatusUrl": "https://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()",
+        "UploadFileUrl": "https://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()",
+        "SettingsUrl": "https://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings()",
+        "UserTrunkMappingUrl": "https://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()",
+        "PhoneBookUrl": "https://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()"
+    },
     "Features": {
-        "Script": "Deepak 10.20.40.7"
+        "Script": "testing new json"
     }
 }
