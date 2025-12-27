@@ -85,6 +85,8 @@
   padding: 12px 5px;
   text-align: center;
   border-bottom: 1px solid #eee;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
 }
 
 .users-table th {

@@ -7,7 +7,7 @@ require_once('config/auth_check.php');
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>License Reports - Xtend</title>
+  <title>License Reports</title>
   <link rel="shortcut icon" href="images/favicon.png" />
   <link rel="stylesheet" href="styles/header-sidebar.css">
   <link rel="stylesheet" href="styles/common.css">

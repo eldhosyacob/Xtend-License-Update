@@ -133,6 +133,7 @@ if ($method === 'GET' && $editId) {
             'SerialID' => $row['system_serialid'],
             'UniqueID' => $row['system_uniqueid'],
             'BuildType' => $row['system_build_type'],
+            'Debug' => $row['system_debug'],
             'IPSettings' => [
               'Type' => $row['system_ipsettings_type'],
               'IP' => $row['system_ipsettings_ip'],
@@ -157,7 +158,9 @@ if ($method === 'GET' && $editId) {
           ],
           'Centralization' => [
             'LiveStatusUrl' => $row['centralization_livestatusurl'],
+            'LiveStatusUrlInterval' => $row['centralization_livestatusurlinterval'],
             'UploadFileUrl' => $row['centralization_uploadfileurl'],
+            'UploadFileUrlInterval' => $row['centralization_uploadfileurlinterval'],
             'SettingsUrl' => $row['centralization_settingsurl'],
             'UserTrunkMappingUrl' => $row['centralization_usertrunkmappingurl'],
             'PhoneBookUrl' => $row['centralization_phonebookurl'],
@@ -280,6 +283,7 @@ function buildLicenseFromPost(array $post): array
       'SerialID' => $str($post['System']['SerialID'] ?? ''),
       'UniqueID' => $str($post['System']['UniqueID'] ?? ''),
       'BuildType' => $str($post['System']['BuildType'] ?? ''),
+      'Debug' => (int) ($post['System']['Debug'] ?? 0),
       'IPSettings' => [
         'Type' => $str($post['System']['IPSettings']['Type'] ?? ''),
         'IP' => $str($post['System']['IPSettings']['IP'] ?? ''),
@@ -300,7 +304,9 @@ function buildLicenseFromPost(array $post): array
     ],
     'Centralization' => [
       'LiveStatusUrl' => $str($post['Centralization']['LiveStatusUrl'] ?? ''),
+      'LiveStatusUrlInterval' => $str($post['Centralization']['LiveStatusUrlInterval'] ?? ''),
       'UploadFileUrl' => $str($post['Centralization']['UploadFileUrl'] ?? ''),
+      'UploadFileUrlInterval' => $str($post['Centralization']['UploadFileUrlInterval'] ?? ''),
       'SettingsUrl' => $str($post['Centralization']['SettingsUrl'] ?? ''),
       'UserTrunkMappingUrl' => $str($post['Centralization']['UserTrunkMappingUrl'] ?? ''),
       'PhoneBookUrl' => $str($post['Centralization']['PhoneBookUrl'] ?? ''),
@@ -423,6 +429,7 @@ if ($method === 'POST' && $action === 'send') {
           $system_serialid = $getNestedPostVal('System', 'SerialID');
           $system_uniqueid = $getNestedPostVal('System', 'UniqueID');
           $system_build_type = $getNestedPostVal('System', 'BuildType');
+          $system_debug = $getNestedPostVal('System', 'Debug', 0);
           $engine_build = $getNestedPostVal('Engine', 'Build');
           $engine_graceperiod = $getNestedPostVal('Engine', 'GracePeriod');
           $engine_maxports = $getNestedPostVal('Engine', 'MaxPorts');
@@ -446,7 +453,9 @@ if ($method === 'POST' && $action === 'send') {
 
           // New Centralization fields
           $centralization_livestatusurl = $getNestedPostVal('Centralization', 'LiveStatusUrl');
+          $centralization_livestatusurlinterval = $getNestedPostVal('Centralization', 'LiveStatusUrlInterval');
           $centralization_uploadfileurl = $getNestedPostVal('Centralization', 'UploadFileUrl');
+          $centralization_uploadfileurlinterval = $getNestedPostVal('Centralization', 'UploadFileUrlInterval');
           $centralization_settingsurl = $getNestedPostVal('Centralization', 'SettingsUrl');
           $centralization_usertrunkmappingurl = $getNestedPostVal('Centralization', 'UserTrunkMappingUrl');
           $centralization_phonebookurl = $getNestedPostVal('Centralization', 'PhoneBookUrl');
@@ -470,6 +479,7 @@ if ($method === 'POST' && $action === 'send') {
             ':system_serialid' => $system_serialid,
             ':system_uniqueid' => $system_uniqueid,
             ':system_build_type' => $system_build_type,
+            ':system_debug' => $system_debug,
             ':engine_build' => $engine_build,
             ':engine_graceperiod' => $engine_graceperiod,
             ':engine_maxports' => $engine_maxports,
@@ -487,7 +497,9 @@ if ($method === 'POST' && $action === 'send') {
             ':system_ipsettings_dns' => $system_ipsettings_dns,
 
             ':centralization_livestatusurl' => $centralization_livestatusurl,
+            ':centralization_livestatusurlinterval' => $centralization_livestatusurlinterval,
             ':centralization_uploadfileurl' => $centralization_uploadfileurl,
+            ':centralization_uploadfileurlinterval' => $centralization_uploadfileurlinterval,
             ':centralization_settingsurl' => $centralization_settingsurl,
             ':centralization_usertrunkmappingurl' => $centralization_usertrunkmappingurl,
             ':centralization_phonebookurl' => $centralization_phonebookurl,
@@ -504,7 +516,8 @@ if ($method === 'POST' && $action === 'send') {
                               licensee_dealer = :licensee_dealer, licensee_type = :licensee_type, licensee_amctill = :licensee_amctill,
                               licensee_validtill = :licensee_validtill, licensee_billno = :licensee_billno, system_type = :system_type,
                               system_os = :system_os, system_isvm = :system_isvm, system_serialid = :system_serialid,
-                              system_uniqueid = :system_uniqueid, system_build_type = :system_build_type, 
+                              system_uniqueid = :system_uniqueid, system_build_type = :system_build_type,
+                              system_debug = :system_debug, 
                               system_ipsettings_type = :system_ipsettings_type, system_ipsettings_ip = :system_ipsettings_ip,
                               system_ipsettings_gateway = :system_ipsettings_gateway, system_ipsettings_dns = :system_ipsettings_dns,
                               engine_build = :engine_build,
@@ -514,7 +527,8 @@ if ($method === 'POST' && $action === 'send') {
                               engine_validcountries = :engine_validcountries, 
                               device_id1 = :device_id1, ports_enabled_deviceid1 = :ports_enabled_deviceid1,
                               device_id2 = :device_id2, ports_enabled_deviceid2 = :ports_enabled_deviceid2,
-                              centralization_livestatusurl = :centralization_livestatusurl, centralization_uploadfileurl = :centralization_uploadfileurl,
+                              centralization_livestatusurl = :centralization_livestatusurl, centralization_livestatusurlinterval = :centralization_livestatusurlinterval,
+                              centralization_uploadfileurl = :centralization_uploadfileurl, centralization_uploadfileurlinterval = :centralization_uploadfileurlinterval,
                               centralization_settingsurl = :centralization_settingsurl, centralization_usertrunkmappingurl = :centralization_usertrunkmappingurl,
                               centralization_phonebookurl = :centralization_phonebookurl,
                               features_script = :features_script, comment = :comment
@@ -524,22 +538,22 @@ if ($method === 'POST' && $action === 'send') {
             $sql = "INSERT INTO license_details (
                               created_on, licensee_name, licensee_distributor, licensee_dealer, licensee_type, 
                               licensee_amctill, licensee_validtill, licensee_billno, system_type, system_os, 
-                              system_isvm, system_serialid, system_uniqueid, system_build_type, 
+                              system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug, 
                               system_ipsettings_type, system_ipsettings_ip, system_ipsettings_gateway, system_ipsettings_dns,
                               engine_build, 
                               engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, 
                               engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, 
-                              centralization_livestatusurl, centralization_uploadfileurl, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
+                              centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
                               features_script, comment
                           ) VALUES (
                               :created_on, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
                               :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
-                              :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, 
+                              :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug, 
                               :system_ipsettings_type, :system_ipsettings_ip, :system_ipsettings_gateway, :system_ipsettings_dns,
                               :engine_build,
                               :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz,
                               :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, 
-                              :centralization_livestatusurl, :centralization_uploadfileurl, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
+                              :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
                               :features_script, :comment
                           )";
           }
@@ -593,7 +607,7 @@ header('Content-Type: text/html; charset=utf-8');
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>License JSON Upload</title>
+  <title>Create License</title>
   <!-- <link rel="stylesheet" href="css/style.css">
     <link rel="shortcut icon" href="images/favicon.png" /> -->
   <link rel="stylesheet" href="styles/users.css">
@@ -703,9 +717,10 @@ header('Content-Type: text/html; charset=utf-8');
         'SerialID' => '',
         'UniqueID' => '',
         'BuildType' => 'sharekhan',
+        'Debug' => 0,
         'IPSettings' => [
           'Type' => 'Static',
-          'IP' => '10.20.40.121/24',
+          'IP' => '10.20.40.121/8',
           'Gateway' => '10.100.100.1',
           'Dns' => '8.8.8.8',
         ],
@@ -725,7 +740,9 @@ header('Content-Type: text/html; charset=utf-8');
       ],
       'Centralization' => [
         'LiveStatusUrl' => 'http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()',
+        'LiveStatusUrlInterval' => '180',
         'UploadFileUrl' => 'http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()',
+        'UploadFileUrlInterval' => '300',
         'SettingsUrl' => 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings()',
         'UserTrunkMappingUrl' => 'http://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()',
         'PhoneBookUrl' => 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()',
@@ -969,6 +986,19 @@ header('Content-Type: text/html; charset=utf-8');
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
 
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[Debug]</label>
+              <select name="System[Debug]" required
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                <?php $debugVal = (int) $val(['System', 'Debug'], $defaults['System']['Debug']); ?>
+                <option value="0" <?php echo ($debugVal === 0) ? 'selected' : ''; ?>>0</option>
+                <option value="1" <?php echo ($debugVal === 1) ? 'selected' : ''; ?>>1</option>
+              </select>
+            </div>
+
             <!-- System IPSettings Fields -->
             <div>
               <label
@@ -1090,14 +1120,14 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID 1
                 [PortsEnabled]</label>
-              <input type="text" maxlength="8" required name="ports_enabled_deviceid1" id="ports_enabled_deviceid1"
+              <input type="text" maxlength="16" required name="ports_enabled_deviceid1" id="ports_enabled_deviceid1"
                 value="<?php echo h($p1_val); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="validatePorts(this); this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
               <div id="error_ports_enabled_deviceid1"
                 style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
-                Must be exactly 8 characters of 0 and 1.
+                Must be exactly 16 characters of 0 and 1.
               </div>
             </div>
             <!-- <p></p> -->
@@ -1144,9 +1174,27 @@ header('Content-Type: text/html; charset=utf-8');
             </div>
             <div>
               <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[LiveStatusUrlInterval]</label>
+              <input type="number" name="Centralization[LiveStatusUrlInterval]"
+                value="<?php echo h($val(['Centralization', 'LiveStatusUrlInterval'], $defaults['Centralization']['LiveStatusUrlInterval'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[UploadFileUrl]</label>
               <input type="text" name="Centralization[UploadFileUrl]" required
                 value="<?php echo h($val(['Centralization', 'UploadFileUrl'], $defaults['Centralization']['UploadFileUrl'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[UploadFileUrlInterval]</label>
+              <input type="number" name="Centralization[UploadFileUrlInterval]"
+                value="<?php echo h($val(['Centralization', 'UploadFileUrlInterval'], $defaults['Centralization']['UploadFileUrlInterval'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -1310,7 +1358,8 @@ header('Content-Type: text/html; charset=utf-8');
 
     function validatePorts(input) {
       const val = input.value.trim();
-      const errorDiv = document.getElementById('error_' + input.name);
+      const errorDiv = document.getElementById('error_' + input.id);
+      const maxLen = input.maxLength || 8;
 
       // If empty, we consider it valid (optional) unless we want to enforce mandatory. 
       // User request strictly says "should have only 8 characters with 0 and 1".
@@ -1320,10 +1369,13 @@ header('Content-Type: text/html; charset=utf-8');
         return true;
       }
 
-      // Check for exactly 8 characters consisting of 0 or 1
-      const regex = /^[01]{8}$/;
+      // Check for exactly maxLen characters consisting of 0 or 1
+      const regex = new RegExp(`^[01]{${maxLen}}$`);
       if (!regex.test(val)) {
-        if (errorDiv) errorDiv.style.display = 'block';
+        if (errorDiv) {
+          errorDiv.innerText = `Must be exactly ${maxLen} characters of 0 and 1.`;
+          errorDiv.style.display = 'block';
+        }
         return false;
       } else {
         if (errorDiv) errorDiv.style.display = 'none';

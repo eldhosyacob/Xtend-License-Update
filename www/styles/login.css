@@ -311,11 +311,17 @@ body {
 }
 
 @media (max-width: 768px) {
+  .login-page {
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
   .login-card {
     flex-direction: column;
   }
 
   .login-illustration {
     flex-basis: auto;
+    display: none;
   }
 }

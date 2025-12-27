@@ -56,6 +56,7 @@ try {
   $system_serialid = getNestedPostVal('System', 'SerialID');
   $system_uniqueid = getNestedPostVal('System', 'UniqueID');
   $system_build_type = getNestedPostVal('System', 'BuildType', 'sharekhan');
+  $system_debug = getNestedPostVal('System', 'Debug', 0);
 
   // Engine
   $engine_build = getNestedPostVal('Engine', 'Build');
@@ -75,7 +76,9 @@ try {
 
   // Centralization
   $centralization_livestatusurl = getNestedPostVal('Centralization', 'LiveStatusUrl');
+  $centralization_livestatusurlinterval = getNestedPostVal('Centralization', 'LiveStatusUrlInterval');
   $centralization_uploadfileurl = getNestedPostVal('Centralization', 'UploadFileUrl');
+  $centralization_uploadfileurlinterval = getNestedPostVal('Centralization', 'UploadFileUrlInterval');
   $centralization_settingsurl = getNestedPostVal('Centralization', 'SettingsUrl');
   $centralization_usertrunkmappingurl = getNestedPostVal('Centralization', 'UserTrunkMappingUrl');
   $centralization_phonebookurl = getNestedPostVal('Centralization', 'PhoneBookUrl');
@@ -87,20 +90,20 @@ try {
   $sql = "INSERT INTO license_details (
         created_on, 
         licensee_name, licensee_distributor, licensee_dealer, licensee_type, licensee_amctill, licensee_validtill, licensee_billno,
-        system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type,
+        system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug,
         engine_build, engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, engine_validcountries,
         hardware_analog2303, hardware_analog2304,
         features_script,
-        centralization_livestatusurl, centralization_uploadfileurl, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
+        centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
         comment
     ) VALUES (
         :created_on,
         :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type, :licensee_amctill, :licensee_validtill, :licensee_billno,
-        :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type,
+        :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug,
         :engine_build, :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz, :engine_validcountries,
         :hardware_analog2303, :hardware_analog2304,
         :features_script,
-        :centralization_livestatusurl, :centralization_uploadfileurl, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
+        :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
         :comment
     )";
 
@@ -121,6 +124,7 @@ try {
     ':system_serialid' => $system_serialid,
     ':system_uniqueid' => $system_uniqueid,
     ':system_build_type' => $system_build_type,
+    ':system_debug' => $system_debug,
     ':engine_build' => $engine_build,
     ':engine_graceperiod' => $engine_graceperiod,
     ':engine_maxports' => $engine_maxports,
@@ -131,7 +135,9 @@ try {
     ':hardware_analog2304' => $hardware_analog2304,
     ':features_script' => $features_script,
     ':centralization_livestatusurl' => $centralization_livestatusurl,
+    ':centralization_livestatusurlinterval' => $centralization_livestatusurlinterval,
     ':centralization_uploadfileurl' => $centralization_uploadfileurl,
+    ':centralization_uploadfileurlinterval' => $centralization_uploadfileurlinterval,
     ':centralization_settingsurl' => $centralization_settingsurl,
     ':centralization_usertrunkmappingurl' => $centralization_usertrunkmappingurl,
     ':centralization_phonebookurl' => $centralization_phonebookurl,

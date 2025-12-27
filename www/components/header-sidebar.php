@@ -37,6 +37,9 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
     </button>
+    <div class="logo-container">
+      <img src="/images/logo.png" alt="Logo">
+    </div>
     <!-- <div class="xtend-logo masked-text">Xtend License Update</div> -->
   </div>
 
