@@ -26,28 +26,38 @@ require_once('config/auth_check.php');
       <div class="header-right">
         <input type="text" id="searchSerial" placeholder="Search Serial ID" class="search-input">
         <input type="text" id="searchUnique" placeholder="Search Unique ID" class="search-input">
+        <input type="text" id="searchLocationCode" placeholder="Search Location Code" class="search-input">
         <button onclick="searchReports()" class="btn-search">Search</button>
       </div>
     </div>
 
     <!-- Reports Table Card -->
     <div class="report-card">
-      <div class="table-container">
-        <table id="reportsTable">
-          <thead>
-            <tr>
-              <th>Sl No</th>
-              <th>Date Created</th>
-              <th>Dealer</th>
-              <th>License Validity</th>
-              <th>Serial ID</th>
-              <th>Unique ID</th>
-              <th>Grace Period</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <!-- <tbody>
+      <div class="table-scroll-wrapper">
+        <button class="scroll-btn scroll-left" id="btnScrollLeft">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <div class="table-container" id="tableContainer">
+          <table id="reportsTable">
+            <thead>
+              <tr>
+                <th>Sl No</th>
+                <th>Date Created</th>
+                <th>Dealer</th>
+                <!-- <th>Location Name</th> -->
+                <th>Location Code</th>
+                <th>License Validity</th>
+                <th>Serial ID</th>
+                <th>Unique ID</th>
+                <th>Grace Period</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <!-- <tbody>
             <tr>
               <td colspan="8" class="loading-state">
                 <div class="loading-spinner"></div>
@@ -55,18 +65,25 @@ require_once('config/auth_check.php');
               </td>
             </tr>
           </tbody> -->
-          <tbody>
-            <tr>
-              <td colspan="9" class="loading-cell">
-                <div class="loading-state">
-                  <div class="loading-spinner"></div>
-                  Loading reports...
-                </div>
-              </td>
-            </tr>
-          </tbody>
+            <tbody>
+              <tr>
+                <td colspan="11" class="loading-cell">
+                  <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    Loading reports...
+                  </div>
+                </td>
+              </tr>
+            </tbody>
 
-        </table>
+          </table>
+        </div>
+        <button class="scroll-btn scroll-right" id="btnScrollRight">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
       </div>
 
       <!-- Pagination Controls -->
@@ -103,12 +120,71 @@ require_once('config/auth_check.php');
     let totalPages = 1;
     const limit = 10;
     let currentStatus = '';
+    let currentClient = '';
 
     document.addEventListener('DOMContentLoaded', function () {
       const urlParams = new URLSearchParams(window.location.search);
       currentStatus = urlParams.get('status') || '';
+      currentClient = urlParams.get('client') || '';
       fetchReports(currentPage);
+      initScrollButtons();
     });
+
+    function initScrollButtons() {
+      const container = document.getElementById('tableContainer');
+      const leftBtn = document.getElementById('btnScrollLeft');
+      const rightBtn = document.getElementById('btnScrollRight');
+
+      if (!container || !leftBtn || !rightBtn) return;
+
+      leftBtn.addEventListener('click', () => {
+        const scrollAmount = container.clientWidth * 0.75;
+        container.scrollBy({
+          left: -scrollAmount,
+          behavior: 'smooth'
+        });
+      });
+
+      rightBtn.addEventListener('click', () => {
+        const scrollAmount = container.clientWidth * 0.75;
+        container.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
+      });
+
+      container.addEventListener('scroll', updateScrollButtons);
+      window.addEventListener('resize', updateScrollButtons);
+    }
+
+    function updateScrollButtons() {
+      const container = document.getElementById('tableContainer');
+      const leftBtn = document.getElementById('btnScrollLeft');
+      const rightBtn = document.getElementById('btnScrollRight');
+
+      if (!container || !leftBtn || !rightBtn) return;
+
+      const {
+        scrollLeft,
+        scrollWidth,
+        clientWidth
+      } = container;
+      const maxScroll = scrollWidth - clientWidth;
+
+      // Show left button if we've scrolled right
+      if (scrollLeft > 10) {
+        leftBtn.classList.add('visible');
+      } else {
+        leftBtn.classList.remove('visible');
+      }
+
+      // Show right button if there's more content to scroll to
+      if (maxScroll > 0 && scrollLeft < maxScroll - 10) {
+        rightBtn.classList.add('visible');
+      } else {
+        rightBtn.classList.remove('visible');
+      }
+    }
 
     function searchReports() {
       currentPage = 1;
@@ -126,12 +202,17 @@ require_once('config/auth_check.php');
 
         const serial = document.getElementById('searchSerial').value;
         const unique = document.getElementById('searchUnique').value;
+        const locationCode = document.getElementById('searchLocationCode').value;
 
 
-        let url = `api/reports.php?page=${page}&limit=${limit}&serial_id=${encodeURIComponent(serial)}&unique_id=${encodeURIComponent(unique)}&_t=${new Date().getTime()}`;
+        let url = `api/reports.php?page=${page}&limit=${limit}&serial_id=${encodeURIComponent(serial)}&unique_id=${encodeURIComponent(unique)}&location_code=${encodeURIComponent(locationCode)}&_t=${new Date().getTime()}`;
 
         if (currentStatus) {
           url += `&status=${encodeURIComponent(currentStatus)}`;
+        }
+
+        if (currentClient) {
+          url += `&client_name=${encodeURIComponent(currentClient)}`;
         }
 
         const response = await fetch(url);
@@ -142,6 +223,8 @@ require_once('config/auth_check.php');
         if (result.success) {
           renderTable(result.data, page);
           updatePagination(result.pagination);
+          // Small delay to allow layout to settle before checking scroll
+          setTimeout(updateScrollButtons, 100);
         } else {
           showError(result.message || 'Failed to load reports');
         }
@@ -158,7 +241,7 @@ require_once('config/auth_check.php');
       if (data.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="9">
+            <td colspan="11">
               <div class="empty-state">
                 <svg width="64" height="64" viewBox="0 0 16 16" fill="currentColor">
                   <path
@@ -242,6 +325,7 @@ require_once('config/auth_check.php');
           <td class="text-center">${startCount + index + 1}</td>
           <td>${dateDisplay || '-'}</td>
           <td>${row.licensee_dealer || '-'}</td>
+          <td>${row.location_code || '-'}</td>
           <td class="validity-cell">${formattedValidTill}</td>
           <td class="code-cell">${row.system_serialid || '-'}</td>
           <td class="code-cell">${uniqueIdDisplay}</td>
@@ -295,7 +379,7 @@ require_once('config/auth_check.php');
       const tbody = document.querySelector('#reportsTable tbody');
       tbody.innerHTML = `
         <tr>
-          <td colspan="9" class="error-state">${message}</td>
+          <td colspan="11" class="error-state">${message}</td>
         </tr>
       `;
       document.getElementById('paginationControls').style.display = 'none';

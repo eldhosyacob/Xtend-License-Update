@@ -111,6 +111,9 @@ if ($method === 'GET' && $editId) {
           'CreatedOn' => $row['created_on']
             ? date('Ymd', strtotime($row['created_on']))
             : '',
+          'ClientName' => $row['client_name'],
+          'LocationName' => $row['location_name'],
+          'LocationCode' => $row['location_code'],
           'Licensee' => [
             'Name' => $row['licensee_name'],
             'Distributor' => $row['licensee_distributor'],
@@ -285,10 +288,10 @@ function buildLicenseFromPost(array $post): array
       'BuildType' => $str($post['System']['BuildType'] ?? ''),
       'Debug' => (int) ($post['System']['Debug'] ?? 0),
       'IPSettings' => [
-        'Type' => $str($post['System']['IPSettings']['Type'] ?? ''),
-        'IP' => $str($post['System']['IPSettings']['IP'] ?? ''),
-        'Gateway' => $str($post['System']['IPSettings']['Gateway'] ?? ''),
-        'Dns' => $str($post['System']['IPSettings']['Dns'] ?? ''),
+        'Type' => ($type = $str($post['System']['IPSettings']['Type'] ?? '')),
+        'IP' => $type === 'DHCP' ? '' : $str($post['System']['IPSettings']['IP'] ?? ''),
+        'Gateway' => $type === 'DHCP' ? '' : $str($post['System']['IPSettings']['Gateway'] ?? ''),
+        'Dns' => $type === 'DHCP' ? '' : $str($post['System']['IPSettings']['Dns'] ?? ''),
       ],
     ],
     'Engine' => [
@@ -416,6 +419,9 @@ if ($method === 'POST' && $action === 'send') {
           };
 
           $created_on = $getPostVal('CreatedOn');
+          $client_name = $getPostVal('ClientName');
+          $location_name = $getPostVal('LocationName');
+          $location_code = $getPostVal('LocationCode');
           $licensee_name = $getNestedPostVal('Licensee', 'Name');
           $licensee_distributor = $getNestedPostVal('Licensee', 'Distributor');
           $licensee_dealer = $getNestedPostVal('Licensee', 'Dealer');
@@ -447,9 +453,9 @@ if ($method === 'POST' && $action === 'send') {
           // New System IPSettings fields
           // Need to fix retrieval for deeper nested keys or just access $_POST directly
           $system_ipsettings_type = isset($_POST['System']['IPSettings']['Type']) ? trim($_POST['System']['IPSettings']['Type']) : '';
-          $system_ipsettings_ip = isset($_POST['System']['IPSettings']['IP']) ? trim($_POST['System']['IPSettings']['IP']) : '';
-          $system_ipsettings_gateway = isset($_POST['System']['IPSettings']['Gateway']) ? trim($_POST['System']['IPSettings']['Gateway']) : '';
-          $system_ipsettings_dns = isset($_POST['System']['IPSettings']['Dns']) ? trim($_POST['System']['IPSettings']['Dns']) : '';
+          $system_ipsettings_ip = ($system_ipsettings_type === 'DHCP') ? '' : (isset($_POST['System']['IPSettings']['IP']) ? trim($_POST['System']['IPSettings']['IP']) : '');
+          $system_ipsettings_gateway = ($system_ipsettings_type === 'DHCP') ? '' : (isset($_POST['System']['IPSettings']['Gateway']) ? trim($_POST['System']['IPSettings']['Gateway']) : '');
+          $system_ipsettings_dns = ($system_ipsettings_type === 'DHCP') ? '' : (isset($_POST['System']['IPSettings']['Dns']) ? trim($_POST['System']['IPSettings']['Dns']) : '');
 
           // New Centralization fields
           $centralization_livestatusurl = $getNestedPostVal('Centralization', 'LiveStatusUrl');
@@ -466,6 +472,9 @@ if ($method === 'POST' && $action === 'send') {
 
           $params = [
             ':created_on' => $created_on,
+            ':client_name' => $client_name,
+            ':location_name' => $location_name,
+            ':location_code' => $location_code,
             ':licensee_name' => $licensee_name,
             ':licensee_distributor' => $licensee_distributor,
             ':licensee_dealer' => $licensee_dealer,
@@ -512,7 +521,7 @@ if ($method === 'POST' && $action === 'send') {
 
           if ($editId) {
             $sql = "UPDATE license_details SET
-                              created_on = :created_on, licensee_name = :licensee_name, licensee_distributor = :licensee_distributor,
+                              created_on = :created_on, client_name = :client_name, location_name = :location_name, location_code = :location_code, licensee_name = :licensee_name, licensee_distributor = :licensee_distributor,
                               licensee_dealer = :licensee_dealer, licensee_type = :licensee_type, licensee_amctill = :licensee_amctill,
                               licensee_validtill = :licensee_validtill, licensee_billno = :licensee_billno, system_type = :system_type,
                               system_os = :system_os, system_isvm = :system_isvm, system_serialid = :system_serialid,
@@ -536,7 +545,7 @@ if ($method === 'POST' && $action === 'send') {
             $params[':id'] = $editId;
           } else {
             $sql = "INSERT INTO license_details (
-                              created_on, licensee_name, licensee_distributor, licensee_dealer, licensee_type, 
+                              created_on, client_name, location_name, location_code, licensee_name, licensee_distributor, licensee_dealer, licensee_type, 
                               licensee_amctill, licensee_validtill, licensee_billno, system_type, system_os, 
                               system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug, 
                               system_ipsettings_type, system_ipsettings_ip, system_ipsettings_gateway, system_ipsettings_dns,
@@ -546,7 +555,7 @@ if ($method === 'POST' && $action === 'send') {
                               centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
                               features_script, comment
                           ) VALUES (
-                              :created_on, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
+                              :created_on, :client_name, :location_name, :location_code, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
                               :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
                               :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug, 
                               :system_ipsettings_type, :system_ipsettings_ip, :system_ipsettings_gateway, :system_ipsettings_dns,
@@ -701,6 +710,9 @@ header('Content-Type: text/html; charset=utf-8');
     $createdOn = date('Ymd');
     $defaults = [
       'CreatedOn' => $createdOn, // Current date in YYYYMMDD format
+      'ClientName' => 'Sharekhan',
+      'LocationName' => '',
+      'LocationCode' => '',
       'Licensee' => [
         'Name' => 'Xtend Technologies Pvt. Ltd.',
         'Distributor' => '',
@@ -740,9 +752,9 @@ header('Content-Type: text/html; charset=utf-8');
       ],
       'Centralization' => [
         'LiveStatusUrl' => 'http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()',
-        'LiveStatusUrlInterval' => '180',
+        'LiveStatusUrlInterval' => '120',
         'UploadFileUrl' => 'http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()',
-        'UploadFileUrlInterval' => '300',
+        'UploadFileUrlInterval' => '120',
         'SettingsUrl' => 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings()',
         'UserTrunkMappingUrl' => 'http://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()',
         'PhoneBookUrl' => 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()',
@@ -823,7 +835,37 @@ header('Content-Type: text/html; charset=utf-8');
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">CreatedOn</label>
               <input type="text" name="CreatedOn" required readonly
                 value="<?php echo h($val(['CreatedOn'], date('Ymd'))); ?>"
-                style="width:25%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background-color: #f1f5f9; cursor: not-allowed; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                style="width:75%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background-color: #f1f5f9; cursor: not-allowed; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">ClientName</label>
+              <select name="ClientName" required
+                style="width:75%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                <?php $clientName = (string) $val(['ClientName'], $defaults['ClientName']); ?>
+                <option value="Sharekhan" <?php echo ($clientName === 'Sharekhan') ? 'selected' : ''; ?>>Sharekhan</option>
+                <option value="Other" <?php echo ($clientName === 'Other') ? 'selected' : ''; ?>>Other</option>
+              </select>
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">LocationName</label>
+              <input type="text" name="LocationName" required
+                value="<?php echo h($val(['LocationName'], $defaults['LocationName'])); ?>"
+                style="width:75%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">LocationCode</label>
+              <input type="text" name="LocationCode" required
+                value="<?php echo h($val(['LocationCode'], $defaults['LocationCode'])); ?>"
+                style="width:75%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
@@ -1003,16 +1045,19 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IPSettings][Type]</label>
-              <input type="text" name="System[IPSettings][Type]" required
-                value="<?php echo h($val(['System', 'IPSettings', 'Type'], $defaults['System']['IPSettings']['Type'])); ?>"
-                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+              <select name="System[IPSettings][Type]" required id="ipSettingsType" onchange="toggleIPSettings()"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                <?php $ipType = (string) $val(['System', 'IPSettings', 'Type'], $defaults['System']['IPSettings']['Type']); ?>
+                <option value="Static" <?php echo ($ipType === 'Static') ? 'selected' : ''; ?>>Static</option>
+                <option value="DHCP" <?php echo ($ipType === 'DHCP') ? 'selected' : ''; ?>>DHCP</option>
+              </select>
             </div>
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IPSettings][IP]</label>
-              <input type="text" name="System[IPSettings][IP]" required
+              <input type="text" name="System[IPSettings][IP]" required id="ipSettingsIP"
                 value="<?php echo h($val(['System', 'IPSettings', 'IP'], $defaults['System']['IPSettings']['IP'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -1021,7 +1066,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IPSettings][Gateway]</label>
-              <input type="text" name="System[IPSettings][Gateway]" required
+              <input type="text" name="System[IPSettings][Gateway]" required id="ipSettingsGateway"
                 value="<?php echo h($val(['System', 'IPSettings', 'Gateway'], $defaults['System']['IPSettings']['Gateway'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -1030,7 +1075,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[IPSettings][Dns]</label>
-              <input type="text" name="System[IPSettings][Dns]" required
+              <input type="text" name="System[IPSettings][Dns]" required id="ipSettingsDns"
                 value="<?php echo h($val(['System', 'IPSettings', 'Dns'], $defaults['System']['IPSettings']['Dns'])); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -1383,7 +1428,38 @@ header('Content-Type: text/html; charset=utf-8');
       }
     }
 
+    function toggleIPSettings() {
+      const typeSelect = document.getElementById('ipSettingsType');
+      const ipInput = document.getElementById('ipSettingsIP');
+      const gatewayInput = document.getElementById('ipSettingsGateway');
+      const dnsInput = document.getElementById('ipSettingsDns');
+
+      if (typeSelect && ipInput && gatewayInput && dnsInput) {
+        const isDHCP = typeSelect.value === 'DHCP';
+        if (isDHCP) {
+          ipInput.value = '';
+          gatewayInput.value = '';
+          dnsInput.value = '';
+          ipInput.disabled = true;
+          gatewayInput.disabled = true;
+          dnsInput.disabled = true;
+          ipInput.style.backgroundColor = '#f1f5f9';
+          gatewayInput.style.backgroundColor = '#f1f5f9';
+          dnsInput.style.backgroundColor = '#f1f5f9';
+        } else {
+          ipInput.disabled = false;
+          gatewayInput.disabled = false;
+          dnsInput.disabled = false;
+          ipInput.style.backgroundColor = '';
+          gatewayInput.style.backgroundColor = '';
+          dnsInput.style.backgroundColor = '';
+        }
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
+      toggleIPSettings();
+
       const form = document.getElementById('licenseForm');
       if (form) {
         form.addEventListener('submit', function (e) {

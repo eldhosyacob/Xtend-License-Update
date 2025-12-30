@@ -39,6 +39,9 @@ function getNestedPostVal($parent, $key, $default = '')
 try {
   // Extract data from POST
   $created_on = getPostVal('CreatedOn');
+  $client_name = getPostVal('ClientName');
+  $location_name = getPostVal('LocationName');
+  $location_code = getPostVal('LocationCode');
 
   // Licensee
   $licensee_name = getNestedPostVal('Licensee', 'Name');
@@ -89,6 +92,7 @@ try {
   // Prepare SQL statement
   $sql = "INSERT INTO license_details (
         created_on, 
+        client_name, location_name, location_code, 
         licensee_name, licensee_distributor, licensee_dealer, licensee_type, licensee_amctill, licensee_validtill, licensee_billno,
         system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug,
         engine_build, engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, engine_validcountries,
@@ -98,6 +102,7 @@ try {
         comment
     ) VALUES (
         :created_on,
+        :client_name, :location_name, :location_code,
         :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type, :licensee_amctill, :licensee_validtill, :licensee_billno,
         :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug,
         :engine_build, :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz, :engine_validcountries,
@@ -111,6 +116,9 @@ try {
 
   $stmt->execute([
     ':created_on' => $created_on,
+    ':client_name' => $client_name,
+    ':location_name' => $location_name,
+    ':location_code' => $location_code,
     ':licensee_name' => $licensee_name,
     ':licensee_distributor' => $licensee_distributor,
     ':licensee_dealer' => $licensee_dealer,

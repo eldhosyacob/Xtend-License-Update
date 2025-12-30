@@ -121,15 +121,32 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
             <span>Users</span>
           </a>
         </li>
-        <li class="sidebar-menu-item <?php echo ($current_page == 'reports') ? 'active' : ''; ?>">
-          <a href="reports.php" class="sidebar-link">
+        <li class="sidebar-menu-item <?php echo ($current_page == 'reports') ? 'active' : ''; ?> has-submenu">
+          <a href="javascript:void(0);" class="sidebar-link submenu-toggle">
             <!-- <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path
                 d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z" />
             </svg> -->
             <i class="fa-solid fa-chart-simple" style="color:#c19149"></i>
             <span>Reports</span>
+            <i class="fa-solid fa-chevron-down submenu-arrow" style="font-size: 10px; margin-left: auto; transition: transform 0.3s ease;"></i>
           </a>
+          <ul class="sidebar-submenu">
+            <?php 
+              $client_param = isset($_GET['client']) ? $_GET['client'] : '';
+              $is_reports_page = ($current_page == 'reports');
+            ?>
+            <li>
+              <a href="reports.php?client=Sharekhan" class="<?php echo ($is_reports_page && $client_param == 'Sharekhan') ? 'active' : ''; ?>">
+                Sharekhan
+              </a>
+            </li>
+            <li>
+              <a href="reports.php" class="<?php echo ($is_reports_page && $client_param == '') ? 'active' : ''; ?>">
+                All
+              </a>
+            </li>
+          </ul>
         </li>
         <li class="sidebar-menu-item <?php echo ($current_page == 'logout') ? 'active' : ''; ?>">
           <a href="#" onclick="showLogoutModal(); return false;" class="sidebar-link">
@@ -216,6 +233,27 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
         $('#userDropdown').removeClass('active');
       }
     });
+
+    // Submenu Toggle
+    $('.submenu-toggle').on('click', function(e) {
+      const $parent = $(this).closest('.has-submenu');
+      const $submenu = $parent.find('.sidebar-submenu');
+      const $arrow = $(this).find('.submenu-arrow');
+
+      if ($submenu.is(':visible')) {
+        $submenu.slideUp(200);
+        $arrow.css('transform', 'rotate(0deg)');
+      } else {
+        $submenu.slideDown(200);
+        $arrow.css('transform', 'rotate(180deg)');
+      }
+    });
+
+    // Keep submenu open if active
+    if ($('.has-submenu.active').length > 0) {
+      $('.has-submenu.active .sidebar-submenu').show();
+      $('.has-submenu.active .submenu-arrow').css('transform', 'rotate(180deg)');
+    }
 
     // Search functionality
     $('.search-btn').on('click', function () {

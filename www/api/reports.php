@@ -80,7 +80,9 @@ try {
   // Get search parameters
   $serialId = isset($_GET['serial_id']) ? trim($_GET['serial_id']) : '';
   $uniqueId = isset($_GET['unique_id']) ? trim($_GET['unique_id']) : '';
+  $locationCode = isset($_GET['location_code']) ? trim($_GET['location_code']) : '';
   $status = isset($_GET['status']) ? trim($_GET['status']) : '';
+  $clientName = isset($_GET['client_name']) ? trim($_GET['client_name']) : '';
 
   // Build WHERE clause
   $whereConditions = [];
@@ -94,6 +96,16 @@ try {
   if ($uniqueId !== '') {
     $whereConditions[] = "system_uniqueid LIKE :unique_id";
     $params[':unique_id'] = '%' . $uniqueId . '%';
+  }
+
+  if ($locationCode !== '') {
+    $whereConditions[] = "location_code LIKE :location_code";
+    $params[':location_code'] = '%' . $locationCode . '%';
+  }
+
+  if ($clientName !== '') {
+    $whereConditions[] = "client_name = :client_name";
+    $params[':client_name'] = $clientName;
   }
 
   if ($status !== '') {
@@ -126,7 +138,7 @@ try {
   $totalRecords = $countStmt->fetchColumn();
 
   // Fetch required fields with pagination
-  $sql = "SELECT id, created_on, licensee_dealer, licensee_validtill, system_serialid, system_uniqueid, engine_graceperiod 
+  $sql = "SELECT id, created_on, licensee_dealer, location_name, location_code, licensee_validtill, system_serialid, system_uniqueid, engine_graceperiod 
             FROM license_details 
             $whereSql
             ORDER BY id DESC 
