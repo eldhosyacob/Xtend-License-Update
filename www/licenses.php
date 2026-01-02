@@ -306,13 +306,20 @@ function buildLicenseFromPost(array $post): array
       'Analog' => [],
     ],
     'Centralization' => [
-      'LiveStatusUrl' => $str($post['Centralization']['LiveStatusUrl'] ?? ''),
+      'LiveStatusUrl' => ($postfix = function ($val, $suffix) use ($str) {
+        $val = $str($val);
+        if ($val === '')
+          return '';
+        if (strpos($val, $suffix) !== false)
+          return $val;
+        return rtrim($val, '/') . $suffix;
+      })($post['Centralization']['LiveStatusUrl'] ?? '', '/UploadZip.xbs?UploadXmlData()'),
       'LiveStatusUrlInterval' => $str($post['Centralization']['LiveStatusUrlInterval'] ?? ''),
-      'UploadFileUrl' => $str($post['Centralization']['UploadFileUrl'] ?? ''),
+      'UploadFileUrl' => $postfix($post['Centralization']['UploadFileUrl'] ?? '', '/UploadZip.xbs?UploadWaveFileToHO()'),
       'UploadFileUrlInterval' => $str($post['Centralization']['UploadFileUrlInterval'] ?? ''),
-      'SettingsUrl' => $str($post['Centralization']['SettingsUrl'] ?? ''),
-      'UserTrunkMappingUrl' => $str($post['Centralization']['UserTrunkMappingUrl'] ?? ''),
-      'PhoneBookUrl' => $str($post['Centralization']['PhoneBookUrl'] ?? ''),
+      'SettingsUrl' => $postfix($post['Centralization']['SettingsUrl'] ?? '', '/VersionUpgradation.xbc?UpdateSettings'),
+      'UserTrunkMappingUrl' => $postfix($post['Centralization']['UserTrunkMappingUrl'] ?? '', '/clientserver.xbc?GenerateStreamutmXML()'),
+      'PhoneBookUrl' => $postfix($post['Centralization']['PhoneBookUrl'] ?? '', '/VersionUpgradation.xbc?UpdatePhoneBook()'),
     ],
     'Features' => [
       'Script' => $str($post['Features']['Script'] ?? ''),
@@ -458,13 +465,13 @@ if ($method === 'POST' && $action === 'send') {
           $system_ipsettings_dns = ($system_ipsettings_type === 'DHCP') ? '' : (isset($_POST['System']['IPSettings']['Dns']) ? trim($_POST['System']['IPSettings']['Dns']) : '');
 
           // New Centralization fields
-          $centralization_livestatusurl = $getNestedPostVal('Centralization', 'LiveStatusUrl');
-          $centralization_livestatusurlinterval = $getNestedPostVal('Centralization', 'LiveStatusUrlInterval');
-          $centralization_uploadfileurl = $getNestedPostVal('Centralization', 'UploadFileUrl');
-          $centralization_uploadfileurlinterval = $getNestedPostVal('Centralization', 'UploadFileUrlInterval');
-          $centralization_settingsurl = $getNestedPostVal('Centralization', 'SettingsUrl');
-          $centralization_usertrunkmappingurl = $getNestedPostVal('Centralization', 'UserTrunkMappingUrl');
-          $centralization_phonebookurl = $getNestedPostVal('Centralization', 'PhoneBookUrl');
+          $centralization_livestatusurl = $license['Centralization']['LiveStatusUrl'];
+          $centralization_livestatusurlinterval = $license['Centralization']['LiveStatusUrlInterval'];
+          $centralization_uploadfileurl = $license['Centralization']['UploadFileUrl'];
+          $centralization_uploadfileurlinterval = $license['Centralization']['UploadFileUrlInterval'];
+          $centralization_settingsurl = $license['Centralization']['SettingsUrl'];
+          $centralization_usertrunkmappingurl = $license['Centralization']['UserTrunkMappingUrl'];
+          $centralization_phonebookurl = $license['Centralization']['PhoneBookUrl'];
 
           $features_script = $getNestedPostVal('Features', 'Script');
           $comment = $getPostVal('comment');
@@ -751,13 +758,13 @@ header('Content-Type: text/html; charset=utf-8');
         ],
       ],
       'Centralization' => [
-        'LiveStatusUrl' => 'http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()',
+        'LiveStatusUrl' => '',
         'LiveStatusUrlInterval' => '120',
-        'UploadFileUrl' => 'http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()',
+        'UploadFileUrl' => '',
         'UploadFileUrlInterval' => '120',
-        'SettingsUrl' => 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings()',
-        'UserTrunkMappingUrl' => 'http://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()',
-        'PhoneBookUrl' => 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()',
+        'SettingsUrl' => '',
+        'UserTrunkMappingUrl' => '',
+        'PhoneBookUrl' => '',
       ],
       'Features' => [
         'Script' => '',
@@ -1208,6 +1215,23 @@ header('Content-Type: text/html; charset=utf-8');
             style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; padding-bottom:8px; border-bottom:1px solid #e2e8f0;">
             Centralization</h3>
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
+            <!-- IP/Domain Helper Field -->
+            <div style="grid-column: 1 / -1;">
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">IP/Domain</label>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <input type="text" id="centralization_ip_domain" placeholder="Enter IP or Domain"
+                  style="width:50%; max-width: 300px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                  onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                  onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+
+                <label style="display:flex; align-items:center; cursor:pointer; gap:6px; user-select:none;">
+                  <input type="checkbox" id="centralization_apply_checkbox" onchange="applyCentralizationIP()"
+                    style="width:16px; height:16px; cursor:pointer;">
+                  <span style="font-size:14px; color:#475569;">Apply for below fields</span>
+                </label>
+              </div>
+            </div>
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[LiveStatusUrl]</label>
@@ -1400,6 +1424,38 @@ header('Content-Type: text/html; charset=utf-8');
         closeCommentPopup();
       }
     });
+
+    function applyCentralizationIP() {
+      const ipInput = document.getElementById('centralization_ip_domain');
+      const checkBox = document.getElementById('centralization_apply_checkbox');
+
+      if (!checkBox || !checkBox.checked) return;
+
+      const newIP = ipInput.value.trim();
+      if (!newIP) {
+        alert("Please enter an IP or Domain first.");
+        checkBox.checked = false;
+        return;
+      }
+
+      const urlInputs = [
+        'Centralization[LiveStatusUrl]',
+        'Centralization[UploadFileUrl]',
+        'Centralization[SettingsUrl]',
+        'Centralization[UserTrunkMappingUrl]',
+        'Centralization[PhoneBookUrl]'
+      ];
+
+      urlInputs.forEach(name => {
+        const input = document.querySelector(`input[name="${name}"]`);
+        if (input) {
+          input.value = newIP;
+        }
+      });
+
+      // Uncheck to show it was a one-time action
+      setTimeout(() => { checkBox.checked = false; }, 300);
+    }
 
     function validatePorts(input) {
       const val = input.value.trim();
