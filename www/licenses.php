@@ -172,6 +172,10 @@ if ($method === 'GET' && $editId) {
           'ports_enabled_deviceid1' => $row['ports_enabled_deviceid1'],
           'device_id2' => $row['device_id2'],
           'ports_enabled_deviceid2' => $row['ports_enabled_deviceid2'],
+          'device_id3' => $row['device_id3'],
+          'ports_enabled_deviceid3' => $row['ports_enabled_deviceid3'],
+          'device_id4' => $row['device_id4'],
+          'ports_enabled_deviceid4' => $row['ports_enabled_deviceid4'],
           'Features' => [
             'Script' => $row['features_script'],
           ],
@@ -326,20 +330,24 @@ function buildLicenseFromPost(array $post): array
     ],
   ];
 
-  $d1 = $str($post['device_id1'] ?? '');
-  $p1 = $str($post['ports_enabled_deviceid1'] ?? '');
-  if ($d1 !== '') {
-    $license['Hardware']['Analog'][$d1] = $p1;
-  }
+  $devices = [
+    ['id' => $str($post['device_id1'] ?? ''), 'ports' => $str($post['ports_enabled_deviceid1'] ?? '')],
+    ['id' => $str($post['device_id2'] ?? ''), 'ports' => $str($post['ports_enabled_deviceid2'] ?? '')],
+    ['id' => $str($post['device_id3'] ?? ''), 'ports' => $str($post['ports_enabled_deviceid3'] ?? '')],
+    ['id' => $str($post['device_id4'] ?? ''), 'ports' => $str($post['ports_enabled_deviceid4'] ?? '')],
+  ];
 
-  $d2 = $str($post['device_id2'] ?? '');
-  $p2 = $str($post['ports_enabled_deviceid2'] ?? '');
-  if ($d2 !== '') {
-    if (isset($license['Hardware']['Analog'][$d2])) {
-      $license['Hardware']['Analog'][$d2 . '_DUPLICATE_KEY_MARKER_'] = $p2;
-    } else {
-      $license['Hardware']['Analog'][$d2] = $p2;
+  foreach ($devices as $d) {
+    if ($d['id'] === '')
+      continue;
+    $key = $d['id'];
+    $counter = 0;
+    // Find a unique key if it already exists
+    while (isset($license['Hardware']['Analog'][$key])) {
+      $counter++;
+      $key = $d['id'] . '_DUPLICATE_KEY_MARKER_' . $counter . '_';
     }
+    $license['Hardware']['Analog'][$key] = $d['ports'];
   }
   return $license;
 }
@@ -347,7 +355,7 @@ function buildLicenseFromPost(array $post): array
 if ($method === 'POST' && $action === 'generate') {
   $license = buildLicenseFromPost($_POST);
   $encoded = json_encode($license, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-  $encoded = str_replace('_DUPLICATE_KEY_MARKER_"', '"', $encoded);
+  $encoded = preg_replace('/_DUPLICATE_KEY_MARKER_\d+_\"/', '"', $encoded);
   if (isset($_POST['download']) && $_POST['download'] === '1') {
     header('Content-Type: application/json; charset=utf-8');
     header('Content-Disposition: attachment; filename="license.json"');
@@ -360,7 +368,7 @@ if ($method === 'POST' && $action === 'generate') {
 if ($method === 'POST' && $action === 'send') {
   $license = buildLicenseFromPost($_POST);
   $encoded = json_encode($license, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-  $encoded = str_replace('_DUPLICATE_KEY_MARKER_"', '"', $encoded);
+  $encoded = preg_replace('/_DUPLICATE_KEY_MARKER_\d+_\"/', '"', $encoded);
   // Write to a temp json file
   $tmpDir = $uploadDir;
   if (!is_dir($tmpDir)) {
@@ -456,6 +464,10 @@ if ($method === 'POST' && $action === 'send') {
           $ports_enabled_deviceid1 = $getPostVal('ports_enabled_deviceid1');
           $device_id2 = $getPostVal('device_id2');
           $ports_enabled_deviceid2 = $getPostVal('ports_enabled_deviceid2');
+          $device_id3 = $getPostVal('device_id3');
+          $ports_enabled_deviceid3 = $getPostVal('ports_enabled_deviceid3');
+          $device_id4 = $getPostVal('device_id4');
+          $ports_enabled_deviceid4 = $getPostVal('ports_enabled_deviceid4');
 
           // New System IPSettings fields
           // Need to fix retrieval for deeper nested keys or just access $_POST directly
@@ -506,6 +518,10 @@ if ($method === 'POST' && $action === 'send') {
             ':ports_enabled_deviceid1' => $ports_enabled_deviceid1,
             ':device_id2' => $device_id2,
             ':ports_enabled_deviceid2' => $ports_enabled_deviceid2,
+            ':device_id3' => $device_id3,
+            ':ports_enabled_deviceid3' => $ports_enabled_deviceid3,
+            ':device_id4' => $device_id4,
+            ':ports_enabled_deviceid4' => $ports_enabled_deviceid4,
 
             ':system_ipsettings_type' => $system_ipsettings_type,
             ':system_ipsettings_ip' => $system_ipsettings_ip,
@@ -543,6 +559,8 @@ if ($method === 'POST' && $action === 'send') {
                               engine_validcountries = :engine_validcountries, 
                               device_id1 = :device_id1, ports_enabled_deviceid1 = :ports_enabled_deviceid1,
                               device_id2 = :device_id2, ports_enabled_deviceid2 = :ports_enabled_deviceid2,
+                              device_id3 = :device_id3, ports_enabled_deviceid3 = :ports_enabled_deviceid3,
+                              device_id4 = :device_id4, ports_enabled_deviceid4 = :ports_enabled_deviceid4,
                               centralization_livestatusurl = :centralization_livestatusurl, centralization_livestatusurlinterval = :centralization_livestatusurlinterval,
                               centralization_uploadfileurl = :centralization_uploadfileurl, centralization_uploadfileurlinterval = :centralization_uploadfileurlinterval,
                               centralization_settingsurl = :centralization_settingsurl, centralization_usertrunkmappingurl = :centralization_usertrunkmappingurl,
@@ -558,7 +576,7 @@ if ($method === 'POST' && $action === 'send') {
                               system_ipsettings_type, system_ipsettings_ip, system_ipsettings_gateway, system_ipsettings_dns,
                               engine_build, 
                               engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, 
-                              engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, 
+                              engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4, 
                               centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
                               features_script, comment
                           ) VALUES (
@@ -568,7 +586,7 @@ if ($method === 'POST' && $action === 'send') {
                               :system_ipsettings_type, :system_ipsettings_ip, :system_ipsettings_gateway, :system_ipsettings_dns,
                               :engine_build,
                               :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz,
-                              :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, 
+                              :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4, 
                               :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
                               :features_script, :comment
                           )";
@@ -793,6 +811,10 @@ header('Content-Type: text/html; charset=utf-8');
     $p1_val = '';
     $d2_val = '';
     $p2_val = '';
+    $d3_val = '';
+    $p3_val = '';
+    $d4_val = '';
+    $p4_val = '';
 
     // Override from prefill (DB or Remote)
     if (is_array($prefill)) {
@@ -805,6 +827,14 @@ header('Content-Type: text/html; charset=utf-8');
         $d2_val = $prefill['device_id2'];
       if (isset($prefill['ports_enabled_deviceid2']))
         $p2_val = $prefill['ports_enabled_deviceid2'];
+      if (isset($prefill['device_id3']))
+        $d3_val = $prefill['device_id3'];
+      if (isset($prefill['ports_enabled_deviceid3']))
+        $p3_val = $prefill['ports_enabled_deviceid3'];
+      if (isset($prefill['device_id4']))
+        $d4_val = $prefill['device_id4'];
+      if (isset($prefill['ports_enabled_deviceid4']))
+        $p4_val = $prefill['ports_enabled_deviceid4'];
 
       // Fallback or override from Hardware structure (e.g. remote fetch calls or legacy structure)
       // If we fetched from remote JSON, we might have keys in Hardware->Analog
@@ -821,6 +851,14 @@ header('Content-Type: text/html; charset=utf-8');
         if (isset($keys[1])) {
           $d2_val = $keys[1];
           $p2_val = $prefill['Hardware']['Analog'][$keys[1]];
+        }
+        if (isset($keys[2])) {
+          $d3_val = $keys[2];
+          $p3_val = $prefill['Hardware']['Analog'][$keys[2]];
+        }
+        if (isset($keys[3])) {
+          $d4_val = $keys[3];
+          $p4_val = $prefill['Hardware']['Analog'][$keys[3]];
         }
       }
     }
@@ -1196,14 +1234,62 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID 2
                 [PortsEnabled]</label>
-              <input type="text" maxlength="8" name="ports_enabled_deviceid2" id="ports_enabled_deviceid2"
+              <input type="text" maxlength="16" name="ports_enabled_deviceid2" id="ports_enabled_deviceid2"
                 value="<?php echo h($p2_val); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="validatePorts(this); this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
               <div id="error_ports_enabled_deviceid2"
                 style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
-                Must be exactly 8 characters of 0 and 1.
+                Must be exactly 16 characters of 0 and 1.
+              </div>
+            </div>
+
+            <!-- Device 3 -->
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID
+                3</label>
+              <input type="number" name="device_id3" value="<?php echo h($d3_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID 3
+                [PortsEnabled]</label>
+              <input type="text" maxlength="16" name="ports_enabled_deviceid3" id="ports_enabled_deviceid3"
+                value="<?php echo h($p3_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="validatePorts(this); this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+              <div id="error_ports_enabled_deviceid3"
+                style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
+                Must be exactly 16 characters of 0 and 1.
+              </div>
+            </div>
+
+            <!-- Device 4 -->
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID
+                4</label>
+              <input type="number" name="device_id4" value="<?php echo h($d4_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID 4
+                [PortsEnabled]</label>
+              <input type="text" maxlength="16" name="ports_enabled_deviceid4" id="ports_enabled_deviceid4"
+                value="<?php echo h($p4_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="validatePorts(this); this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+              <div id="error_ports_enabled_deviceid4"
+                style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
+                Must be exactly 16 characters of 0 and 1.
               </div>
             </div>
           </div>
@@ -1528,8 +1614,14 @@ header('Content-Type: text/html; charset=utf-8');
 
           if (p1) valid1 = validatePorts(p1);
           if (p2) valid2 = validatePorts(p2);
+          const p3 = document.getElementById('ports_enabled_deviceid3');
+          const p4 = document.getElementById('ports_enabled_deviceid4');
+          let valid3 = true;
+          let valid4 = true;
+          if (p3) valid3 = validatePorts(p3);
+          if (p4) valid4 = validatePorts(p4);
 
-          if (!valid1 || !valid2) {
+          if (!valid1 || !valid2 || !valid3 || !valid4) {
             e.preventDefault();
             alert('Please correct the errors in Hardware PortsEnabled fields.');
             return;

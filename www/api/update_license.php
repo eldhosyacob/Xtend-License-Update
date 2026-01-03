@@ -70,9 +70,14 @@ try {
   $engine_validcountries = getNestedPostVal('Engine', 'ValidCountries');
 
   // Hardware
-  // Assuming these are passed as Hardware[Analog][2303] etc.
-  $hardware_analog2303 = isset($_POST['Hardware']['Analog']['2303']) ? $_POST['Hardware']['Analog']['2303'] : '';
-  $hardware_analog2304 = isset($_POST['Hardware']['Analog']['2304']) ? $_POST['Hardware']['Analog']['2304'] : '';
+  $device_id1 = getPostVal('device_id1');
+  $ports_enabled_deviceid1 = getPostVal('ports_enabled_deviceid1');
+  $device_id2 = getPostVal('device_id2');
+  $ports_enabled_deviceid2 = getPostVal('ports_enabled_deviceid2');
+  $device_id3 = getPostVal('device_id3');
+  $ports_enabled_deviceid3 = getPostVal('ports_enabled_deviceid3');
+  $device_id4 = getPostVal('device_id4');
+  $ports_enabled_deviceid4 = getPostVal('ports_enabled_deviceid4');
 
   // Features
   $features_script = getNestedPostVal('Features', 'Script');
@@ -96,7 +101,7 @@ try {
         licensee_name, licensee_distributor, licensee_dealer, licensee_type, licensee_amctill, licensee_validtill, licensee_billno,
         system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug,
         engine_build, engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, engine_validcountries,
-        hardware_analog2303, hardware_analog2304,
+        device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4,
         features_script,
         centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
         comment
@@ -106,7 +111,7 @@ try {
         :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type, :licensee_amctill, :licensee_validtill, :licensee_billno,
         :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug,
         :engine_build, :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz, :engine_validcountries,
-        :hardware_analog2303, :hardware_analog2304,
+        :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,
         :features_script,
         :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
         :comment
@@ -139,8 +144,14 @@ try {
     ':engine_validstarttz' => $engine_validstarttz,
     ':engine_validendtz' => $engine_validendtz,
     ':engine_validcountries' => $engine_validcountries,
-    ':hardware_analog2303' => $hardware_analog2303,
-    ':hardware_analog2304' => $hardware_analog2304,
+    ':device_id1' => $device_id1,
+    ':ports_enabled_deviceid1' => $ports_enabled_deviceid1,
+    ':device_id2' => $device_id2,
+    ':ports_enabled_deviceid2' => $ports_enabled_deviceid2,
+    ':device_id3' => $device_id3,
+    ':ports_enabled_deviceid3' => $ports_enabled_deviceid3,
+    ':device_id4' => $device_id4,
+    ':ports_enabled_deviceid4' => $ports_enabled_deviceid4,
     ':features_script' => $features_script,
     ':centralization_livestatusurl' => $centralization_livestatusurl,
     ':centralization_livestatusurlinterval' => $centralization_livestatusurlinterval,

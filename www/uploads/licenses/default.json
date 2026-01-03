@@ -1,50 +1,53 @@
 {
-    "CreatedOn": "20251231",
+    "CreatedOn": "20251223",
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
         "Distributor": "Xtend",
-        "Dealer": "Abin",
+        "Dealer": "Eldhos Test",
         "Type": "Rental",
-        "AMCTill": "20261231",
-        "ValidTill": "20260130",
+        "AMCTill": "20261230",
+        "ValidTill": "20261231",
         "BillNo": "XT25-1002"
     },
     "System": {
         "Type": "Standalone",
         "OS": "Linux",
         "IsVM": false,
-        "SerialID": "7002",
-        "UniqueID": "2SHA-NN32-Z3KL-84H9",
+        "SerialID": "6194",
+        "UniqueID": "2JTE-PN52-8MPL-GAD6",
         "BuildType": "sharekhan",
         "Debug": 0,
         "IPSettings": {
-            "Type": "Static",
-            "IP": "10.20.40.16/8",
-            "Gateway": "10.100.100.1",
-            "Dns": "8.8.8.8"
+            "Type": "DHCP",
+            "IP": "",
+            "Gateway": "",
+            "Dns": ""
         }
     },
     "Engine": {
         "Build": "Xtend IVR",
         "GracePeriod": 30,
-        "MaxPorts": "M=4,*=4",
+        "MaxPorts": "M=1,*=1",
         "ValidStartTZ": 330,
         "ValidEndTZ": 330,
         "ValidCountries": 65
     },
     "Hardware": {
         "Analog": {
-            "82775": "1111000000000000"
+            "82429": "1111111111111111",
+            "82429": "1111111111111111",
+            "82430": "1111111111111111",
+            "82431": "1111111111111111"
         }
     },
     "Centralization": {
-        "LiveStatusUrl": "http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()",
-        "LiveStatusUrlInterval": "120",
-        "UploadFileUrl": "http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()",
+        "LiveStatusUrl": "http://103.38.15.2:8063/UploadZip.xbs?UploadXmlData()",
+        "LiveStatusUrlInterval": "60",
+        "UploadFileUrl": "http://103.38.15.2:8063/UploadZip.xbs?UploadWaveFileToHO()",
         "UploadFileUrlInterval": "120",
-        "SettingsUrl": "http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings",
-        "UserTrunkMappingUrl": "http://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()",
-        "PhoneBookUrl": "http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()"
+        "SettingsUrl": "http://103.38.15.2:8063/VersionUpgradation.xbc?UpdateSettings()",
+        "UserTrunkMappingUrl": "http://103.38.15.2:8063/clientserver.xbc?GenerateStreamutmXML()",
+        "PhoneBookUrl": "http://103.38.15.2:8063/VersionUpgradation.xbc?UpdatePhoneBook()"
     },
     "Features": {
         "Script": "Xtend Script"
