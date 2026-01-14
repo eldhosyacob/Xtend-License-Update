@@ -83,6 +83,8 @@ try {
   $locationCode = isset($_GET['location_code']) ? trim($_GET['location_code']) : '';
   $status = isset($_GET['status']) ? trim($_GET['status']) : '';
   $clientName = isset($_GET['client_name']) ? trim($_GET['client_name']) : '';
+  $fromDate = isset($_GET['from_date']) ? trim($_GET['from_date']) : '';
+  $toDate = isset($_GET['to_date']) ? trim($_GET['to_date']) : '';
 
   // Build WHERE clause
   $whereConditions = [];
@@ -101,6 +103,14 @@ try {
   if ($locationCode !== '') {
     $whereConditions[] = "location_code LIKE :location_code";
     $params[':location_code'] = '%' . $locationCode . '%';
+  }
+
+  if ($fromDate !== '' && $toDate !== '') {
+    $fromDateClean = str_replace('-', '', $fromDate);
+    $toDateClean = str_replace('-', '', $toDate);
+    $whereConditions[] = "created_on >= :from_date AND created_on <= :to_date";
+    $params[':from_date'] = $fromDateClean;
+    $params[':to_date'] = $toDateClean;
   }
 
   if ($clientName !== '') {
@@ -138,7 +148,7 @@ try {
   $totalRecords = $countStmt->fetchColumn();
 
   // Fetch required fields with pagination
-  $sql = "SELECT id, created_on, licensee_dealer, location_name, location_code, licensee_validtill, system_serialid, system_uniqueid, engine_graceperiod 
+  $sql = "SELECT id, created_on, licensee_dealer, location_name, location_code, licensee_validtill, system_serialid, system_uniqueid, engine_graceperiod, device_status 
             FROM license_details 
             $whereSql
             ORDER BY id DESC 

@@ -24,9 +24,21 @@ require_once('config/auth_check.php');
         <!-- <p class="page-subtitle">Comprehensive overview of all generated licenses and their current status</p> -->
       </div>
       <div class="header-right">
-        <input type="text" id="searchSerial" placeholder="Search Serial ID" class="search-input">
-        <input type="text" id="searchUnique" placeholder="Search Unique ID" class="search-input">
-        <input type="text" id="searchLocationCode" placeholder="Search Location Code" class="search-input">
+        <select id="searchType" class="search-input" style="width: auto; cursor: pointer;">
+          <option value="serial_id">Search Serial ID</option>
+          <option value="unique_id">Search Unique ID</option>
+          <option value="location_code">Search Location Code</option>
+          <option value="date_range">Search Date Range</option>
+        </select>
+
+        <input type="text" id="searchValue" placeholder="Search Serial ID" class="search-input">
+
+        <div id="dateRangeInputs" style="display: none; gap: 8px; align-items: center;">
+          <input type="date" id="searchFromDate" class="search-input" style="width: 140px;">
+          <span style="color: var(--text-dark);">-</span>
+          <input type="date" id="searchToDate" class="search-input" style="width: 140px;">
+        </div>
+
         <button onclick="searchReports()" class="btn-search">Search</button>
       </div>
     </div>
@@ -53,7 +65,8 @@ require_once('config/auth_check.php');
                 <th>Serial ID</th>
                 <th>Unique ID</th>
                 <th>Grace Period</th>
-                <th>Status</th>
+                <th>Device Status</th>
+                <th>Lic. Status</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -67,7 +80,7 @@ require_once('config/auth_check.php');
           </tbody> -->
             <tbody>
               <tr>
-                <td colspan="11" class="loading-cell">
+                <td colspan="12" class="loading-cell">
                   <div class="loading-state">
                     <div class="loading-spinner"></div>
                     Loading reports...
@@ -116,6 +129,7 @@ require_once('config/auth_check.php');
   <?php include 'components/header-sidebar.php'; ?>
 
   <script>
+    const userRole = "<?php echo isset($_SESSION['role']) ? htmlspecialchars($_SESSION['role']) : 'Limited Access'; ?>";
     let currentPage = 1;
     let totalPages = 1;
     const limit = 10;
@@ -126,6 +140,29 @@ require_once('config/auth_check.php');
       const urlParams = new URLSearchParams(window.location.search);
       currentStatus = urlParams.get('status') || '';
       currentClient = urlParams.get('client') || '';
+
+      // Initialize search dropdown handler
+      const searchType = document.getElementById('searchType');
+      const searchValue = document.getElementById('searchValue');
+      const dateRangeInputs = document.getElementById('dateRangeInputs');
+
+      searchType.addEventListener('change', function () {
+        // Reset values
+        searchValue.value = '';
+
+        if (this.value === 'date_range') {
+          searchValue.style.display = 'none';
+          dateRangeInputs.style.display = 'flex';
+        } else {
+          searchValue.style.display = 'block';
+          dateRangeInputs.style.display = 'none';
+
+          // Update placeholder based on selection
+          const selectedOption = this.options[this.selectedIndex].text;
+          searchValue.placeholder = selectedOption;
+        }
+      });
+
       fetchReports(currentPage);
       initScrollButtons();
     });
@@ -200,12 +237,22 @@ require_once('config/auth_check.php');
           document.querySelector('#reportsTable').style.opacity = '0.6';
         }
 
-        const serial = document.getElementById('searchSerial').value;
-        const unique = document.getElementById('searchUnique').value;
-        const locationCode = document.getElementById('searchLocationCode').value;
+        const searchType = document.getElementById('searchType').value;
+        const searchValue = document.getElementById('searchValue').value;
+        const fromDate = document.getElementById('searchFromDate').value;
+        const toDate = document.getElementById('searchToDate').value;
 
+        let url = `api/reports.php?page=${page}&limit=${limit}&_t=${new Date().getTime()}`;
 
-        let url = `api/reports.php?page=${page}&limit=${limit}&serial_id=${encodeURIComponent(serial)}&unique_id=${encodeURIComponent(unique)}&location_code=${encodeURIComponent(locationCode)}&_t=${new Date().getTime()}`;
+        if (searchType === 'serial_id') {
+          url += `&serial_id=${encodeURIComponent(searchValue)}`;
+        } else if (searchType === 'unique_id') {
+          url += `&unique_id=${encodeURIComponent(searchValue)}`;
+        } else if (searchType === 'location_code') {
+          url += `&location_code=${encodeURIComponent(searchValue)}`;
+        } else if (searchType === 'date_range' && fromDate && toDate) {
+          url += `&from_date=${encodeURIComponent(fromDate)}&to_date=${encodeURIComponent(toDate)}`;
+        }
 
         if (currentStatus) {
           url += `&status=${encodeURIComponent(currentStatus)}`;
@@ -321,6 +368,33 @@ require_once('config/auth_check.php');
         // Handle Unique ID display
         const uniqueIdDisplay = (row.system_uniqueid && row.system_uniqueid !== 'UNKNOWN') ? row.system_uniqueid : '-';
 
+
+        const viewLink = `licenses.php?edit_id=${row.id}&mode=view`;
+        const editLink = `licenses.php?edit_id=${row.id}`;
+
+        const viewBtn = `
+          <a href="${viewLink}" class="btn-icon" style="margin-right: 8px;" title="View">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+              <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+            </svg>
+          </a>
+        `;
+
+        const editBtn = `
+          <a href="${editLink}" class="btn-icon" title="Edit">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+            </svg>
+          </a>
+        `;
+
+        let actionButtons = viewBtn;
+        // userRole is defined globally in the script tag below/above
+        if (typeof userRole !== 'undefined' && userRole === 'Administrator') {
+          actionButtons += ' ' + editBtn;
+        }
+
         tr.innerHTML = `
           <td class="text-center">${startCount + index + 1}</td>
           <td>${dateDisplay || '-'}</td>
@@ -330,13 +404,10 @@ require_once('config/auth_check.php');
           <td class="code-cell">${row.system_serialid || '-'}</td>
           <td class="code-cell">${uniqueIdDisplay}</td>
           <td class="text-center">${row.engine_graceperiod || '-'}</td>
+          <td>${row.device_status || '-'}</td>
           <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-          <td>
-            <a href="licenses.php?edit_id=${row.id}" class="btn-icon" title="Edit">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
-              </svg>
-            </a>
+          <td class="action-cell">
+            ${actionButtons}
           </td>
         `;
         tbody.appendChild(tr);
@@ -379,7 +450,7 @@ require_once('config/auth_check.php');
       const tbody = document.querySelector('#reportsTable tbody');
       tbody.innerHTML = `
         <tr>
-          <td colspan="11" class="error-state">${message}</td>
+          <td colspan="12" class="error-state">${message}</td>
         </tr>
       `;
       document.getElementById('paginationControls').style.display = 'none';

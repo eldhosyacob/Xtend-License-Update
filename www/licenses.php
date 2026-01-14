@@ -95,6 +95,15 @@ $prefill = null; // holds fetched JSON to prefill the form
 $submitResult = null; // holds submission result data
 $commentValue = isset($_POST['comment']) ? (string) $_POST['comment'] : '';
 $editId = $_GET['edit_id'] ?? null;
+$userRole = $_SESSION['role'] ?? 'Limited Access';
+$mode = $_GET['mode'] ?? '';
+$isViewMode = ($mode === 'view') || ($userRole !== 'Administrator');
+
+// Block POST requests for non-admins
+if ($method === 'POST' && $userRole !== 'Administrator') {
+  header('HTTP/1.1 403 Forbidden');
+  die('Unauthorized access');
+}
 
 if ($method === 'GET' && $editId) {
   require_once('config/database.php');
@@ -179,6 +188,7 @@ if ($method === 'GET' && $editId) {
           'Features' => [
             'Script' => $row['features_script'],
           ],
+          'DeviceStatus' => $row['device_status'],
         ];
         $commentValue = $row['comment'];
       }
@@ -274,6 +284,11 @@ function buildLicenseFromPost(array $post): array
   };
   $license = [
     'CreatedOn' => $str($post['CreatedOn'] ?? ''),
+    'Client' => [
+      'ClientName' => $str($post['ClientName'] ?? ''),
+      'LocationName' => $str($post['LocationName'] ?? ''),
+      'LocationCode' => $str($post['LocationCode'] ?? ''),
+    ],
     'Licensee' => [
       'Name' => $str($post['Licensee']['Name'] ?? ''),
       'Distributor' => $str($post['Licensee']['Distributor'] ?? ''),
@@ -296,6 +311,10 @@ function buildLicenseFromPost(array $post): array
         'IP' => $type === 'DHCP' ? '' : $str($post['System']['IPSettings']['IP'] ?? ''),
         'Gateway' => $type === 'DHCP' ? '' : $str($post['System']['IPSettings']['Gateway'] ?? ''),
         'Dns' => $type === 'DHCP' ? '' : $str($post['System']['IPSettings']['Dns'] ?? ''),
+      ],
+      'Passwords' => [
+        'System' => $str($post['System']['Passwords']['System'] ?? ''),
+        'Web' => $str($post['System']['Passwords']['Web'] ?? ''),
       ],
     ],
     'Engine' => [
@@ -328,6 +347,7 @@ function buildLicenseFromPost(array $post): array
     'Features' => [
       'Script' => $str($post['Features']['Script'] ?? ''),
     ],
+    'DeviceStatus' => $str($post['DeviceStatus'] ?? ''),
   ];
 
   $devices = [
@@ -475,6 +495,8 @@ if ($method === 'POST' && $action === 'send') {
           $system_ipsettings_ip = ($system_ipsettings_type === 'DHCP') ? '' : (isset($_POST['System']['IPSettings']['IP']) ? trim($_POST['System']['IPSettings']['IP']) : '');
           $system_ipsettings_gateway = ($system_ipsettings_type === 'DHCP') ? '' : (isset($_POST['System']['IPSettings']['Gateway']) ? trim($_POST['System']['IPSettings']['Gateway']) : '');
           $system_ipsettings_dns = ($system_ipsettings_type === 'DHCP') ? '' : (isset($_POST['System']['IPSettings']['Dns']) ? trim($_POST['System']['IPSettings']['Dns']) : '');
+          $system_passwords_system = isset($_POST['System']['Passwords']['System']) ? trim($_POST['System']['Passwords']['System']) : '';
+          $system_passwords_web = isset($_POST['System']['Passwords']['Web']) ? trim($_POST['System']['Passwords']['Web']) : '';
 
           // New Centralization fields
           $centralization_livestatusurl = $license['Centralization']['LiveStatusUrl'];
@@ -486,6 +508,7 @@ if ($method === 'POST' && $action === 'send') {
           $centralization_phonebookurl = $license['Centralization']['PhoneBookUrl'];
 
           $features_script = $getNestedPostVal('Features', 'Script');
+          $device_status = $getPostVal('DeviceStatus');
           $comment = $getPostVal('comment');
           $editId = $_POST['edit_id'] ?? '';
 
@@ -527,6 +550,8 @@ if ($method === 'POST' && $action === 'send') {
             ':system_ipsettings_ip' => $system_ipsettings_ip,
             ':system_ipsettings_gateway' => $system_ipsettings_gateway,
             ':system_ipsettings_dns' => $system_ipsettings_dns,
+            ':system_passwords_system' => $system_passwords_system,
+            ':system_passwords_web' => $system_passwords_web,
 
             ':centralization_livestatusurl' => $centralization_livestatusurl,
             ':centralization_livestatusurlinterval' => $centralization_livestatusurlinterval,
@@ -539,6 +564,7 @@ if ($method === 'POST' && $action === 'send') {
             // ':hardware_analog2303' => $hardware_analog2303,
             // ':hardware_analog2304' => $hardware_analog2304,
             ':features_script' => $features_script,
+            ':device_status' => $device_status,
             ':comment' => $comment
           ];
 
@@ -552,6 +578,7 @@ if ($method === 'POST' && $action === 'send') {
                               system_debug = :system_debug, 
                               system_ipsettings_type = :system_ipsettings_type, system_ipsettings_ip = :system_ipsettings_ip,
                               system_ipsettings_gateway = :system_ipsettings_gateway, system_ipsettings_dns = :system_ipsettings_dns,
+                              system_passwords_system = :system_passwords_system, system_passwords_web = :system_passwords_web,
                               engine_build = :engine_build,
                               engine_graceperiod = :engine_graceperiod, engine_maxports = :engine_maxports,
 
@@ -565,7 +592,7 @@ if ($method === 'POST' && $action === 'send') {
                               centralization_uploadfileurl = :centralization_uploadfileurl, centralization_uploadfileurlinterval = :centralization_uploadfileurlinterval,
                               centralization_settingsurl = :centralization_settingsurl, centralization_usertrunkmappingurl = :centralization_usertrunkmappingurl,
                               centralization_phonebookurl = :centralization_phonebookurl,
-                              features_script = :features_script, comment = :comment
+                              features_script = :features_script, device_status = :device_status, comment = :comment
                           WHERE id = :id";
             $params[':id'] = $editId;
           } else {
@@ -574,21 +601,23 @@ if ($method === 'POST' && $action === 'send') {
                               licensee_amctill, licensee_validtill, licensee_billno, system_type, system_os, 
                               system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug, 
                               system_ipsettings_type, system_ipsettings_ip, system_ipsettings_gateway, system_ipsettings_dns,
+                              system_passwords_system, system_passwords_web,
                               engine_build, 
                               engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, 
                               engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4, 
                               centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
-                              features_script, comment
+                              features_script, device_status, comment
                           ) VALUES (
                               :created_on, :client_name, :location_name, :location_code, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
                               :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
                               :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug, 
                               :system_ipsettings_type, :system_ipsettings_ip, :system_ipsettings_gateway, :system_ipsettings_dns,
+                              :system_passwords_system, :system_passwords_web,
                               :engine_build,
                               :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz,
                               :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4, 
                               :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
-                              :features_script, :comment
+                              :features_script, :device_status, :comment
                           )";
           }
 
@@ -612,6 +641,24 @@ if ($method === 'POST' && $action === 'send') {
               ]);
             } catch (PDOException $e) {
               error_log('Comment insert failed: ' . $e->getMessage());
+            }
+          }
+
+          // Insert into device_status table
+          if ($licenseId) {
+            try {
+              $statusStmt = $db->prepare("
+                INSERT INTO device_status (license_id, status, date, user) 
+                VALUES (:license_id, :status, :date, :user)
+              ");
+              $statusStmt->execute([
+                ':license_id' => $licenseId,
+                ':status' => $device_status,
+                ':date' => date('Y-m-d H:i:s'),
+                ':user' => $_SESSION['full_name'] ?? 'Unknown'
+              ]);
+            } catch (PDOException $e) {
+              error_log('Device Status insert failed: ' . $e->getMessage());
             }
           }
         } catch (PDOException $e) {
@@ -664,7 +711,15 @@ header('Content-Type: text/html; charset=utf-8');
 
 <body>
   <div class="page-containers">
-    <div class="heading"><?php echo $editId ? 'UPDATE LICENSE' : 'APPLY LICENSE'; ?></div>
+    <div class="heading">
+      <?php
+      if ($isViewMode && $editId) {
+        echo 'VIEW LICENSE';
+      } else {
+        echo $editId ? 'UPDATE LICENSE' : 'APPLY LICENSE';
+      }
+      ?>
+    </div>
     <?php if ($errors): ?>
       <div
         style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:12px 16px; border-radius:8px; margin-bottom:16px;">
@@ -761,6 +816,10 @@ header('Content-Type: text/html; charset=utf-8');
           'Gateway' => '10.100.100.1',
           'Dns' => '8.8.8.8',
         ],
+        'Passwords' => [
+          'System' => 'root',
+          'Web' => 'admin',
+        ],
       ],
       'Engine' => [
         'Build' => 'Xtend IVR',
@@ -787,6 +846,7 @@ header('Content-Type: text/html; charset=utf-8');
       'Features' => [
         'Script' => '',
       ],
+      'DeviceStatus' => 'Testing',
     ];
 
     // Merge values from prefill if available
@@ -1126,6 +1186,24 @@ header('Content-Type: text/html; charset=utf-8');
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[Passwords][System]</label>
+              <input type="text" name="System[Passwords][System]" required
+                value="<?php echo h($val(['System', 'Passwords', 'System'], $defaults['System']['Passwords']['System'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[Passwords][Web]</label>
+              <input type="text" name="System[Passwords][Web]" required
+                value="<?php echo h($val(['System', 'Passwords', 'Web'], $defaults['System']['Passwords']['Web'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
           </div>
         </div>
 
@@ -1402,11 +1480,49 @@ header('Content-Type: text/html; charset=utf-8');
           </div>
         </div>
 
+        <!-- Device Status Section -->
+        <div style="margin-bottom:16px; display:flex; gap:16px; align-items:flex-end;">
+          <div>
+            <label
+              style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">DeviceStatus</label>
+            <select name="DeviceStatus"
+              style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer; min-width:180px;"
+              onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+              <?php $ds = (string) $val(['DeviceStatus'], $defaults['DeviceStatus']); ?>
+              <option value="Testing" <?php echo ($ds === 'Testing' || $ds === '') ? 'selected' : ''; ?>>Testing</option>
+              <option value="Ready For Dispatch" <?php echo ($ds === 'Ready For Dispatch') ? 'selected' : ''; ?>>Ready For
+                Dispatch</option>
+              <option value="Installed" <?php echo ($ds === 'Installed') ? 'selected' : ''; ?>>Installed</option>
+              <option value="Serviced" <?php echo ($ds === 'Serviced') ? 'selected' : ''; ?>>Serviced</option>
+              <option value="Replaced" <?php echo ($ds === 'Replaced') ? 'selected' : ''; ?>>Replaced</option>
+            </select>
+          </div>
+          <div>
+            <label
+              style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">StatusDate</label>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="text" name="StatusDate" readonly value="<?php echo date('Y-m-d'); ?>"
+                style="width:120px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background-color: #f1f5f9; cursor: not-allowed;">
+              <?php if ($editId): ?>
+                <div style="cursor:pointer; color:#64748b; display:flex; align-items:center;"
+                  onclick="showDeviceStatusPopup()" title="View Device Status History">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+              <?php endif; ?>
+            </div>
+          </div>
+        </div>
+
         <!-- Comment Section -->
         <div style="margin-bottom:24px;">
           <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Comment</label>
           <div style="display:flex; align-items:center; gap:10px;">
-            <input type="text" name="comment" required value=""
+            <input type="text" name="comment" value=""
               style="width:25%; max-width:500px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
               onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
               onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -1423,11 +1539,13 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
 
         <!-- Action Buttons -->
-        <div
-          style="margin-top:24px; padding-top:20px; border-top:2px solid #f1f5f9; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
-          <button type="submit" name="action" class="btn-submit"
-            value="send"><?php echo $editId ? 'Update' : 'Submit'; ?></button>
-        </div>
+        <?php if (!$isViewMode): ?>
+          <div
+            style="margin-top:24px; padding-top:20px; border-top:2px solid #f1f5f9; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+            <button type="submit" name="action" class="btn-submit"
+              value="send"><?php echo $editId ? 'Update' : 'Submit'; ?></button>
+          </div>
+        <?php endif; ?>
       </form>
     <?php endif; ?>
   </div>
@@ -1443,6 +1561,23 @@ header('Content-Type: text/html; charset=utf-8');
       </div>
       <div style="text-align:right; flex-shrink: 0;">
         <button type="button" onclick="closeCommentPopup()"
+          style="padding:8px 16px; background:#f16767; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:background-color 0.2s;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Device Status Popup -->
+  <div id="deviceStatusPopup"
+    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div
+      style="background:white; padding:24px; border-radius:12px; max-width:800px; max-height: 60vh; width:90%; box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); display: flex; flex-direction: column;">
+      <h3 style="margin:0 0 16px 0; font-size:18px; font-weight:600; color:#1e293b; flex-shrink: 0;">Device Status
+        History
+      </h3>
+      <div id="existingDeviceStatusText" style="margin-bottom:24px; overflow-y:auto; flex: 1; min-height: 0;">
+      </div>
+      <div style="text-align:right; flex-shrink: 0;">
+        <button type="button" onclick="closeDeviceStatusPopup()"
           style="padding:8px 16px; background:#f16767; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:background-color 0.2s;">Close</button>
       </div>
     </div>
@@ -1508,6 +1643,67 @@ header('Content-Type: text/html; charset=utf-8');
     document.getElementById('commentPopup').addEventListener('click', function (e) {
       if (e.target === this) {
         closeCommentPopup();
+      }
+    });
+
+    async function showDeviceStatusPopup() {
+      const licenseId = '<?php echo h($editId); ?>';
+      if (!licenseId) return;
+
+      try {
+        const response = await fetch(`api/device_status.php?license_id=${licenseId}`);
+        const rows = await response.json();
+
+        let html = '';
+        if (rows.length === 0) {
+          html = '<p style="color:#94a3b8; font-style:italic; text-align:center; padding:20px;">No previous status history</p>';
+        } else {
+          html = `
+            <table style="width:100%; border-collapse:collapse; font-size:14px;">
+              <thead>
+                <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
+                  <th style="padding:12px 8px; text-align:left; font-weight:600; color:#475569; width:50px;">Sl No</th>
+                  <th style="padding:12px 8px; text-align:left; font-weight:600; color:#475569; width:150px;">User</th>
+                  <th style="padding:12px 8px; text-align:left; font-weight:600; color:#475569; width:150px;">Date/Time</th>
+                  <th style="padding:12px 8px; text-align:left; font-weight:600; color:#475569;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          rows.forEach((row, index) => {
+            html += `
+              <tr style="border-bottom:1px solid #e2e8f0;">
+                <td style="padding:12px 8px; color:#64748b;">${index + 1}</td>
+                <td style="padding:12px 8px; color:#1e293b; font-weight:500;">${row.user || 'Unknown'}</td>
+                <td style="padding:12px 8px; color:#64748b; font-size:12px;">${row.formatted_date || row.date}</td>
+                <td style="padding:12px 8px; color:#475569;">${row.status}</td>
+              </tr>
+            `;
+          });
+
+          html += `
+              </tbody>
+            </table>
+          `;
+        }
+
+        document.getElementById('existingDeviceStatusText').innerHTML = html;
+        document.getElementById('deviceStatusPopup').style.display = 'flex';
+      } catch (error) {
+        console.error('Error fetching device status:', error);
+        document.getElementById('existingDeviceStatusText').innerHTML = '<p style="color:#ef4444; text-align:center; padding:20px;">Error loading status history</p>';
+        document.getElementById('deviceStatusPopup').style.display = 'flex';
+      }
+    }
+
+    function closeDeviceStatusPopup() {
+      document.getElementById('deviceStatusPopup').style.display = 'none';
+    }
+
+    document.getElementById('deviceStatusPopup').addEventListener('click', function (e) {
+      if (e.target === this) {
+        closeDeviceStatusPopup();
       }
     });
 
@@ -1577,6 +1773,10 @@ header('Content-Type: text/html; charset=utf-8');
       const dnsInput = document.getElementById('ipSettingsDns');
 
       if (typeSelect && ipInput && gatewayInput && dnsInput) {
+        // Prevent logic execution if strict view mode
+        const isViewMode = <?php echo $isViewMode ? 'true' : 'false'; ?>;
+        if (isViewMode) return;
+
         const isDHCP = typeSelect.value === 'DHCP';
         if (isDHCP) {
           ipInput.value = '';
@@ -1600,7 +1800,24 @@ header('Content-Type: text/html; charset=utf-8');
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+      const isViewMode = <?php echo $isViewMode ? 'true' : 'false'; ?>;
+
       toggleIPSettings();
+
+      if (isViewMode) {
+        // Disable all form inputs
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+          input.disabled = true;
+          input.setAttribute('readonly', 'readonly');
+          input.style.backgroundColor = '#f1f5f9';
+          input.style.cursor = 'not-allowed';
+        });
+
+        // Ensure IP Settings stay disabled even if toggle logic ran
+        const ipType = document.getElementById('ipSettingsType');
+        if (ipType) ipType.disabled = true;
+      }
 
       const form = document.getElementById('licenseForm');
       if (form) {
@@ -1640,7 +1857,8 @@ header('Content-Type: text/html; charset=utf-8');
           }
         });
       }
-    });
+    }
+  );
   </script>
 </body>
 

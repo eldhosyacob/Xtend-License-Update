@@ -11,7 +11,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 $db = getDatabaseConnection();
 $users = [];
 if ($db) {
-  $stmt = $db->query("SELECT id, username, full_name FROM users ORDER BY id DESC");
+  $stmt = $db->query("SELECT id, username, full_name, role FROM users ORDER BY id DESC");
   $users = $stmt->fetchAll();
 }
 ?>
@@ -30,11 +30,19 @@ if ($db) {
   <script src="plugins/jquery-3.7.1.min.js"></script>
 </head>
 
+
+<?php
+$currentUserRole = $_SESSION['role'] ?? 'Limited Access';
+$isAdmin = $currentUserRole === 'Administrator';
+?>
+
 <body>
   <div class="users-page-container page-containers">
     <div class="page-header-actions">
       <div class="gradient-text">User Management</div>
-      <button class="btn-primary" id="addUserBtn">Add User</button>
+      <?php if ($isAdmin): ?>
+        <button class="btn-primary" id="addUserBtn">Add User</button>
+      <?php endif; ?>
     </div>
 
     <div class="users-table-container">
@@ -44,7 +52,10 @@ if ($db) {
             <th>Sl No</th>
             <th>Username</th>
             <th>Full Name</th>
-            <th>Actions</th>
+            <th>Role</th>
+            <?php if ($isAdmin): ?>
+              <th>Actions</th>
+            <?php endif; ?>
           </tr>
         </thead>
         <tbody>
@@ -53,13 +64,17 @@ if ($db) {
               <td><?php echo $index + 1; ?></td>
               <td><?php echo htmlspecialchars($user['username']); ?></td>
               <td><?php echo htmlspecialchars($user['full_name']); ?></td>
-              <td>
-                <button class="btn-edit" data-id="<?php echo $user['id']; ?>"
-                  data-username="<?php echo htmlspecialchars($user['username']); ?>"
-                  data-fullname="<?php echo htmlspecialchars($user['full_name']); ?>">
-                  Edit
-                </button>
-              </td>
+              <td><?php echo htmlspecialchars($user['role']); ?></td>
+              <?php if ($isAdmin): ?>
+                <td>
+                  <button class="btn-edit" data-id="<?php echo $user['id']; ?>"
+                    data-username="<?php echo htmlspecialchars($user['username']); ?>"
+                    data-fullname="<?php echo htmlspecialchars($user['full_name']); ?>"
+                    data-role="<?php echo htmlspecialchars($user['role']); ?>">
+                    Edit
+                  </button>
+                </td>
+              <?php endif; ?>
             </tr>
           <?php endforeach; ?>
         </tbody>
@@ -83,6 +98,15 @@ if ($db) {
         <div class="form-group">
           <label for="fullName">Full Name</label>
           <input type="text" id="fullName" name="full_name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Role</label>
+          <select id="role" name="role" required
+            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="Administrator">Administrator</option>
+            <option value="Limited Access">Limited Access</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -111,6 +135,7 @@ if ($db) {
         $('#userId').val('');
         $('#username').val('');
         $('#fullName').val('');
+        $('#role').val('Limited Access');
         $('#password').val('');
         $('#password').attr('placeholder', 'Required for new users');
         $('#password').prop('required', true);
@@ -122,11 +147,13 @@ if ($db) {
         var id = $(this).data('id');
         var username = $(this).data('username');
         var fullname = $(this).data('fullname');
+        var role = $(this).data('role');
 
         $('#modalTitle').text('Edit User');
         $('#userId').val(id);
         $('#username').val(username);
         $('#fullName').val(fullname);
+        $('#role').val(role);
         $('#password').val('');
         $('#password').attr('placeholder', 'Leave blank to keep current password');
         $('#password').prop('required', false);

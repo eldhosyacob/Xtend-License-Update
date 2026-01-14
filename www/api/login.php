@@ -19,7 +19,7 @@ if (!$db) {
 }
 
 
-$stmt = $db->prepare("SELECT id, username, password_hash, full_name FROM users WHERE username = :username LIMIT 1");
+$stmt = $db->prepare("SELECT id, username, password_hash, full_name, role FROM users WHERE username = :username LIMIT 1");
 $stmt->execute(['username' => $username]);
 $user = $stmt->fetch();
 
@@ -46,6 +46,7 @@ if (password_verify($password, $user['password_hash'])) {
     $_SESSION['id'] = $user['id'];
     $_SESSION['username'] = $user['username'];
     $_SESSION['full_name'] = $user['full_name'];
+    $_SESSION['role'] = $user['role'];
     $_SESSION['logged_in'] = true;
 
     echo json_encode([
@@ -54,7 +55,8 @@ if (password_verify($password, $user['password_hash'])) {
         'data' => [
             'id' => $user['id'],
             'username' => $user['username'],
-            'full_name' => $user['full_name']
+            'full_name' => $user['full_name'],
+            'role' => $user['role']
         ]
     ]);
 } else {

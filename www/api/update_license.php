@@ -60,6 +60,8 @@ try {
   $system_uniqueid = getNestedPostVal('System', 'UniqueID');
   $system_build_type = getNestedPostVal('System', 'BuildType', 'sharekhan');
   $system_debug = getNestedPostVal('System', 'Debug', 0);
+  $system_passwords_system = isset($_POST['System']['Passwords']['System']) ? trim($_POST['System']['Passwords']['System']) : '';
+  $system_passwords_web = isset($_POST['System']['Passwords']['Web']) ? trim($_POST['System']['Passwords']['Web']) : '';
 
   // Engine
   $engine_build = getNestedPostVal('Engine', 'Build');
@@ -91,6 +93,9 @@ try {
   $centralization_usertrunkmappingurl = getNestedPostVal('Centralization', 'UserTrunkMappingUrl');
   $centralization_phonebookurl = getNestedPostVal('Centralization', 'PhoneBookUrl');
 
+  // DeviceStatus
+  $device_status = getPostVal('DeviceStatus');
+
   // Comment
   $comment = getPostVal('comment');
 
@@ -100,9 +105,10 @@ try {
         client_name, location_name, location_code, 
         licensee_name, licensee_distributor, licensee_dealer, licensee_type, licensee_amctill, licensee_validtill, licensee_billno,
         system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug,
+        system_passwords_system, system_passwords_web,
         engine_build, engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, engine_validcountries,
         device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4,
-        features_script,
+        features_script, device_status,
         centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
         comment
     ) VALUES (
@@ -110,9 +116,10 @@ try {
         :client_name, :location_name, :location_code,
         :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type, :licensee_amctill, :licensee_validtill, :licensee_billno,
         :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug,
+        :system_passwords_system, :system_passwords_web,
         :engine_build, :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz, :engine_validcountries,
         :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,
-        :features_script,
+        :features_script, :device_status,
         :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
         :comment
     )";
@@ -138,6 +145,8 @@ try {
     ':system_uniqueid' => $system_uniqueid,
     ':system_build_type' => $system_build_type,
     ':system_debug' => $system_debug,
+    ':system_passwords_system' => $system_passwords_system,
+    ':system_passwords_web' => $system_passwords_web,
     ':engine_build' => $engine_build,
     ':engine_graceperiod' => $engine_graceperiod,
     ':engine_maxports' => $engine_maxports,
@@ -153,6 +162,7 @@ try {
     ':device_id4' => $device_id4,
     ':ports_enabled_deviceid4' => $ports_enabled_deviceid4,
     ':features_script' => $features_script,
+    ':device_status' => $device_status,
     ':centralization_livestatusurl' => $centralization_livestatusurl,
     ':centralization_livestatusurlinterval' => $centralization_livestatusurlinterval,
     ':centralization_uploadfileurl' => $centralization_uploadfileurl,
@@ -162,6 +172,26 @@ try {
     ':centralization_phonebookurl' => $centralization_phonebookurl,
     ':comment' => $comment
   ]);
+
+  // Insert device status log
+  $licenseId = $db->lastInsertId();
+  if ($licenseId) {
+    try {
+      $statusStmt = $db->prepare("
+          INSERT INTO device_status (license_id, status, date, user) 
+          VALUES (:license_id, :status, :date, :user)
+      ");
+      $statusStmt->execute([
+        ':license_id' => $licenseId,
+        ':status' => $device_status,
+        ':date' => date('Y-m-d H:i:s'),
+        ':user' => $_SESSION['full_name'] ?? 'Unknown'
+      ]);
+    } catch (PDOException $e) {
+      // Log error but don't fail the request
+      error_log('Device Status insert failed in API: ' . $e->getMessage());
+    }
+  }
 
   echo json_encode([
     'success' => true,

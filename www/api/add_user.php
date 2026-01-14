@@ -27,6 +27,7 @@ if (!$db) {
 $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
 $username = isset($_POST['username']) ? trim($_POST['username']) : '';
 $full_name = isset($_POST['full_name']) ? trim($_POST['full_name']) : '';
+$role = isset($_POST['role']) ? trim($_POST['role']) : 'Limited Access';
 $password = isset($_POST['password']) ? $_POST['password'] : '';
 
 // Validation
@@ -60,19 +61,21 @@ if ($user_id) {
   if (!empty($password)) {
     // Update with password
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $db->prepare("UPDATE users SET username = :username, full_name = :full_name, password_hash = :password_hash, updated_at = NOW(), created_at = created_at WHERE id = :id");
+    $stmt = $db->prepare("UPDATE users SET username = :username, full_name = :full_name, role = :role, password_hash = :password_hash, updated_at = NOW(), created_at = created_at WHERE id = :id");
     $stmt->execute([
       'username' => $username,
       'full_name' => $full_name,
+      'role' => $role,
       'password_hash' => $password_hash,
       'id' => $user_id
     ]);
   } else {
     // Update without password
-    $stmt = $db->prepare("UPDATE users SET username = :username, full_name = :full_name, updated_at = NOW(), created_at = created_at WHERE id = :id");
+    $stmt = $db->prepare("UPDATE users SET username = :username, full_name = :full_name, role = :role, updated_at = NOW(), created_at = created_at WHERE id = :id");
     $stmt->execute([
       'username' => $username,
       'full_name' => $full_name,
+      'role' => $role,
       'id' => $user_id
     ]);
   }
@@ -91,10 +94,11 @@ if ($user_id) {
   }
 
   $password_hash = password_hash($password, PASSWORD_DEFAULT);
-  $stmt = $db->prepare("INSERT INTO users (username, full_name, password_hash) VALUES (:username, :full_name, :password_hash)");
+  $stmt = $db->prepare("INSERT INTO users (username, full_name, role, password_hash) VALUES (:username, :full_name, :role, :password_hash)");
   $stmt->execute([
     'username' => $username,
     'full_name' => $full_name,
+    'role' => $role,
     'password_hash' => $password_hash
   ]);
   $message = 'User added successfully';

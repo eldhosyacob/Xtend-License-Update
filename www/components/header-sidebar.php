@@ -27,6 +27,7 @@ $page_title = isset($page_titles[$current_page]) ? $page_titles[$current_page] :
 $user_full_name = isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'Admin';
 $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : '';
 $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
+$user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
 ?>
 
 <!-- Header -->
@@ -129,15 +130,17 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
             </svg> -->
             <i class="fa-solid fa-chart-simple" style="color:#c19149"></i>
             <span>Reports</span>
-            <i class="fa-solid fa-chevron-down submenu-arrow" style="font-size: 10px; margin-left: auto; transition: transform 0.3s ease;"></i>
+            <i class="fa-solid fa-chevron-down submenu-arrow"
+              style="font-size: 10px; margin-left: auto; transition: transform 0.3s ease;"></i>
           </a>
           <ul class="sidebar-submenu">
-            <?php 
-              $client_param = isset($_GET['client']) ? $_GET['client'] : '';
-              $is_reports_page = ($current_page == 'reports');
+            <?php
+            $client_param = isset($_GET['client']) ? $_GET['client'] : '';
+            $is_reports_page = ($current_page == 'reports');
             ?>
             <li>
-              <a href="reports.php?client=Sharekhan" class="<?php echo ($is_reports_page && $client_param == 'Sharekhan') ? 'active' : ''; ?>">
+              <a href="reports.php?client=Sharekhan"
+                class="<?php echo ($is_reports_page && $client_param == 'Sharekhan') ? 'active' : ''; ?>">
                 Sharekhan
               </a>
             </li>
@@ -175,7 +178,9 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
       </div>
       <div class="sidebar-user-details">
         <div class="sidebar-user-name"><?php echo htmlspecialchars($user_full_name); ?></div>
-        <div class="sidebar-user-role">Administrator</div>
+        <div class="sidebar-user-role">
+          <?php echo htmlspecialchars($user_role); ?>
+        </div>
       </div>
     </div>
   </div>
@@ -235,7 +240,7 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
     });
 
     // Submenu Toggle
-    $('.submenu-toggle').on('click', function(e) {
+    $('.submenu-toggle').on('click', function (e) {
       const $parent = $(this).closest('.has-submenu');
       const $submenu = $parent.find('.sidebar-submenu');
       const $arrow = $(this).find('.submenu-arrow');

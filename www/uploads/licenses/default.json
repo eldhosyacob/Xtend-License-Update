@@ -1,5 +1,10 @@
 {
     "CreatedOn": "20251223",
+    "Client": {
+        "ClientName": "Other",
+        "LocationName": "Kochi",
+        "LocationCode": "682030"
+    },
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
         "Distributor": "Xtend",
@@ -18,10 +23,14 @@
         "BuildType": "sharekhan",
         "Debug": 0,
         "IPSettings": {
-            "Type": "DHCP",
-            "IP": "",
-            "Gateway": "",
-            "Dns": ""
+            "Type": "Static",
+            "IP": "10.20.40.11/8",
+            "Gateway": "10.100.100.1",
+            "Dns": "8.8.8.8"
+        },
+        "Passwords": {
+            "System": "root",
+            "Web": "admin"
         }
     },
     "Engine": {
@@ -34,22 +43,20 @@
     },
     "Hardware": {
         "Analog": {
-            "82429": "1111111111111111",
-            "82429": "1111111111111111",
-            "82430": "1111111111111111",
-            "82431": "1111111111111111"
+            "82429": "1010000000000000"
         }
     },
     "Centralization": {
-        "LiveStatusUrl": "http://103.38.15.2:8063/UploadZip.xbs?UploadXmlData()",
+        "LiveStatusUrl": "http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()",
         "LiveStatusUrlInterval": "60",
-        "UploadFileUrl": "http://103.38.15.2:8063/UploadZip.xbs?UploadWaveFileToHO()",
+        "UploadFileUrl": "http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()",
         "UploadFileUrlInterval": "120",
-        "SettingsUrl": "http://103.38.15.2:8063/VersionUpgradation.xbc?UpdateSettings()",
-        "UserTrunkMappingUrl": "http://103.38.15.2:8063/clientserver.xbc?GenerateStreamutmXML()",
-        "PhoneBookUrl": "http://103.38.15.2:8063/VersionUpgradation.xbc?UpdatePhoneBook()"
+        "SettingsUrl": "http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings",
+        "UserTrunkMappingUrl": "http://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()",
+        "PhoneBookUrl": "http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()"
     },
     "Features": {
         "Script": "Xtend Script"
-    }
+    },
+    "DeviceStatus": "Testing"
 }
