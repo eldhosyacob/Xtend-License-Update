@@ -391,8 +391,15 @@ require_once('config/auth_check.php');
 
         let actionButtons = viewBtn;
         // userRole is defined globally in the script tag below/above
-        if (typeof userRole !== 'undefined' && userRole === 'Administrator') {
-          actionButtons += ' ' + editBtn;
+        if (typeof userRole !== 'undefined') {
+          if (userRole === 'Administrator') {
+            actionButtons += ' ' + editBtn;
+          } else if (userRole === 'Limited Access') {
+            // Only show edit if NOT Sharekhan
+            if (row.client_name !== 'Sharekhan') {
+              actionButtons += ' ' + editBtn;
+            }
+          }
         }
 
         tr.innerHTML = `

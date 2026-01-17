@@ -138,12 +138,14 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
             $client_param = isset($_GET['client']) ? $_GET['client'] : '';
             $is_reports_page = ($current_page == 'reports');
             ?>
+            <?php if ($user_role !== 'Limited Access'): ?>
             <li>
               <a href="reports.php?client=Sharekhan"
                 class="<?php echo ($is_reports_page && $client_param == 'Sharekhan') ? 'active' : ''; ?>">
                 Sharekhan
               </a>
             </li>
+            <?php endif; ?>
             <li>
               <a href="reports.php" class="<?php echo ($is_reports_page && $client_param == '') ? 'active' : ''; ?>">
                 All

@@ -40,8 +40,19 @@ try {
   // Extract data from POST
   $created_on = getPostVal('CreatedOn');
   $client_name = getPostVal('ClientName');
+  // Check permission for Limited Access users
+  $userRole = $_SESSION['role'] ?? '';
+  if ($userRole === 'Limited Access' && $client_name === 'Sharekhan') {
+    echo json_encode([
+      'success' => false,
+      'message' => 'Unauthorized: You cannot create Sharekhan licenses'
+    ]);
+    exit;
+  }
+
   $location_name = getPostVal('LocationName');
   $location_code = getPostVal('LocationCode');
+  $board_type = getPostVal('BoardType', 'Lichee Pi');
 
   // Licensee
   $licensee_name = getNestedPostVal('Licensee', 'Name');
@@ -95,6 +106,7 @@ try {
 
   // DeviceStatus
   $device_status = getPostVal('DeviceStatus');
+  $status_date_input = getPostVal('StatusDate');
 
   // Comment
   $comment = getPostVal('comment');
@@ -102,7 +114,7 @@ try {
   // Prepare SQL statement
   $sql = "INSERT INTO license_details (
         created_on, 
-        client_name, location_name, location_code, 
+        client_name, location_name, location_code, board_type,
         licensee_name, licensee_distributor, licensee_dealer, licensee_type, licensee_amctill, licensee_validtill, licensee_billno,
         system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug,
         system_passwords_system, system_passwords_web,
@@ -113,7 +125,7 @@ try {
         comment
     ) VALUES (
         :created_on,
-        :client_name, :location_name, :location_code,
+        :client_name, :location_name, :location_code, :board_type,
         :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type, :licensee_amctill, :licensee_validtill, :licensee_billno,
         :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug,
         :system_passwords_system, :system_passwords_web,
@@ -131,6 +143,7 @@ try {
     ':client_name' => $client_name,
     ':location_name' => $location_name,
     ':location_code' => $location_code,
+    ':board_type' => $board_type,
     ':licensee_name' => $licensee_name,
     ':licensee_distributor' => $licensee_distributor,
     ':licensee_dealer' => $licensee_dealer,
@@ -175,16 +188,17 @@ try {
 
   // Insert device status log
   $licenseId = $db->lastInsertId();
-  if ($licenseId) {
+  // Only insert into device_status history if status and date are provided
+  if ($licenseId && !empty($device_status) && !empty($status_date_input)) {
     try {
       $statusStmt = $db->prepare("
-          INSERT INTO device_status (license_id, status, date, user) 
+          INSERT INTO device_status (`license_id`, `status`, `date`, `user`) 
           VALUES (:license_id, :status, :date, :user)
       ");
       $statusStmt->execute([
         ':license_id' => $licenseId,
         ':status' => $device_status,
-        ':date' => date('Y-m-d H:i:s'),
+        ':date' => $status_date_input . ' ' . date('H:i:s'),
         ':user' => $_SESSION['full_name'] ?? 'Unknown'
       ]);
     } catch (PDOException $e) {

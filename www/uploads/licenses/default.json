@@ -1,5 +1,5 @@
 {
-    "CreatedOn": "20251223",
+    "CreatedOn": "20260116",
     "Client": {
         "ClientName": "Other",
         "LocationName": "Kochi",
@@ -8,47 +8,47 @@
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
         "Distributor": "Xtend",
-        "Dealer": "Eldhos Test",
+        "Dealer": "Eldhos",
         "Type": "Rental",
-        "AMCTill": "20261230",
-        "ValidTill": "20261231",
+        "AMCTill": "20270116",
+        "ValidTill": "20260131",
         "BillNo": "XT25-1002"
     },
     "System": {
         "Type": "Standalone",
         "OS": "Linux",
         "IsVM": false,
-        "SerialID": "6194",
-        "UniqueID": "2JTE-PN52-8MPL-GAD6",
+        "SerialID": "100",
+        "UniqueID": "8AGL-2RSU-H8CK-BECE",
         "BuildType": "sharekhan",
         "Debug": 0,
         "IPSettings": {
             "Type": "Static",
-            "IP": "10.20.40.11/8",
+            "IP": "10.100.2.5/16",
             "Gateway": "10.100.100.1",
             "Dns": "8.8.8.8"
         },
         "Passwords": {
-            "System": "root",
-            "Web": "admin"
+            "System": "Xtend123",
+            "Web": "Xtend123"
         }
     },
     "Engine": {
         "Build": "Xtend IVR",
         "GracePeriod": 30,
-        "MaxPorts": "M=1,*=1",
+        "MaxPorts": "M=4,*=4",
         "ValidStartTZ": 330,
         "ValidEndTZ": 330,
         "ValidCountries": 65
     },
     "Hardware": {
         "Analog": {
-            "82429": "1010000000000000"
+            "22352": "1111000000000000"
         }
     },
     "Centralization": {
         "LiveStatusUrl": "http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()",
-        "LiveStatusUrlInterval": "60",
+        "LiveStatusUrlInterval": "120",
         "UploadFileUrl": "http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()",
         "UploadFileUrlInterval": "120",
         "SettingsUrl": "http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings",
@@ -56,7 +56,7 @@
         "PhoneBookUrl": "http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()"
     },
     "Features": {
-        "Script": "Xtend Script"
+        "Script": "xtend"
     },
-    "DeviceStatus": "Testing"
+    "DeviceStatus": ""
 }

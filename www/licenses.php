@@ -97,10 +97,10 @@ $commentValue = isset($_POST['comment']) ? (string) $_POST['comment'] : '';
 $editId = $_GET['edit_id'] ?? null;
 $userRole = $_SESSION['role'] ?? 'Limited Access';
 $mode = $_GET['mode'] ?? '';
-$isViewMode = ($mode === 'view') || ($userRole !== 'Administrator');
+$isViewMode = ($mode === 'view') || ($userRole !== 'Administrator' && $userRole !== 'Limited Access');
 
-// Block POST requests for non-admins
-if ($method === 'POST' && $userRole !== 'Administrator') {
+// Block POST requests for unauthorized roles
+if ($method === 'POST' && $userRole !== 'Administrator' && $userRole !== 'Limited Access') {
   header('HTTP/1.1 403 Forbidden');
   die('Unauthorized access');
 }
@@ -115,6 +115,11 @@ if ($method === 'GET' && $editId) {
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
       if ($row) {
+        // Restrict Limited Access users from viewing Sharekhan licenses
+        if ($userRole === 'Limited Access' && $row['client_name'] === 'Sharekhan') {
+          die('Unauthorized access: You are not allowed to view or edit Sharekhan licenses.');
+        }
+
         $prefill = [
           // 'CreatedOn' => $row['created_on'],
           'CreatedOn' => $row['created_on']
@@ -123,6 +128,7 @@ if ($method === 'GET' && $editId) {
           'ClientName' => $row['client_name'],
           'LocationName' => $row['location_name'],
           'LocationCode' => $row['location_code'],
+          'BoardType' => $row['board_type'],
           'Licensee' => [
             'Name' => $row['licensee_name'],
             'Distributor' => $row['licensee_distributor'],
@@ -151,6 +157,10 @@ if ($method === 'GET' && $editId) {
               'IP' => $row['system_ipsettings_ip'],
               'Gateway' => $row['system_ipsettings_gateway'],
               'Dns' => $row['system_ipsettings_dns'],
+            ],
+            'Passwords' => [
+              'System' => $row['system_passwords_system'],
+              'Web' => $row['system_passwords_web'],
             ],
           ],
           'Engine' => [
@@ -191,6 +201,8 @@ if ($method === 'GET' && $editId) {
           'DeviceStatus' => $row['device_status'],
         ];
         $commentValue = $row['comment'];
+
+
       }
     } catch (PDOException $e) {
       $errors[] = 'Database error: ' . $e->getMessage();
@@ -270,7 +282,7 @@ if ($method === 'POST' && $action === 'fetch_remote') {
 }
 
 // Build JSON directly from a fixed schema form
-function buildLicenseFromPost(array $post): array
+function buildLicenseFromPost(array $post, $db = null): array
 {
   $str = function ($v): string {
     return is_string($v) ? trim($v) : (string) $v;
@@ -282,6 +294,29 @@ function buildLicenseFromPost(array $post): array
     return $s === 'true' || $s === '1' || $s === 'yes';
     // Note: "No" will return false (which is correct)
   };
+
+  // Determine DeviceStatus
+  $deviceStatus = $str($post['DeviceStatus'] ?? '');
+  if ($deviceStatus === '' && $db !== null && !empty($post['edit_id'])) {
+    try {
+      // First try to get latest from history
+      $stmt = $db->prepare("SELECT status FROM device_status WHERE license_id = :id ORDER BY id DESC LIMIT 1");
+      $stmt->execute([':id' => $post['edit_id']]);
+      if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $deviceStatus = $row['status'];
+      } else {
+        // Fallback to current main table status
+        $stmt = $db->prepare("SELECT device_status FROM license_details WHERE id = :id");
+        $stmt->execute([':id' => $post['edit_id']]);
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+          $deviceStatus = $row['device_status'];
+        }
+      }
+    } catch (Exception $e) {
+      // Ignore DB errors during build, fallback to empty
+    }
+  }
+
   $license = [
     'CreatedOn' => $str($post['CreatedOn'] ?? ''),
     'Client' => [
@@ -347,7 +382,7 @@ function buildLicenseFromPost(array $post): array
     'Features' => [
       'Script' => $str($post['Features']['Script'] ?? ''),
     ],
-    'DeviceStatus' => $str($post['DeviceStatus'] ?? ''),
+    'DeviceStatus' => $deviceStatus,
   ];
 
   $devices = [
@@ -386,7 +421,9 @@ if ($method === 'POST' && $action === 'generate') {
 }
 
 if ($method === 'POST' && $action === 'send') {
-  $license = buildLicenseFromPost($_POST);
+  require_once('config/database.php');
+  $db = getDatabaseConnection();
+  $license = buildLicenseFromPost($_POST, $db);
   $encoded = json_encode($license, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
   $encoded = preg_replace('/_DUPLICATE_KEY_MARKER_\d+_\"/', '"', $encoded);
   // Write to a temp json file
@@ -457,6 +494,7 @@ if ($method === 'POST' && $action === 'send') {
           $client_name = $getPostVal('ClientName');
           $location_name = $getPostVal('LocationName');
           $location_code = $getPostVal('LocationCode');
+          $board_type = $getPostVal('BoardType', 'Lichee Pi');
           $licensee_name = $getNestedPostVal('Licensee', 'Name');
           $licensee_distributor = $getNestedPostVal('Licensee', 'Distributor');
           $licensee_dealer = $getNestedPostVal('Licensee', 'Dealer');
@@ -509,6 +547,7 @@ if ($method === 'POST' && $action === 'send') {
 
           $features_script = $getNestedPostVal('Features', 'Script');
           $device_status = $getPostVal('DeviceStatus');
+          $status_date_input = $getPostVal('StatusDate');
           $comment = $getPostVal('comment');
           $editId = $_POST['edit_id'] ?? '';
 
@@ -564,8 +603,9 @@ if ($method === 'POST' && $action === 'send') {
             // ':hardware_analog2303' => $hardware_analog2303,
             // ':hardware_analog2304' => $hardware_analog2304,
             ':features_script' => $features_script,
-            ':device_status' => $device_status,
-            ':comment' => $comment
+            ':device_status' => ($device_status !== '' ? $device_status : ($prefill['DeviceStatus'] ?? '')),
+            ':comment' => $comment,
+            ':board_type' => $board_type
           ];
 
           if ($editId) {
@@ -576,6 +616,7 @@ if ($method === 'POST' && $action === 'send') {
                               system_os = :system_os, system_isvm = :system_isvm, system_serialid = :system_serialid,
                               system_uniqueid = :system_uniqueid, system_build_type = :system_build_type,
                               system_debug = :system_debug, 
+                              board_type = :board_type,
                               system_ipsettings_type = :system_ipsettings_type, system_ipsettings_ip = :system_ipsettings_ip,
                               system_ipsettings_gateway = :system_ipsettings_gateway, system_ipsettings_dns = :system_ipsettings_dns,
                               system_passwords_system = :system_passwords_system, system_passwords_web = :system_passwords_web,
@@ -592,14 +633,37 @@ if ($method === 'POST' && $action === 'send') {
                               centralization_uploadfileurl = :centralization_uploadfileurl, centralization_uploadfileurlinterval = :centralization_uploadfileurlinterval,
                               centralization_settingsurl = :centralization_settingsurl, centralization_usertrunkmappingurl = :centralization_usertrunkmappingurl,
                               centralization_phonebookurl = :centralization_phonebookurl,
-                              features_script = :features_script, device_status = :device_status, comment = :comment
+                              features_script = :features_script, 
+                              device_status = :device_status, 
+                              comment = :comment
                           WHERE id = :id";
             $params[':id'] = $editId;
+
+            // Security check for Limited Access users during Edit
+            if ($userRole === 'Limited Access') {
+              // Check if the creating/updating to Sharekhan
+              if ($client_name === 'Sharekhan') {
+                throw new Exception("Unauthorized: You cannot set Client Name to Sharekhan.");
+              }
+
+              // If updating, check if the original record was Sharekhan (Double check)
+              $checkStmt = $db->prepare("SELECT client_name FROM license_details WHERE id = :id");
+              $checkStmt->execute([':id' => $editId]);
+              $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+              if ($existing && $existing['client_name'] === 'Sharekhan') {
+                throw new Exception("Unauthorized: You cannot edit Sharekhan licenses.");
+              }
+            }
           } else {
+            // Security check for Limited Access users during Create
+            if ($userRole === 'Limited Access' && $client_name === 'Sharekhan') {
+              throw new Exception("Unauthorized: You cannot create Sharekhan licenses.");
+            }
+
             $sql = "INSERT INTO license_details (
                               created_on, client_name, location_name, location_code, licensee_name, licensee_distributor, licensee_dealer, licensee_type, 
                               licensee_amctill, licensee_validtill, licensee_billno, system_type, system_os, 
-                              system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug, 
+                              system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug, board_type,
                               system_ipsettings_type, system_ipsettings_ip, system_ipsettings_gateway, system_ipsettings_dns,
                               system_passwords_system, system_passwords_web,
                               engine_build, 
@@ -610,7 +674,7 @@ if ($method === 'POST' && $action === 'send') {
                           ) VALUES (
                               :created_on, :client_name, :location_name, :location_code, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
                               :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
-                              :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug, 
+                              :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug, :board_type,
                               :system_ipsettings_type, :system_ipsettings_ip, :system_ipsettings_gateway, :system_ipsettings_dns,
                               :system_passwords_system, :system_passwords_web,
                               :engine_build,
@@ -644,17 +708,18 @@ if ($method === 'POST' && $action === 'send') {
             }
           }
 
-          // Insert into device_status table
-          if ($licenseId) {
+          // Insert into device_status table only if values are provided
+          // Insert into device_status table only if values are provided
+          if ($licenseId && !empty($device_status) && !empty($status_date_input)) {
             try {
               $statusStmt = $db->prepare("
-                INSERT INTO device_status (license_id, status, date, user) 
+                INSERT INTO device_status (`license_id`, `status`, `date`, `user`) 
                 VALUES (:license_id, :status, :date, :user)
               ");
               $statusStmt->execute([
                 ':license_id' => $licenseId,
                 ':status' => $device_status,
-                ':date' => date('Y-m-d H:i:s'),
+                ':date' => $status_date_input . ' ' . date('H:i:s'),
                 ':user' => $_SESSION['full_name'] ?? 'Unknown'
               ]);
             } catch (PDOException $e) {
@@ -793,6 +858,7 @@ header('Content-Type: text/html; charset=utf-8');
       'ClientName' => 'Sharekhan',
       'LocationName' => '',
       'LocationCode' => '',
+      'BoardType' => 'Lichee Pi',
       'Licensee' => [
         'Name' => 'Xtend Technologies Pvt. Ltd.',
         'Distributor' => '',
@@ -817,7 +883,7 @@ header('Content-Type: text/html; charset=utf-8');
           'Dns' => '8.8.8.8',
         ],
         'Passwords' => [
-          'System' => 'root',
+          'System' => 'Xtend123',
           'Web' => 'admin',
         ],
       ],
@@ -952,7 +1018,9 @@ header('Content-Type: text/html; charset=utf-8');
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
                 <?php $clientName = (string) $val(['ClientName'], $defaults['ClientName']); ?>
-                <option value="Sharekhan" <?php echo ($clientName === 'Sharekhan') ? 'selected' : ''; ?>>Sharekhan</option>
+                <?php if ($userRole !== 'Limited Access' || $clientName === 'Sharekhan'): ?>
+                  <option value="Sharekhan" <?php echo ($clientName === 'Sharekhan') ? 'selected' : ''; ?>>Sharekhan</option>
+                <?php endif; ?>
                 <option value="Other" <?php echo ($clientName === 'Other') ? 'selected' : ''; ?>>Other</option>
               </select>
             </div>
@@ -973,6 +1041,18 @@ header('Content-Type: text/html; charset=utf-8');
                 style="width:75%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">BoardType</label>
+              <select name="BoardType" required
+                style="width:75%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                <?php $boardType = (string) $val(['BoardType'], $defaults['BoardType']); ?>
+                <option value="Lichee Pi" <?php echo ($boardType === 'Lichee Pi') ? 'selected' : ''; ?>>Lichee Pi</option>
+                <option value="Tibbo" <?php echo ($boardType === 'Tibbo') ? 'selected' : ''; ?>>Tibbo</option>
+              </select>
             </div>
           </div>
         </div>
@@ -1106,11 +1186,24 @@ header('Content-Type: text/html; charset=utf-8');
             <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[SerialID]</label>
-              <input type="text" name="System[SerialID]" required
-                value="<?php echo h($val(['System', 'SerialID'], $defaults['System']['SerialID'])); ?>"
-                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
-                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
-                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+              <div style="position:relative;">
+                <input type="text" name="System[SerialID]" id="SystemSerialID" required
+                  value="<?php echo h($val(['System', 'SerialID'], $defaults['System']['SerialID'])); ?>"
+                  style="width:100%; padding:10px 36px 10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                  onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                  onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                <?php if (empty($editId)): ?>
+                  <span onclick="checkSerialID()" title="Check availability"
+                    style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:#3b82f6;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
+                      <path
+                        d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" />
+                    </svg>
+                  </span>
+                <?php endif; ?>
+              </div>
+              <div id="serialIdCheckResult" style="font-size:12px; margin-top:4px; display:none;"></div>
             </div>
             <div>
               <label
@@ -1485,25 +1578,29 @@ header('Content-Type: text/html; charset=utf-8');
           <div>
             <label
               style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">DeviceStatus</label>
-            <select name="DeviceStatus"
-              style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer; min-width:180px;"
-              onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
-              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
-              <?php $ds = (string) $val(['DeviceStatus'], $defaults['DeviceStatus']); ?>
-              <option value="Testing" <?php echo ($ds === 'Testing' || $ds === '') ? 'selected' : ''; ?>>Testing</option>
-              <option value="Ready For Dispatch" <?php echo ($ds === 'Ready For Dispatch') ? 'selected' : ''; ?>>Ready For
-                Dispatch</option>
-              <option value="Installed" <?php echo ($ds === 'Installed') ? 'selected' : ''; ?>>Installed</option>
-              <option value="Serviced" <?php echo ($ds === 'Serviced') ? 'selected' : ''; ?>>Serviced</option>
-              <option value="Replaced" <?php echo ($ds === 'Replaced') ? 'selected' : ''; ?>>Replaced</option>
-            </select>
+
+            <div style="display:flex; align-items:center; gap:8px;">
+              <select name="DeviceStatus" id="DeviceStatusSelect"
+                style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; min-width:180px;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                <option value="" selected>Select Status</option>
+                <option value="Testing">Testing</option>
+                <option value="Ready For Dispatch">Ready For Dispatch</option>
+                <option value="Installed">Installed</option>
+                <option value="Serviced">Serviced</option>
+                <option value="Replaced">Replaced</option>
+              </select>
+            </div>
           </div>
           <div>
             <label
               style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">StatusDate</label>
             <div style="display:flex; align-items:center; gap:8px;">
-              <input type="text" name="StatusDate" readonly value="<?php echo date('Y-m-d'); ?>"
-                style="width:120px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background-color: #f1f5f9; cursor: not-allowed;">
+              <input type="date" name="StatusDate" id="StatusDateInput" value=""
+                style="width:140px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
               <?php if ($editId): ?>
                 <div style="cursor:pointer; color:#64748b; display:flex; align-items:center;"
                   onclick="showDeviceStatusPopup()" title="View Device Status History">
@@ -1799,6 +1896,8 @@ header('Content-Type: text/html; charset=utf-8');
       }
     }
 
+
+
     document.addEventListener('DOMContentLoaded', function () {
       const isViewMode = <?php echo $isViewMode ? 'true' : 'false'; ?>;
 
@@ -1858,7 +1957,47 @@ header('Content-Type: text/html; charset=utf-8');
         });
       }
     }
-  );
+    );
+    function checkSerialID() {
+      const input = document.getElementById('SystemSerialID');
+      const resultDiv = document.getElementById('serialIdCheckResult');
+      const serialId = input.value.trim();
+
+      if (!serialId) {
+        alert('Please enter a Serial ID');
+        return;
+      }
+
+      resultDiv.style.display = 'none';
+      resultDiv.className = '';
+
+      fetch('api/check_serial.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ serial_id: serialId })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            resultDiv.style.display = 'block';
+            if (data.exists) {
+              resultDiv.style.color = '#ef4444';
+              resultDiv.textContent = 'Serial ID already exists.';
+            } else {
+              resultDiv.style.color = '#10b981';
+              resultDiv.textContent = 'Serial ID is available.';
+            }
+          } else {
+            alert('Error checking Serial ID: ' + (data.message || 'Unknown error'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while checking Serial ID');
+        });
+    }
   </script>
 </body>
 
