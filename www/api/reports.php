@@ -143,6 +143,13 @@ try {
     }
   }
 
+  // Filter by Device Status
+  $deviceStatusVal = isset($_GET['device_status_val']) ? trim($_GET['device_status_val']) : '';
+  if ($deviceStatusVal !== '') {
+    $whereConditions[] = "COALESCE((SELECT status FROM device_status WHERE license_id = license_details.id ORDER BY id DESC LIMIT 1), device_status) = :device_status_val";
+    $params[':device_status_val'] = $deviceStatusVal;
+  }
+
   // Restrict Limited Access users from viewing Sharekhan clients
   $userRole = isset($_SESSION['role']) ? $_SESSION['role'] : '';
   if ($userRole === 'Limited Access') {

@@ -110,6 +110,7 @@ try {
 
   // Comment
   $comment = getPostVal('comment');
+  $tested_by = getPostVal('TestedBy');
 
   // Prepare SQL statement
   $sql = "INSERT INTO license_details (
@@ -122,7 +123,8 @@ try {
         device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4,
         features_script, device_status,
         centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
-        comment
+        comment,
+        tested_by
     ) VALUES (
         :created_on,
         :client_name, :location_name, :location_code, :board_type,
@@ -133,7 +135,8 @@ try {
         :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,
         :features_script, :device_status,
         :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
-        :comment
+        :comment,
+        :tested_by
     )";
 
   $stmt = $db->prepare($sql);
@@ -183,7 +186,8 @@ try {
     ':centralization_settingsurl' => $centralization_settingsurl,
     ':centralization_usertrunkmappingurl' => $centralization_usertrunkmappingurl,
     ':centralization_phonebookurl' => $centralization_phonebookurl,
-    ':comment' => $comment
+    ':comment' => $comment,
+    ':tested_by' => $tested_by
   ]);
 
   // Insert device status log

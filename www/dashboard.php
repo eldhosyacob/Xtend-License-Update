@@ -67,7 +67,8 @@ if ($pdo) {
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-      <a href="users.php" class="stat-card stat-card-primary" style="text-decoration: none; color: inherit; display: block;">
+      <a href="users.php" class="stat-card stat-card-primary"
+        style="text-decoration: none; color: inherit; display: block;">
         <div class="stat-icon">
           <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor">
             <path
@@ -190,8 +191,9 @@ if ($pdo) {
                     </svg>
                   </div>
                   <div class="activity-content">
-                    <div class="activity-title">New user registered</div>
-                    <div class="activity-description"><?php echo htmlspecialchars($user['full_name']); ?> joined the system
+                    <div class="activity-title">User Logged In</div>
+                    <div class="activity-description"><?php echo htmlspecialchars($user['full_name']); ?> logged in the
+                      system
                     </div>
                   </div>
                   <div class="activity-time"><?php echo date('M j', strtotime($user['created_at'])); ?></div>

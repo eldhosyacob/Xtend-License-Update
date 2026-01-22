@@ -28,10 +28,21 @@ require_once('config/auth_check.php');
           <option value="serial_id">Search Serial ID</option>
           <option value="unique_id">Search Unique ID</option>
           <option value="location_code">Search Location Code</option>
+          <option value="device_status">Search Device Status</option>
           <option value="date_range">Search Date Range</option>
         </select>
 
         <input type="text" id="searchValue" placeholder="Search Serial ID" class="search-input">
+
+        <select id="searchDeviceStatus" class="search-input" style="display: none; width: 200px; cursor: pointer;">
+          <option value="">Select Status</option>
+          <option value="Testing">Testing</option>
+          <option value="Ready For Dispatch">Ready For Dispatch</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Installed">Installed</option>
+          <option value="Serviced">Serviced</option>
+          <option value="Replaced">Replaced</option>
+        </select>
 
         <div id="dateRangeInputs" style="display: none; gap: 8px; align-items: center;">
           <input type="date" id="searchFromDate" class="search-input" style="width: 140px;">
@@ -100,12 +111,28 @@ require_once('config/auth_check.php');
       </div>
 
       <!-- Pagination Controls -->
-      <div class="pagination-container" id="paginationControls" style="display: none;">
-        <div class="pagination-info">
+      <div class="pagination-container" id="paginationControls"
+        style="display: none; position: relative; justify-content: center;">
+        <div class="pagination-info" style="position: absolute; left: 32px;">
           Showing <span id="startRange">0</span> to <span id="endRange">0</span> of <span id="totalRecords">0</span>
           entries
         </div>
-        <div class="pagination-buttons">
+
+        <div style="flex: 1; display: flex; justify-content: center;">
+          <button id="exportBtn" class="btn-search"
+            style="padding: 8px 16px; height: 30px; display: flex; align-items: center; gap: 6px;"
+            onclick="exportReports()" title="Export">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path
+                d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+              <path
+                d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+            </svg>
+
+          </button>
+        </div>
+
+        <div class="pagination-buttons" style="position: absolute; right: 32px;">
           <button id="prevBtn" onclick="changePage(-1)" disabled>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
               <path fill-rule="evenodd"
@@ -149,14 +176,22 @@ require_once('config/auth_check.php');
       searchType.addEventListener('change', function () {
         // Reset values
         searchValue.value = '';
+        document.getElementById('searchDeviceStatus').value = '';
 
-        if (this.value === 'date_range') {
-          searchValue.style.display = 'none';
+        const type = this.value;
+        const deviceStatusSelect = document.getElementById('searchDeviceStatus');
+
+        // Hide all inputs first
+        searchValue.style.display = 'none';
+        dateRangeInputs.style.display = 'none';
+        deviceStatusSelect.style.display = 'none';
+
+        if (type === 'date_range') {
           dateRangeInputs.style.display = 'flex';
+        } else if (type === 'device_status') {
+          deviceStatusSelect.style.display = 'block';
         } else {
           searchValue.style.display = 'block';
-          dateRangeInputs.style.display = 'none';
-
           // Update placeholder based on selection
           const selectedOption = this.options[this.selectedIndex].text;
           searchValue.placeholder = selectedOption;
@@ -230,6 +265,40 @@ require_once('config/auth_check.php');
       fetchReports(currentPage);
     }
 
+    function exportReports() {
+      const searchType = document.getElementById('searchType').value;
+      const searchValue = document.getElementById('searchValue').value;
+      const fromDate = document.getElementById('searchFromDate').value;
+      const toDate = document.getElementById('searchToDate').value;
+      const deviceStatusVal = document.getElementById('searchDeviceStatus').value;
+
+      let url = `api/export_reports.php?_t=${new Date().getTime()}`;
+
+      if (searchType === 'serial_id') {
+        url += `&serial_id=${encodeURIComponent(searchValue)}`;
+      } else if (searchType === 'unique_id') {
+        url += `&unique_id=${encodeURIComponent(searchValue)}`;
+      } else if (searchType === 'location_code') {
+        url += `&location_code=${encodeURIComponent(searchValue)}`;
+      } else if (searchType === 'device_status') {
+        if (deviceStatusVal) {
+          url += `&device_status_val=${encodeURIComponent(deviceStatusVal)}`;
+        }
+      } else if (searchType === 'date_range' && fromDate && toDate) {
+        url += `&from_date=${encodeURIComponent(fromDate)}&to_date=${encodeURIComponent(toDate)}`;
+      }
+
+      if (currentStatus) {
+        url += `&status=${encodeURIComponent(currentStatus)}`;
+      }
+
+      if (currentClient) {
+        url += `&client_name=${encodeURIComponent(currentClient)}`;
+      }
+
+      window.location.href = url;
+    }
+
     async function fetchReports(page) {
       try {
         const tbody = document.querySelector('#reportsTable tbody');
@@ -242,6 +311,8 @@ require_once('config/auth_check.php');
         const fromDate = document.getElementById('searchFromDate').value;
         const toDate = document.getElementById('searchToDate').value;
 
+        const deviceStatusVal = document.getElementById('searchDeviceStatus').value;
+
         let url = `api/reports.php?page=${page}&limit=${limit}&_t=${new Date().getTime()}`;
 
         if (searchType === 'serial_id') {
@@ -250,6 +321,10 @@ require_once('config/auth_check.php');
           url += `&unique_id=${encodeURIComponent(searchValue)}`;
         } else if (searchType === 'location_code') {
           url += `&location_code=${encodeURIComponent(searchValue)}`;
+        } else if (searchType === 'device_status') {
+          if (deviceStatusVal) {
+            url += `&device_status_val=${encodeURIComponent(deviceStatusVal)}`;
+          }
         } else if (searchType === 'date_range' && fromDate && toDate) {
           url += `&from_date=${encodeURIComponent(fromDate)}&to_date=${encodeURIComponent(toDate)}`;
         }

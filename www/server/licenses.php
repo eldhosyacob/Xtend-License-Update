@@ -94,7 +94,6 @@ $rawJson = '';  // no longer used
 $prefill = null; // holds fetched JSON to prefill the form
 $submitResult = null; // holds submission result data
 $commentValue = isset($_POST['comment']) ? (string) $_POST['comment'] : '';
-$testedByValue = isset($_POST['TestedBy']) ? (string) $_POST['TestedBy'] : '';
 $editId = $_GET['edit_id'] ?? null;
 $userRole = $_SESSION['role'] ?? 'Limited Access';
 $mode = $_GET['mode'] ?? '';
@@ -202,7 +201,6 @@ if ($method === 'GET' && $editId) {
           'DeviceStatus' => $row['device_status'],
         ];
         $commentValue = $row['comment'];
-        $testedByValue = $row['tested_by'] ?? '';
 
 
       }
@@ -551,7 +549,6 @@ if ($method === 'POST' && $action === 'send') {
           $device_status = $getPostVal('DeviceStatus');
           $status_date_input = $getPostVal('StatusDate');
           $comment = $getPostVal('comment');
-          $tested_by = $getPostVal('TestedBy');
           $editId = $_POST['edit_id'] ?? '';
 
           $params = [
@@ -608,7 +605,6 @@ if ($method === 'POST' && $action === 'send') {
             ':features_script' => $features_script,
             ':device_status' => ($device_status !== '' ? $device_status : ($prefill['DeviceStatus'] ?? '')),
             ':comment' => $comment,
-            ':tested_by' => $tested_by,
             ':board_type' => $board_type
           ];
 
@@ -639,8 +635,7 @@ if ($method === 'POST' && $action === 'send') {
                               centralization_phonebookurl = :centralization_phonebookurl,
                               features_script = :features_script, 
                               device_status = :device_status, 
-                              comment = :comment,
-                              tested_by = :tested_by
+                              comment = :comment
                           WHERE id = :id";
             $params[':id'] = $editId;
 
@@ -675,7 +670,7 @@ if ($method === 'POST' && $action === 'send') {
                               engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, 
                               engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4, 
                               centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
-                              features_script, device_status, comment, tested_by
+                              features_script, device_status, comment
                           ) VALUES (
                               :created_on, :client_name, :location_name, :location_code, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
                               :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
@@ -686,7 +681,7 @@ if ($method === 'POST' && $action === 'send') {
                               :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz,
                               :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4, 
                               :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
-                              :features_script, :device_status, :comment, :tested_by
+                              :features_script, :device_status, :comment
                           )";
           }
 
@@ -1592,7 +1587,6 @@ header('Content-Type: text/html; charset=utf-8');
                 <option value="" selected>Select Status</option>
                 <option value="Testing">Testing</option>
                 <option value="Ready For Dispatch">Ready For Dispatch</option>
-                <option value="In Progress">In Progress</option>
                 <option value="Installed">Installed</option>
                 <option value="Serviced">Serviced</option>
                 <option value="Replaced">Replaced</option>
@@ -1641,22 +1635,12 @@ header('Content-Type: text/html; charset=utf-8');
           </div>
         </div>
 
-        <!-- TestedBy Section -->
-        <div style="margin-bottom:24px;">
-          <label
-            style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">TestedBy</label>
-          <input type="text" name="TestedBy" value="<?php echo h($testedByValue); ?>"
-            style="width:25%; max-width:500px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
-            onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
-            onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
-        </div>
-
         <!-- Action Buttons -->
         <?php if (!$isViewMode): ?>
           <div
             style="margin-top:24px; padding-top:20px; border-top:2px solid #f1f5f9; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
             <button type="submit" name="action" class="btn-submit"
-              value="send"><?php echo $editId ? 'Update License' : 'Submit'; ?></button>
+              value="send"><?php echo $editId ? 'Update' : 'Submit'; ?></button>
           </div>
         <?php endif; ?>
       </form>
