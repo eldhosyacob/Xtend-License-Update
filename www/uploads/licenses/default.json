@@ -31,7 +31,9 @@
         "Passwords": {
             "System": "Xtend123",
             "Web": "Xtend123"
-        }
+        },
+        "FetchUpdates": 1,
+        "InstallUpdates": 1
     },
     "Engine": {
         "Build": "Xtend IVR",
@@ -43,7 +45,12 @@
     },
     "Hardware": {
         "Analog": {
-            "82429": "1000000000000000"
+            "82429": "1000000000000000",
+            "222222": "1111111111111111",
+            "33333": "1111111111111111",
+            "44445": "1111111111111111",
+            "55555": "1111000000000000",
+            "66666": "1000000000000000"
         }
     },
     "Centralization": {
@@ -58,5 +65,5 @@
     "Features": {
         "Script": "Xtend Script"
     },
-    "DeviceStatus": "Installed"
+    "DeviceStatus": "On Hold"
 }

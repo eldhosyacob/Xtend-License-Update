@@ -339,6 +339,22 @@ require_once('config/auth_check.php');
                                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[Passwords][Web]</label>
                             <input type="text" name="System[Passwords][Web]" disabled class="form-input">
                         </div>
+                        <div>
+                            <label
+                                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[FetchUpdates]</label>
+                            <select name="System[FetchUpdates]" disabled class="form-input">
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[InstallUpdates]</label>
+                            <select name="System[InstallUpdates]" disabled class="form-input">
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -435,6 +451,30 @@ require_once('config/auth_check.php');
                                 4</label>
                             <input type="text" name="ports_enabled_deviceid4" disabled class="form-input">
                         </div>
+                        <div>
+                            <label
+                                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device
+                                ID 5</label>
+                            <input type="number" name="device_id5" disabled class="form-input">
+                        </div>
+                        <div>
+                            <label
+                                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">PortsEnabled
+                                5</label>
+                            <input type="text" name="ports_enabled_deviceid5" disabled class="form-input">
+                        </div>
+                        <div>
+                            <label
+                                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device
+                                ID 6</label>
+                            <input type="number" name="device_id6" disabled class="form-input">
+                        </div>
+                        <div>
+                            <label
+                                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">PortsEnabled
+                                6</label>
+                            <input type="text" name="ports_enabled_deviceid6" disabled class="form-input">
+                        </div>
                     </div>
                 </div>
 
@@ -508,6 +548,7 @@ require_once('config/auth_check.php');
                             <option value="">Select Status</option>
                             <option value="Testing">Testing</option>
                             <option value="Ready For Dispatch">Ready For Dispatch</option>
+                            <option value="On Hold">On Hold</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Installed">Installed</option>
                             <option value="Serviced">Serviced</option>
@@ -799,6 +840,8 @@ require_once('config/auth_check.php');
 
             $('input[name="System[Passwords][System]"]').val(data.system_passwords_system);
             $('input[name="System[Passwords][Web]"]').val(data.system_passwords_web);
+            $('select[name="System[FetchUpdates]"]').val(data.fetch_updates !== undefined ? data.fetch_updates : 0);
+            $('select[name="System[InstallUpdates]"]').val(data.install_updates !== undefined ? data.install_updates : 0);
 
             $('input[name="Engine[Build]"]').val(data.engine_build);
             $('input[name="Engine[GracePeriod]"]').val(data.engine_graceperiod);
@@ -815,6 +858,10 @@ require_once('config/auth_check.php');
             $('input[name="ports_enabled_deviceid3"]').val(data.ports_enabled_deviceid3);
             $('input[name="device_id4"]').val(data.device_id4);
             $('input[name="ports_enabled_deviceid4"]').val(data.ports_enabled_deviceid4);
+            $('input[name="device_id5"]').val(data.device_id5);
+            $('input[name="ports_enabled_deviceid5"]').val(data.ports_enabled_deviceid5);
+            $('input[name="device_id6"]').val(data.device_id6);
+            $('input[name="ports_enabled_deviceid6"]').val(data.ports_enabled_deviceid6);
 
             $('input[name="Centralization[LiveStatusUrl]"]').val(data.centralization_livestatusurl);
             $('input[name="Centralization[LiveStatusUrlInterval]"]').val(data.centralization_livestatusurlinterval);

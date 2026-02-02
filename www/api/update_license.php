@@ -73,6 +73,8 @@ try {
   $system_debug = getNestedPostVal('System', 'Debug', 0);
   $system_passwords_system = isset($_POST['System']['Passwords']['System']) ? trim($_POST['System']['Passwords']['System']) : '';
   $system_passwords_web = isset($_POST['System']['Passwords']['Web']) ? trim($_POST['System']['Passwords']['Web']) : '';
+  $fetch_updates = isset($_POST['System']['FetchUpdates']) ? (int) $_POST['System']['FetchUpdates'] : 0;
+  $install_updates = isset($_POST['System']['InstallUpdates']) ? (int) $_POST['System']['InstallUpdates'] : 0;
 
   // Engine
   $engine_build = getNestedPostVal('Engine', 'Build');
@@ -91,6 +93,10 @@ try {
   $ports_enabled_deviceid3 = getPostVal('ports_enabled_deviceid3');
   $device_id4 = getPostVal('device_id4');
   $ports_enabled_deviceid4 = getPostVal('ports_enabled_deviceid4');
+  $device_id5 = getPostVal('device_id5');
+  $ports_enabled_deviceid5 = getPostVal('ports_enabled_deviceid5');
+  $device_id6 = getPostVal('device_id6');
+  $ports_enabled_deviceid6 = getPostVal('ports_enabled_deviceid6');
 
   // Features
   $features_script = getNestedPostVal('Features', 'Script');
@@ -118,9 +124,9 @@ try {
         client_name, location_name, location_code, board_type,
         licensee_name, licensee_distributor, licensee_dealer, licensee_type, licensee_amctill, licensee_validtill, licensee_billno,
         system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug,
-        system_passwords_system, system_passwords_web,
+        system_passwords_system, system_passwords_web, fetch_updates, install_updates,
         engine_build, engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, engine_validcountries,
-        device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4,
+        device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4,device_id5, ports_enabled_deviceid5, device_id6, ports_enabled_deviceid6,
         features_script, device_status,
         centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
         comment,
@@ -130,9 +136,9 @@ try {
         :client_name, :location_name, :location_code, :board_type,
         :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type, :licensee_amctill, :licensee_validtill, :licensee_billno,
         :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug,
-        :system_passwords_system, :system_passwords_web,
+        :system_passwords_system, :system_passwords_web, :fetch_updates, :install_updates,
         :engine_build, :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz, :engine_validcountries,
-        :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,
+        :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,:device_id5, :ports_enabled_deviceid5, :device_id6, :ports_enabled_deviceid6,
         :features_script, :device_status,
         :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
         :comment,
@@ -163,6 +169,8 @@ try {
     ':system_debug' => $system_debug,
     ':system_passwords_system' => $system_passwords_system,
     ':system_passwords_web' => $system_passwords_web,
+    ':fetch_updates' => $fetch_updates,
+    ':install_updates' => $install_updates,
     ':engine_build' => $engine_build,
     ':engine_graceperiod' => $engine_graceperiod,
     ':engine_maxports' => $engine_maxports,
@@ -177,6 +185,10 @@ try {
     ':ports_enabled_deviceid3' => $ports_enabled_deviceid3,
     ':device_id4' => $device_id4,
     ':ports_enabled_deviceid4' => $ports_enabled_deviceid4,
+    ':device_id5' => $device_id5,
+    ':ports_enabled_deviceid5' => $ports_enabled_deviceid5,
+    ':device_id6' => $device_id6,
+    ':ports_enabled_deviceid6' => $ports_enabled_deviceid6,
     ':features_script' => $features_script,
     ':device_status' => $device_status,
     ':centralization_livestatusurl' => $centralization_livestatusurl,

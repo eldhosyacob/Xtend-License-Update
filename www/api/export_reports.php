@@ -94,7 +94,8 @@ try {
 
     // Fetch data for export
     $sql = "SELECT created_on, client_name, location_name, location_code, board_type, licensee_validtill, system_serialid, system_uniqueid, engine_maxports as total_ports, 
-            device_id1, device_id2, device_id3, device_id4
+            device_id1, device_id2, device_id3, device_id4,
+            ports_enabled_deviceid1, ports_enabled_deviceid2, ports_enabled_deviceid3, ports_enabled_deviceid4
             FROM license_details 
             $whereSql
             ORDER BY id DESC";
@@ -107,7 +108,7 @@ try {
 
     // Set headers for CSV download
     header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="report_export_' . date('Y-m-d_H-i-s') . '.csv"');
+    header('Content-Disposition: attachment; filename="License_Export_' . date('Y-m-d_H-i-s') . '.csv"');
     header('Pragma: no-cache');
     header('Expires: 0');
 
@@ -125,6 +126,7 @@ try {
         'Serial ID',
         'Unique ID',
         'Total Ports',
+        'Ports Enabled',
         'Device ID'
     ]);
 
@@ -148,6 +150,13 @@ try {
             $totalPorts = $matches[1];
         }
 
+        // Calculate Ports Enabled (count of '1's in ports_enabled_deviceid columns)
+        $portsEnabledCount = 0;
+        $portsEnabledCount += substr_count((string) $row['ports_enabled_deviceid1'], '1');
+        $portsEnabledCount += substr_count((string) $row['ports_enabled_deviceid2'], '1');
+        $portsEnabledCount += substr_count((string) $row['ports_enabled_deviceid3'], '1');
+        $portsEnabledCount += substr_count((string) $row['ports_enabled_deviceid4'], '1');
+
         fputcsv($output, [
             $cnt++,
             $row['created_on'],
@@ -159,6 +168,7 @@ try {
             $row['system_serialid'],
             $row['system_uniqueid'],
             $totalPorts,
+            $portsEnabledCount,
             $deviceIdStr
         ]);
     }

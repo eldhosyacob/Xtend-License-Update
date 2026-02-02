@@ -38,6 +38,7 @@ require_once('config/auth_check.php');
           <option value="">Select Status</option>
           <option value="Testing">Testing</option>
           <option value="Ready For Dispatch">Ready For Dispatch</option>
+          <option value="On Hold">On Hold</option>
           <option value="In Progress">In Progress</option>
           <option value="Installed">Installed</option>
           <option value="Serviced">Serviced</option>
@@ -200,6 +201,18 @@ require_once('config/auth_check.php');
 
       fetchReports(currentPage);
       initScrollButtons();
+
+      // Add Enter key listeners for search inputs
+      const handleEnterKey = (event) => {
+        if (event.key === 'Enter') {
+          searchReports();
+        }
+      };
+
+      searchValue.addEventListener('keydown', handleEnterKey);
+      document.getElementById('searchFromDate').addEventListener('keydown', handleEnterKey);
+      document.getElementById('searchToDate').addEventListener('keydown', handleEnterKey);
+      document.getElementById('searchDeviceStatus').addEventListener('keydown', handleEnterKey);
     });
 
     function initScrollButtons() {

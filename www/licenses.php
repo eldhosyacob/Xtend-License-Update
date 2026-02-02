@@ -163,6 +163,8 @@ if ($method === 'GET' && $editId) {
               'System' => $row['system_passwords_system'],
               'Web' => $row['system_passwords_web'],
             ],
+            'FetchUpdates' => $row['fetch_updates'],
+            'InstallUpdates' => $row['install_updates'],
           ],
           'Engine' => [
             'Build' => $row['engine_build'],
@@ -196,6 +198,10 @@ if ($method === 'GET' && $editId) {
           'ports_enabled_deviceid3' => $row['ports_enabled_deviceid3'],
           'device_id4' => $row['device_id4'],
           'ports_enabled_deviceid4' => $row['ports_enabled_deviceid4'],
+          'device_id5' => $row['device_id5'],
+          'ports_enabled_deviceid5' => $row['ports_enabled_deviceid5'],
+          'device_id6' => $row['device_id6'],
+          'ports_enabled_deviceid6' => $row['ports_enabled_deviceid6'],
           'Features' => [
             'Script' => $row['features_script'],
           ],
@@ -353,6 +359,8 @@ function buildLicenseFromPost(array $post, $db = null): array
         'System' => $str($post['System']['Passwords']['System'] ?? ''),
         'Web' => $str($post['System']['Passwords']['Web'] ?? ''),
       ],
+      'FetchUpdates' => (int) ($post['System']['FetchUpdates'] ?? 0),
+      'InstallUpdates' => (int) ($post['System']['InstallUpdates'] ?? 0),
     ],
     'Engine' => [
       'Build' => $str($post['Engine']['Build'] ?? ''),
@@ -392,6 +400,8 @@ function buildLicenseFromPost(array $post, $db = null): array
     ['id' => $str($post['device_id2'] ?? ''), 'ports' => $str($post['ports_enabled_deviceid2'] ?? '')],
     ['id' => $str($post['device_id3'] ?? ''), 'ports' => $str($post['ports_enabled_deviceid3'] ?? '')],
     ['id' => $str($post['device_id4'] ?? ''), 'ports' => $str($post['ports_enabled_deviceid4'] ?? '')],
+    ['id' => $str($post['device_id5'] ?? ''), 'ports' => $str($post['ports_enabled_deviceid5'] ?? '')],
+    ['id' => $str($post['device_id6'] ?? ''), 'ports' => $str($post['ports_enabled_deviceid6'] ?? '')],
   ];
 
   foreach ($devices as $d) {
@@ -528,6 +538,10 @@ if ($method === 'POST' && $action === 'send') {
           $ports_enabled_deviceid3 = $getPostVal('ports_enabled_deviceid3');
           $device_id4 = $getPostVal('device_id4');
           $ports_enabled_deviceid4 = $getPostVal('ports_enabled_deviceid4');
+          $device_id5 = $getPostVal('device_id5');
+          $ports_enabled_deviceid5 = $getPostVal('ports_enabled_deviceid5');
+          $device_id6 = $getPostVal('device_id6');
+          $ports_enabled_deviceid6 = $getPostVal('ports_enabled_deviceid6');
 
           // New System IPSettings fields
           // Need to fix retrieval for deeper nested keys or just access $_POST directly
@@ -537,6 +551,8 @@ if ($method === 'POST' && $action === 'send') {
           $system_ipsettings_dns = ($system_ipsettings_type === 'DHCP') ? '' : (isset($_POST['System']['IPSettings']['Dns']) ? trim($_POST['System']['IPSettings']['Dns']) : '');
           $system_passwords_system = isset($_POST['System']['Passwords']['System']) ? trim($_POST['System']['Passwords']['System']) : '';
           $system_passwords_web = isset($_POST['System']['Passwords']['Web']) ? trim($_POST['System']['Passwords']['Web']) : '';
+          $fetch_updates = isset($_POST['System']['FetchUpdates']) ? (int) $_POST['System']['FetchUpdates'] : 0;
+          $install_updates = isset($_POST['System']['InstallUpdates']) ? (int) $_POST['System']['InstallUpdates'] : 0;
 
           // New Centralization fields
           $centralization_livestatusurl = $license['Centralization']['LiveStatusUrl'];
@@ -587,6 +603,10 @@ if ($method === 'POST' && $action === 'send') {
             ':ports_enabled_deviceid3' => $ports_enabled_deviceid3,
             ':device_id4' => $device_id4,
             ':ports_enabled_deviceid4' => $ports_enabled_deviceid4,
+            ':device_id5' => $device_id5,
+            ':ports_enabled_deviceid5' => $ports_enabled_deviceid5,
+            ':device_id6' => $device_id6,
+            ':ports_enabled_deviceid6' => $ports_enabled_deviceid6,
 
             ':system_ipsettings_type' => $system_ipsettings_type,
             ':system_ipsettings_ip' => $system_ipsettings_ip,
@@ -594,6 +614,8 @@ if ($method === 'POST' && $action === 'send') {
             ':system_ipsettings_dns' => $system_ipsettings_dns,
             ':system_passwords_system' => $system_passwords_system,
             ':system_passwords_web' => $system_passwords_web,
+            ':fetch_updates' => $fetch_updates,
+            ':install_updates' => $install_updates,
 
             ':centralization_livestatusurl' => $centralization_livestatusurl,
             ':centralization_livestatusurlinterval' => $centralization_livestatusurlinterval,
@@ -623,7 +645,8 @@ if ($method === 'POST' && $action === 'send') {
                               board_type = :board_type,
                               system_ipsettings_type = :system_ipsettings_type, system_ipsettings_ip = :system_ipsettings_ip,
                               system_ipsettings_gateway = :system_ipsettings_gateway, system_ipsettings_dns = :system_ipsettings_dns,
-                              system_passwords_system = :system_passwords_system, system_passwords_web = :system_passwords_web,
+                              system_passwords_system = :system_passwords_system, system_passwords_web = :system_passwords_web, 
+                              fetch_updates = :fetch_updates, install_updates = :install_updates,
                               engine_build = :engine_build,
                               engine_graceperiod = :engine_graceperiod, engine_maxports = :engine_maxports,
 
@@ -633,6 +656,8 @@ if ($method === 'POST' && $action === 'send') {
                               device_id2 = :device_id2, ports_enabled_deviceid2 = :ports_enabled_deviceid2,
                               device_id3 = :device_id3, ports_enabled_deviceid3 = :ports_enabled_deviceid3,
                               device_id4 = :device_id4, ports_enabled_deviceid4 = :ports_enabled_deviceid4,
+                              device_id5 = :device_id5, ports_enabled_deviceid5 = :ports_enabled_deviceid5,
+                              device_id6 = :device_id6, ports_enabled_deviceid6 = :ports_enabled_deviceid6,
                               centralization_livestatusurl = :centralization_livestatusurl, centralization_livestatusurlinterval = :centralization_livestatusurlinterval,
                               centralization_uploadfileurl = :centralization_uploadfileurl, centralization_uploadfileurlinterval = :centralization_uploadfileurlinterval,
                               centralization_settingsurl = :centralization_settingsurl, centralization_usertrunkmappingurl = :centralization_usertrunkmappingurl,
@@ -670,10 +695,10 @@ if ($method === 'POST' && $action === 'send') {
                               licensee_amctill, licensee_validtill, licensee_billno, system_type, system_os, 
                               system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug, board_type,
                               system_ipsettings_type, system_ipsettings_ip, system_ipsettings_gateway, system_ipsettings_dns,
-                              system_passwords_system, system_passwords_web,
+                              system_passwords_system, system_passwords_web, fetch_updates, install_updates,
                               engine_build, 
                               engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, 
-                              engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4, 
+                              engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4, device_id5, ports_enabled_deviceid5, device_id6, ports_enabled_deviceid6,
                               centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
                               features_script, device_status, comment, tested_by
                           ) VALUES (
@@ -681,10 +706,10 @@ if ($method === 'POST' && $action === 'send') {
                               :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
                               :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug, :board_type,
                               :system_ipsettings_type, :system_ipsettings_ip, :system_ipsettings_gateway, :system_ipsettings_dns,
-                              :system_passwords_system, :system_passwords_web,
+                              :system_passwords_system, :system_passwords_web, :fetch_updates, :install_updates,
                               :engine_build,
                               :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz,
-                              :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4, 
+                              :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,:device_id5, :ports_enabled_deviceid5, :device_id6, :ports_enabled_deviceid6,
                               :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
                               :features_script, :device_status, :comment, :tested_by
                           )";
@@ -866,12 +891,12 @@ header('Content-Type: text/html; charset=utf-8');
       'BoardType' => 'Lichee Pi',
       'Licensee' => [
         'Name' => 'Xtend Technologies Pvt. Ltd.',
-        'Distributor' => '',
-        'Dealer' => '',
+        'Distributor' => 'Xtend Technologies Pvt. Ltd.',
+        'Dealer' => 'SHAREKHAN-',
         'Type' => 'Rental',
         'AMCTill' => date('Ymd', strtotime($createdOn . ' +1 year')),
-        'ValidTill' => '',
-        'BillNo' => 'XT25-1002',
+        'ValidTill' => '20260401',
+        'BillNo' => 'NA',
       ],
       'System' => [
         'Type' => 'Standalone',
@@ -882,7 +907,7 @@ header('Content-Type: text/html; charset=utf-8');
         'BuildType' => 'sharekhan',
         'Debug' => 0,
         'IPSettings' => [
-          'Type' => 'Static',
+          'Type' => 'DHCP',
           'IP' => '10.20.40.121/8',
           'Gateway' => '10.100.100.1',
           'Dns' => '8.8.8.8',
@@ -946,6 +971,10 @@ header('Content-Type: text/html; charset=utf-8');
     $p3_val = '';
     $d4_val = '';
     $p4_val = '';
+    $d5_val = '';
+    $p5_val = '';
+    $d6_val = '';
+    $p6_val = '';
 
     // Override from prefill (DB or Remote)
     if (is_array($prefill)) {
@@ -966,6 +995,14 @@ header('Content-Type: text/html; charset=utf-8');
         $d4_val = $prefill['device_id4'];
       if (isset($prefill['ports_enabled_deviceid4']))
         $p4_val = $prefill['ports_enabled_deviceid4'];
+      if (isset($prefill['device_id5']))
+        $d5_val = $prefill['device_id5'];
+      if (isset($prefill['ports_enabled_deviceid5']))
+        $p5_val = $prefill['ports_enabled_deviceid5'];
+      if (isset($prefill['device_id6']))
+        $d6_val = $prefill['device_id6'];
+      if (isset($prefill['ports_enabled_deviceid6']))
+        $p6_val = $prefill['ports_enabled_deviceid6'];
 
       // Fallback or override from Hardware structure (e.g. remote fetch calls or legacy structure)
       // If we fetched from remote JSON, we might have keys in Hardware->Analog
@@ -1302,6 +1339,30 @@ header('Content-Type: text/html; charset=utf-8');
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[FetchUpdates]</label>
+              <select name="System[FetchUpdates]" required
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                <?php $fetchUpd = (int) $val(['System', 'FetchUpdates'], $defaults['System']['FetchUpdates'] ?? 0); ?>
+                <option value="0" <?php echo ($fetchUpd === 0) ? 'selected' : ''; ?>>0</option>
+                <option value="1" <?php echo ($fetchUpd === 1) ? 'selected' : ''; ?>>1</option>
+              </select>
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[InstallUpdates]</label>
+              <select name="System[InstallUpdates]" required
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                <?php $installUpd = (int) $val(['System', 'InstallUpdates'], $defaults['System']['InstallUpdates'] ?? 0); ?>
+                <option value="0" <?php echo ($installUpd === 0) ? 'selected' : ''; ?>>0</option>
+                <option value="1" <?php echo ($installUpd === 1) ? 'selected' : ''; ?>>1</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -1468,6 +1529,54 @@ header('Content-Type: text/html; charset=utf-8');
                 Must be exactly 16 characters of 0 and 1.
               </div>
             </div>
+
+            <!-- Device 5 -->
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID
+                5</label>
+              <input type="number" name="device_id5" value="<?php echo h($d5_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID 5
+                [PortsEnabled]</label>
+              <input type="text" maxlength="16" name="ports_enabled_deviceid5" id="ports_enabled_deviceid5"
+                value="<?php echo h($p5_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="validatePorts(this); this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+              <div id="error_ports_enabled_deviceid5"
+                style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
+                Must be exactly 16 characters of 0 and 1.
+              </div>
+            </div>
+
+            <!-- Device 6 -->
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID
+                6</label>
+              <input type="number" name="device_id6" value="<?php echo h($d6_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID 6
+                [PortsEnabled]</label>
+              <input type="text" maxlength="16" name="ports_enabled_deviceid6" id="ports_enabled_deviceid6"
+                value="<?php echo h($p6_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="validatePorts(this); this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+              <div id="error_ports_enabled_deviceid6"
+                style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
+                Must be exactly 16 characters of 0 and 1.
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1592,6 +1701,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <option value="" selected>Select Status</option>
                 <option value="Testing">Testing</option>
                 <option value="Ready For Dispatch">Ready For Dispatch</option>
+                <option value="On Hold">On Hold</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Installed">Installed</option>
                 <option value="Serviced">Serviced</option>
@@ -1908,6 +2018,11 @@ header('Content-Type: text/html; charset=utf-8');
           ipInput.style.backgroundColor = '';
           gatewayInput.style.backgroundColor = '';
           dnsInput.style.backgroundColor = '';
+
+          // Auto-fill defaults if empty when switching to Static
+          if (ipInput.value === '') ipInput.value = '10.20.40.121/8';
+          if (gatewayInput.value === '') gatewayInput.value = '10.100.100.1';
+          if (dnsInput.value === '') dnsInput.value = '8.8.8.8';
         }
       }
     }

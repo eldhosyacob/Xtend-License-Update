@@ -100,18 +100,18 @@ try {
   $params = [];
 
   if ($serialId !== '') {
-    $whereConditions[] = "system_serialid LIKE :serial_id";
-    $params[':serial_id'] = '%' . $serialId . '%';
+    $whereConditions[] = "system_serialid = :serial_id";
+    $params[':serial_id'] = $serialId;
   }
 
   if ($uniqueId !== '') {
-    $whereConditions[] = "system_uniqueid LIKE :unique_id";
-    $params[':unique_id'] = '%' . $uniqueId . '%';
+    $whereConditions[] = "system_uniqueid = :unique_id";
+    $params[':unique_id'] = $uniqueId;
   }
 
   if ($locationCode !== '') {
-    $whereConditions[] = "location_code LIKE :location_code";
-    $params[':location_code'] = '%' . $locationCode . '%';
+    $whereConditions[] = "location_code = :location_code";
+    $params[':location_code'] = $locationCode;
   }
 
   if ($fromDate !== '' && $toDate !== '') {
