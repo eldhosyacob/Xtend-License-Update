@@ -1,8 +1,8 @@
 {
     "CreatedOn": "20251223",
     "Client": {
-        "ClientName": "Other",
-        "LocationName": "Kakkanad",
+        "ClientName": "Sharekhan",
+        "LocationName": "Kakkanad kerala",
         "LocationCode": "682030"
     },
     "Licensee": {
@@ -23,17 +23,17 @@
         "BuildType": "sharekhan",
         "Debug": 0,
         "IPSettings": {
-            "Type": "Static",
-            "IP": "10.20.40.11/8",
-            "Gateway": "10.100.100.1",
-            "Dns": "8.8.8.8"
+            "Type": "DHCP",
+            "IP": "",
+            "Gateway": "",
+            "Dns": ""
         },
         "Passwords": {
             "System": "Xtend123",
             "Web": "Xtend123"
         },
         "FetchUpdates": 1,
-        "InstallUpdates": 1
+        "InstallUpdates": 0
     },
     "Engine": {
         "Build": "Xtend IVR",
@@ -45,9 +45,9 @@
     },
     "Hardware": {
         "Analog": {
-            "82429": "1000000000000000",
+            "82429": "1110000000001111",
             "222222": "1111111111111111",
-            "33333": "1111111111111111",
+            "33333": "1111111111110000",
             "44445": "1111111111111111",
             "55555": "1111000000000000",
             "66666": "1000000000000000"
@@ -65,5 +65,5 @@
     "Features": {
         "Script": "Xtend Script"
     },
-    "DeviceStatus": "On Hold"
+    "DeviceStatus": "Replaced"
 }

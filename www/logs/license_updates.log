@@ -1,0 +1,52 @@
+[2026-02-04 15:39:59] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 44)
+Changes:
+ - created_on: '2025-12-23' -> '20251223'
+ - licensee_amctill: '2026-12-30' -> '20261230'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> 'false'
+ - ports_enabled_deviceid1: '1110000000000000' -> '1110000000001111'
+ - system_ipsettings_type: 'Static' -> 'DHCP'
+ - system_ipsettings_ip: '10.20.40.121/8' -> ''
+ - system_ipsettings_gateway: '10.100.100.1' -> ''
+ - system_ipsettings_dns: '8.8.8.8' -> ''
+ - comment: '' -> 'test'
+--------------------------------------------------
+[2026-02-06 13:10:25] User: eldhos | Serial: 7013
+Action: Updated License Entry (ID: 82)
+Changes:
+ - created_on: '2026-01-03' -> '20260103'
+ - licensee_amctill: '2027-01-03' -> '20270103'
+ - licensee_validtill: '2026-04-01' -> '20260401'
+ - system_isvm: '0' -> 'false'
+ - device_status: '' -> 'Installed'
+--------------------------------------------------
+[2026-02-06 13:13:12] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 44)
+Changes:
+ - created_on: '2025-12-23' -> '20251223'
+ - licensee_amctill: '2026-12-30' -> '20261230'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> 'false'
+ - device_status: 'Installed' -> 'Ready For Dispatch'
+ - comment: 'test' -> ''
+--------------------------------------------------
+[2026-02-06 13:17:38] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 44)
+Changes:
+ - created_on: '2025-12-23' -> '20251223'
+ - client_name: 'Other' -> 'Sharekhan'
+ - licensee_amctill: '2026-12-30' -> '20261230'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> 'false'
+ - device_status: 'Ready For Dispatch' -> ''
+--------------------------------------------------
+[2026-02-10 15:03:25] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 44)
+Changes:
+ - created_on: '2025-12-23' -> '20251223'
+ - licensee_amctill: '2026-12-30' -> '20261230'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> 'false'
+ - device_status: '' -> 'Replaced'
+--------------------------------------------------

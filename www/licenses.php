@@ -121,6 +121,19 @@ if ($method === 'GET' && $editId) {
           die('Unauthorized access: You are not allowed to view or edit Sharekhan licenses.');
         }
 
+        // Fetch latest status from history if available
+        $latestDeviceStatus = $row['device_status'];
+        try {
+          $stmtStatus = $db->prepare("SELECT status FROM device_status WHERE license_id = :id ORDER BY id DESC LIMIT 1");
+          $stmtStatus->execute([':id' => $editId]);
+          $statusRow = $stmtStatus->fetch(PDO::FETCH_ASSOC);
+          if ($statusRow && !empty($statusRow['status'])) {
+            $latestDeviceStatus = $statusRow['status'];
+          }
+        } catch (Exception $e) {
+          // Ignore error, keep original status
+        }
+
         $prefill = [
           // 'CreatedOn' => $row['created_on'],
           'CreatedOn' => $row['created_on']
@@ -205,7 +218,7 @@ if ($method === 'GET' && $editId) {
           'Features' => [
             'Script' => $row['features_script'],
           ],
-          'DeviceStatus' => $row['device_status'],
+          'DeviceStatus' => $latestDeviceStatus,
         ];
         $commentValue = $row['comment'];
         $testedByValue = $row['tested_by'] ?? '';
@@ -634,6 +647,19 @@ if ($method === 'POST' && $action === 'send') {
             ':board_type' => $board_type
           ];
 
+          // LOGGING PRE-PROCESSING: Fetch old data
+          $logOldRow = null;
+          $logIsNew = true;
+          if ($editId) {
+            $logIsNew = false;
+            try {
+              $stmtLog = $db->prepare("SELECT * FROM license_details WHERE id = :id");
+              $stmtLog->execute([':id' => $editId]);
+              $logOldRow = $stmtLog->fetch(PDO::FETCH_ASSOC);
+            } catch (Exception $e) { /* ignore */
+            }
+          }
+
           if ($editId) {
             $sql = "UPDATE license_details SET
                               created_on = :created_on, client_name = :client_name, location_name = :location_name, location_code = :location_code, licensee_name = :licensee_name, licensee_distributor = :licensee_distributor,
@@ -755,6 +781,55 @@ if ($method === 'POST' && $action === 'send') {
             } catch (PDOException $e) {
               error_log('Device Status insert failed: ' . $e->getMessage());
             }
+          }
+
+          // LOGGING POST-PROCESSING: Write Log
+          try {
+            $logDir = __DIR__ . '/logs';
+            if (!is_dir($logDir)) {
+              mkdir($logDir, 0777, true);
+            }
+            $logFile = $logDir . '/license_updates.log';
+
+            $timestamp = date('Y-m-d H:i:s');
+            $logUser = $_SESSION['full_name'] ?? 'Unknown User';
+            $logSerial = $system_serialid ?: 'N/A';
+
+            $logEntry = "[$timestamp] User: $logUser | Serial: $logSerial\n";
+
+            if ($logIsNew) {
+              $logEntry .= "Action: Created New License Entry\n";
+            } else {
+              $logEntry .= "Action: Updated License Entry (ID: $editId)\n";
+
+              $logChanges = [];
+              if ($logOldRow) {
+                foreach ($params as $paramKey => $newValue) {
+                  $dbCol = substr($paramKey, 1); // remove :
+                  if (array_key_exists($dbCol, $logOldRow)) {
+                    $oldVal = trim((string) $logOldRow[$dbCol]);
+                    $newVal = trim((string) $newValue);
+                    if ($oldVal !== $newVal) {
+                      $logChanges[] = "$dbCol: '$oldVal' -> '$newVal'";
+                    }
+                  }
+                }
+              }
+
+              if (empty($logChanges)) {
+                $logEntry .= "Changes: No changes detected.\n";
+              } else {
+                $logEntry .= "Changes:\n";
+                foreach ($logChanges as $change) {
+                  $logEntry .= " - $change\n";
+                }
+              }
+            }
+            $logEntry .= str_repeat("-", 50) . "\n";
+            file_put_contents($logFile, $logEntry, FILE_APPEND);
+
+          } catch (Exception $e) {
+            error_log("Logging failed: " . $e->getMessage());
           }
         } catch (PDOException $e) {
           error_log('Database insert/update failed: ' . $e->getMessage());
@@ -1688,12 +1763,12 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
 
         <!-- Device Status Section -->
-        <div style="margin-bottom:16px; display:flex; gap:16px; align-items:flex-end;">
+        <div style="margin-bottom:16px; display:flex; gap:16px; align-items:flex-start;">
           <div>
             <label
               style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">DeviceStatus</label>
 
-            <div style="display:flex; align-items:center; gap:8px;">
+            <div style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
               <select name="DeviceStatus" id="DeviceStatusSelect"
                 style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; min-width:180px;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
@@ -1707,6 +1782,12 @@ header('Content-Type: text/html; charset=utf-8');
                 <option value="Serviced">Serviced</option>
                 <option value="Replaced">Replaced</option>
               </select>
+              <?php if ($editId): ?>
+                <div style="font-size:12px; color:#64748b; font-weight:500;">
+                  Current Device Status: <span
+                    style="color:#017f73; font-size:11px; font-weight:500;"><?php echo h($val(['DeviceStatus'], '')); ?></span>
+                </div>
+              <?php endif; ?>
             </div>
           </div>
           <div>

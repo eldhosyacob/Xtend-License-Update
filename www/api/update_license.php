@@ -37,6 +37,7 @@ function getNestedPostVal($parent, $key, $default = '')
 }
 
 try {
+  file_put_contents(__DIR__ . '/../logs/debug_trace.txt', "Script started at " . date('Y-m-d H:i:s') . "\n", FILE_APPEND);
   // Extract data from POST
   $created_on = getPostVal('CreatedOn');
   $client_name = getPostVal('ClientName');
@@ -117,6 +118,91 @@ try {
   // Comment
   $comment = getPostVal('comment');
   $tested_by = getPostVal('TestedBy');
+
+  // START LOGGING LOGIC: Fetch previous data to compare
+  $logChanges = [];
+  $isNewLicense = true;
+
+  if (!empty($system_serialid)) {
+    try {
+      $stmtPrev = $db->prepare("SELECT * FROM license_details WHERE system_serialid = :serial_id ORDER BY id DESC LIMIT 1");
+      $stmtPrev->execute([':serial_id' => $system_serialid]);
+      $oldRow = $stmtPrev->fetch(PDO::FETCH_ASSOC);
+
+      if ($oldRow) {
+        $isNewLicense = false;
+
+        // Array of fields to compare mapping: DB column => New Value variable
+        $fieldsToCheck = [
+          'client_name' => $client_name,
+          'location_name' => $location_name,
+          'location_code' => $location_code,
+          'board_type' => $board_type,
+          'licensee_name' => $licensee_name,
+          'licensee_distributor' => $licensee_distributor,
+          'licensee_dealer' => $licensee_dealer,
+          'licensee_type' => $licensee_type,
+          'licensee_amctill' => $licensee_amctill,
+          'licensee_validtill' => $licensee_validtill,
+          'licensee_billno' => $licensee_billno,
+          'system_type' => $system_type,
+          'system_os' => $system_os,
+          'system_isvm' => $system_isvm,
+          'system_uniqueid' => $system_uniqueid,
+          'system_build_type' => $system_build_type,
+          'system_debug' => $system_debug,
+          'system_passwords_system' => $system_passwords_system,
+          'system_passwords_web' => $system_passwords_web,
+          'fetch_updates' => $fetch_updates,
+          'install_updates' => $install_updates,
+          'engine_build' => $engine_build,
+          'engine_graceperiod' => $engine_graceperiod,
+          'engine_maxports' => $engine_maxports,
+          'engine_validstarttz' => $engine_validstarttz,
+          'engine_validendtz' => $engine_validendtz,
+          'engine_validcountries' => $engine_validcountries,
+          'device_id1' => $device_id1,
+          'ports_enabled_deviceid1' => $ports_enabled_deviceid1,
+          'device_id2' => $device_id2,
+          'ports_enabled_deviceid2' => $ports_enabled_deviceid2,
+          'device_id3' => $device_id3,
+          'ports_enabled_deviceid3' => $ports_enabled_deviceid3,
+          'device_id4' => $device_id4,
+          'ports_enabled_deviceid4' => $ports_enabled_deviceid4,
+          'device_id5' => $device_id5,
+          'ports_enabled_deviceid5' => $ports_enabled_deviceid5,
+          'device_id6' => $device_id6,
+          'ports_enabled_deviceid6' => $ports_enabled_deviceid6,
+          'features_script' => $features_script,
+          'device_status' => $device_status,
+          'centralization_livestatusurl' => $centralization_livestatusurl,
+          'centralization_livestatusurlinterval' => $centralization_livestatusurlinterval,
+          'centralization_uploadfileurl' => $centralization_uploadfileurl,
+          'centralization_uploadfileurlinterval' => $centralization_uploadfileurlinterval,
+          'centralization_settingsurl' => $centralization_settingsurl,
+          'centralization_usertrunkmappingurl' => $centralization_usertrunkmappingurl,
+          'centralization_phonebookurl' => $centralization_phonebookurl,
+          'comment' => $comment,
+          'tested_by' => $tested_by
+        ];
+
+        foreach ($fieldsToCheck as $field => $newValue) {
+          $oldValue = isset($oldRow[$field]) ? $oldRow[$field] : '';
+
+          // Normalize for comparison
+          $val1 = trim((string) $oldValue);
+          $val2 = trim((string) $newValue);
+
+          if ($val1 !== $val2) {
+            $logChanges[] = "$field: '$val1' -> '$val2'";
+          }
+        }
+      }
+    } catch (Exception $e) {
+      // Silently fail logging prep if DB issue, main flow proceeds
+    }
+  }
+  // END LOGGING LOGIC
 
   // Prepare SQL statement
   $sql = "INSERT INTO license_details (
@@ -221,6 +307,48 @@ try {
       // Log error but don't fail the request
       error_log('Device Status insert failed in API: ' . $e->getMessage());
     }
+  }
+
+  // LOG FILE WRITING
+  file_put_contents(__DIR__ . '/../logs/debug_trace.txt', "Reaching Log Block\n", FILE_APPEND);
+  try {
+    $logDir = __DIR__ . '/../logs';
+    if (!is_dir($logDir)) {
+      if (!mkdir($logDir, 0777, true)) {
+        error_log("Failed to create log directory: " . $logDir);
+      }
+    }
+    $logFile = $logDir . '/license_updates.log';
+
+    $timestamp = date('Y-m-d H:i:s');
+    $user = $_SESSION['full_name'] ?? 'Unknown User';
+    $serial = !empty($system_serialid) ? $system_serialid : 'N/A';
+
+    $logEntry = "[$timestamp] User: $user | Serial: $serial\n";
+
+    if ($isNewLicense) {
+      $logEntry .= "Action: Created New License Entry\n";
+    } else {
+      $logEntry .= "Action: Updated License Entry\n";
+      if (empty($logChanges)) {
+        $logEntry .= "Changes: No changes detected.\n";
+      } else {
+        $logEntry .= "Changes:\n";
+        foreach ($logChanges as $change) {
+          $logEntry .= " - $change\n";
+        }
+      }
+    }
+    $logEntry .= str_repeat("-", 50) . "\n";
+
+    if (file_put_contents($logFile, $logEntry, FILE_APPEND) === false) {
+      error_log("Failed to write to log file: " . $logFile);
+    }
+
+  } catch (Exception $e) {
+    // Suppress logging errors so they don't break the response
+    file_put_contents(__DIR__ . '/../logs/debug_trace.txt', "Logging Exception: " . $e->getMessage() . "\n", FILE_APPEND);
+    error_log('Failed to write to license update log: ' . $e->getMessage());
   }
 
   echo json_encode([
