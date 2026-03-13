@@ -223,7 +223,93 @@ if ($method === 'GET' && $editId) {
         $commentValue = $row['comment'];
         $testedByValue = $row['tested_by'] ?? '';
 
+        // Attempt to fetch updated data from SVN
+        $svnBin = find_svn_binary();
+        if ($svnBin && !empty($row['system_serialid']) && !empty($row['system_uniqueid'])) {
+          $serialId = trim((string) $row['system_serialid']);
+          $uniqueId = trim((string) $row['system_uniqueid']);
+          $systemType = $row['system_type'];
+          $systemOs = $row['system_os'];
+          $repoType = 'sl'; // Default fallback
+          if ($systemType === 'Standalone' && $systemOs === 'Linux') {
+            $repoType = 'sl';
+          } elseif ($systemType === 'Standalone' && $systemOs === 'Windows') {
+            $repoType = 'sw';
+          } elseif ($systemType === 'Desktop' && $systemOs === 'Windows') {
+            $repoType = 'dw';
+          }
 
+          $svnUrl = "svn://src/xtendlic/{$repoType}/{$serialId}/{$uniqueId}";
+
+          $targetDir = __DIR__ . '/uploads/licenses';
+          if (!is_dir($targetDir)) {
+            @mkdir($targetDir, 0777, true);
+          }
+          $tempJsonFile = $targetDir . '/data_' . uniqid() . '.json';
+
+          $cmd = [$svnBin, 'export', '--force', '--non-interactive', $svnUrl, $tempJsonFile];
+          [$code, $out, $err] = run_process($cmd);
+
+          if ($code === 0 && file_exists($tempJsonFile)) {
+            $jsonContent = file_get_contents($tempJsonFile);
+            $jsonData = json_decode($jsonContent, true);
+
+            if (is_array($jsonData)) {
+              $exclude = ['CreatedOn', 'DeviceStatus', 'Comment'];
+              foreach ($jsonData as $key => $val) {
+                if (in_array($key, $exclude)) {
+                  continue;
+                }
+                if ($key === 'Client' && is_array($val)) {
+                  // Map Client fields to top-level keys as expected by the form
+                  if (isset($val['ClientName'])) {
+                    $prefill['ClientName'] = $val['ClientName'];
+                  }
+                  if (isset($val['LocationName'])) {
+                    $prefill['LocationName'] = $val['LocationName'];
+                  }
+                  if (isset($val['LocationCode'])) {
+                    $prefill['LocationCode'] = $val['LocationCode'];
+                  }
+                  // Keep the array as well in case it's needed elsewhere, though form uses top-level
+                  $prefill[$key] = $val;
+                } elseif ($key === 'Engine' && is_array($val)) {
+                  // Merge Engine data but preserve existing MaxPorts
+                  $originalMaxPorts = $prefill['Engine']['MaxPorts'] ?? null;
+                  $prefill['Engine'] = array_merge($prefill['Engine'] ?? [], $val);
+                  if ($originalMaxPorts !== null) {
+                    $prefill['Engine']['MaxPorts'] = $originalMaxPorts;
+                  }
+                } else {
+                  $prefill[$key] = $val;
+                }
+              }
+
+              // Map nested Hardware->Analog to flat device input fields
+              if (isset($prefill['Hardware']['Analog']) && is_array($prefill['Hardware']['Analog'])) {
+                // Clear DB values first to strictly follow JSON
+                for ($i = 1; $i <= 6; $i++) {
+                  $prefill["device_id{$i}"] = '';
+                  $prefill["ports_enabled_deviceid{$i}"] = '';
+                }
+
+                $analog = $prefill['Hardware']['Analog'];
+                $idx = 1;
+                foreach ($analog as $dId => $ports) {
+                  if ($idx > 6)
+                    break;
+                  // Handle potential duplicate marker cleanup
+                  $cleanId = preg_replace('/_DUPLICATE_KEY_MARKER_.*$/', '', (string) $dId);
+
+                  $prefill["device_id{$idx}"] = $cleanId;
+                  $prefill["ports_enabled_deviceid{$idx}"] = $ports;
+                  $idx++;
+                }
+              }
+            }
+            @unlink($tempJsonFile);
+          }
+        }
       }
     } catch (PDOException $e) {
       $errors[] = 'Database error: ' . $e->getMessage();
@@ -1138,6 +1224,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <?php if ($userRole !== 'Limited Access' || $clientName === 'Sharekhan'): ?>
                   <option value="Sharekhan" <?php echo ($clientName === 'Sharekhan') ? 'selected' : ''; ?>>Sharekhan</option>
                 <?php endif; ?>
+                <option value="Torus" <?php echo ($clientName === 'Torus') ? 'selected' : ''; ?>>Torus</option>
                 <option value="Other" <?php echo ($clientName === 'Other') ? 'selected' : ''; ?>>Other</option>
               </select>
             </div>
@@ -1333,7 +1420,7 @@ header('Content-Type: text/html; charset=utf-8');
             </div>
 
 
-            <div>
+            <!-- <div>
               <label
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[BuildType]</label>
               <input type="text" name="System[BuildType]" required
@@ -1341,6 +1428,21 @@ header('Content-Type: text/html; charset=utf-8');
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div> -->
+
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">System[BuildType]</label>
+              <select name="System[BuildType]" required
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; background:#ffffff; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box; cursor:pointer;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+                <?php $systemBuildType = (string) $val(['System', 'BuildType'], $defaults['System']['BuildType']); ?>
+                <option value="sharekhan" <?php echo ($systemBuildType === 'sharekhan') ? 'selected' : ''; ?>>sharekhan
+                </option>
+                <option value="Torus" <?php echo ($systemBuildType === 'Torus') ? 'selected' : ''; ?>>Torus</option>
+                <option value="Test" <?php echo ($systemBuildType === 'Test') ? 'selected' : ''; ?>>Test</option>
+              </select>
             </div>
 
             <div>

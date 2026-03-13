@@ -34,17 +34,17 @@ if ($method === 'GET') {
     $results = [];
 
     if (!empty($searchId)) {
-      $stmt = $db->prepare("SELECT * FROM license_details WHERE id = :id");
+      $stmt = $db->prepare("SELECT *, (SELECT status FROM device_status WHERE license_id = license_details.id ORDER BY id DESC LIMIT 1) as latest_status_from_history FROM license_details WHERE id = :id");
       $stmt->execute([':id' => $searchId]);
       $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
       if ($searchType === 'serial_id') {
-        $stmt = $db->prepare("SELECT * FROM license_details WHERE system_serialid = :term");
+        $stmt = $db->prepare("SELECT *, (SELECT status FROM device_status WHERE license_id = license_details.id ORDER BY id DESC LIMIT 1) as latest_status_from_history FROM license_details WHERE system_serialid = :term");
       } elseif ($searchType === 'location_code') {
-        $stmt = $db->prepare("SELECT * FROM license_details WHERE location_code = :term");
+        $stmt = $db->prepare("SELECT *, (SELECT status FROM device_status WHERE license_id = license_details.id ORDER BY id DESC LIMIT 1) as latest_status_from_history FROM license_details WHERE location_code = :term");
       } else {
         // Fallback / Generic search
-        $stmt = $db->prepare("SELECT * FROM license_details WHERE system_serialid = :term OR location_code = :term");
+        $stmt = $db->prepare("SELECT *, (SELECT status FROM device_status WHERE license_id = license_details.id ORDER BY id DESC LIMIT 1) as latest_status_from_history FROM license_details WHERE system_serialid = :term OR location_code = :term");
       }
       $stmt->execute([':term' => $searchTerm]);
       $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -100,6 +100,7 @@ if ($method === 'GET') {
   $testedBy = isset($_POST['TestedBy']) ? trim($_POST['TestedBy']) : '';
   $comment = isset($_POST['Comment']) ? trim($_POST['Comment']) : '';
   $supportRemarks = isset($_POST['SupportRemarks']) ? trim($_POST['SupportRemarks']) : '';
+  $salesRemarks = isset($_POST['SalesRemarks']) ? trim($_POST['SalesRemarks']) : '';
 
   $userFullName = $_SESSION['full_name'] ?? 'Unknown';
 
@@ -161,6 +162,16 @@ if ($method === 'GET') {
       $remarkStmt->execute([
         ':license_id' => $id,
         ':remark' => $supportRemarks,
+        ':created_by' => $userFullName
+      ]);
+    }
+
+    // 5. Handle Sales Remarks History
+    if (!empty($salesRemarks)) {
+      $salesStmt = $db->prepare("INSERT INTO sales_remarks (license_id, remark, created_by, created_at) VALUES (:license_id, :remark, :created_by, NOW())");
+      $salesStmt->execute([
+        ':license_id' => $id,
+        ':remark' => $salesRemarks,
         ':created_by' => $userFullName
       ]);
     }

@@ -50,3 +50,167 @@ Changes:
  - system_isvm: '0' -> 'false'
  - device_status: '' -> 'Replaced'
 --------------------------------------------------
+[2026-02-18 15:44:53] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 44)
+Changes:
+ - created_on: '2025-12-23' -> '20251223'
+ - location_code: '682030' -> '6820306'
+ - licensee_amctill: '2026-12-30' -> '20261230'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> 'false'
+ - system_debug: '0' -> '1'
+ - device_status: 'Serviced' -> ''
+--------------------------------------------------
+[2026-02-18 16:54:57] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 44)
+Changes:
+ - created_on: '2025-12-23' -> ''
+ - licensee_amctill: '2026-12-30' -> '20261230'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> ''
+ - device_status: '' -> 'Serviced'
+--------------------------------------------------
+[2026-02-18 16:59:06] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 44)
+Changes:
+ - created_on: '0000-00-00' -> ''
+ - licensee_amctill: '2026-12-30' -> '20261230'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> ''
+--------------------------------------------------
+[2026-02-18 17:00:42] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 44)
+Changes:
+ - created_on: '0000-00-00' -> ''
+ - licensee_amctill: '2026-12-30' -> '20261230'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> ''
+--------------------------------------------------
+[2026-02-18 17:09:39] User: eldhos | Serial: 6194
+Action: Created New License Entry
+--------------------------------------------------
+[2026-02-18 17:22:49] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 95)
+Changes:
+ - created_on: '0000-00-00' -> ''
+ - licensee_amctill: '2027-02-18' -> '20270218'
+ - licensee_validtill: '2026-04-01' -> '20260401'
+ - system_isvm: '0' -> ''
+ - centralization_livestatusurl: 'http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()' -> 'https://vlscloud.sharekhan.com:8090/UploadZip.xbs?UploadXmlData()'
+ - centralization_uploadfileurl: 'http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()' -> 'https://vlscloud.sharekhan.com:8090/UploadZip.xbs?UploadWaveFileToHO()'
+ - centralization_settingsurl: 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings' -> 'https://vlscloud.sharekhan.com:8090/VersionUpgradation.xbc?UpdateSettings'
+ - centralization_usertrunkmappingurl: 'http://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()' -> 'https://vlscloud.sharekhan.com:8090/clientserver.xbc?GenerateStreamutmXML()'
+ - centralization_phonebookurl: 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()' -> 'https://vlscloud.sharekhan.com:8090/VersionUpgradation.xbc?UpdatePhoneBook()'
+ - comment: 'Licence done by Eldhos' -> ''
+--------------------------------------------------
+[2026-02-18 17:57:51] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 95)
+Changes:
+ - created_on: '0000-00-00' -> ''
+ - location_code: '12143014' -> '280107'
+ - licensee_amctill: '2027-02-18' -> '20270218'
+ - licensee_validtill: '2026-04-01' -> '20260401'
+ - system_isvm: '0' -> ''
+ - centralization_livestatusurl: 'https://vlscloud.sharekhan.com:8090/UploadZip.xbs?UploadXmlData()' -> 'https://10.20.20.14:8080/UploadZip.xbs?UploadXmlData()'
+ - centralization_uploadfileurl: 'https://vlscloud.sharekhan.com:8090/UploadZip.xbs?UploadWaveFileToHO()' -> 'https://10.20.20.14:8080/UploadZip.xbs?UploadWaveFileToHO()'
+ - centralization_settingsurl: 'https://vlscloud.sharekhan.com:8090/VersionUpgradation.xbc?UpdateSettings' -> 'https://10.20.20.14:8080/VersionUpgradation.xbc?UpdateSettings'
+ - centralization_usertrunkmappingurl: 'https://vlscloud.sharekhan.com:8090/clientserver.xbc?GenerateStreamutmXML()' -> 'https://10.20.20.14:8080/clientserver.xbc?GenerateStreamutmXML()'
+ - centralization_phonebookurl: 'https://vlscloud.sharekhan.com:8090/VersionUpgradation.xbc?UpdatePhoneBook()' -> 'https://10.20.20.14:8080/VersionUpgradation.xbc?UpdatePhoneBook()'
+--------------------------------------------------
+[2026-02-19 17:14:22] User: eldhos | Serial: 7014
+Action: Updated License Entry (ID: 91)
+Changes:
+ - created_on: '2026-01-13' -> '20260113'
+ - location_name: 'Test35' -> 'Test'
+ - location_code: '1035' -> 'Testing'
+ - licensee_name: 'Xtend Technologies Pvt. Ltd.' -> 'Xtend Technologies Pvt. Ltd'
+ - licensee_dealer: 'Asif2' -> 'Asif'
+ - licensee_amctill: '2027-01-13' -> '20270401'
+ - licensee_validtill: '2026-01-30' -> '20260401'
+ - licensee_billno: 'XT25-1002' -> 'NA'
+ - system_isvm: '0' -> 'false'
+ - engine_validstarttz: '330' -> '22'
+ - engine_validendtz: '330' -> '22'
+ - engine_validcountries: '65' -> '66'
+ - system_ipsettings_type: 'Static' -> 'DHCP'
+ - system_ipsettings_ip: '10.20.40.49/8' -> ''
+ - system_ipsettings_gateway: '10.100.100.1' -> ''
+ - system_ipsettings_dns: '8.8.8.8' -> ''
+ - device_status: '' -> 'Testing'
+--------------------------------------------------
+[2026-02-19 17:53:00] User: eldhos | Serial: 7014
+Action: Updated License Entry (ID: 91)
+Changes:
+ - created_on: '2026-01-13' -> '20260113'
+ - licensee_name: 'Xtend Technologies Pvt. Ltd' -> 'Xtend Technologies Pvt. Ltd.'
+ - licensee_amctill: '2027-04-01' -> '20270'
+ - licensee_validtill: '2026-04-01' -> '2026'
+ - licensee_billno: 'NA' -> 'XT25'
+ - system_isvm: '0' -> 'false'
+ - engine_graceperiod: '30' -> '60'
+ - engine_validstarttz: '22' -> '36'
+ - engine_validendtz: '22' -> '35'
+ - engine_validcountries: '66' -> '64'
+ - device_id1: '82609' -> '82608'
+ - system_passwords_system: 'Xtend123' -> 'Xtend111'
+ - system_passwords_web: 'Xtend123' -> 'Xtend111'
+ - centralization_livestatusurl: 'http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()' -> 'https://vls.sharekhan.com/UploadZip.xbs?UploadXmlData()'
+ - centralization_uploadfileurl: 'http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()' -> 'http://10.20.20.13:1111/UploadZip.xbs?UploadWaveFileToHO()'
+ - centralization_settingsurl: 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings' -> 'http://10.20.20.13:1111/VersionUpgradation.xbc?UpdateSettings'
+ - centralization_usertrunkmappingurl: 'http://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()' -> 'http://10.20.20.13:1111/clientserver.xbc?GenerateStreamutmXML()'
+ - centralization_phonebookurl: 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()' -> 'http://vls.sharekhan.com/VersionUpgradation.xbc?UpdatePhoneBook()'
+ - device_status: 'Testing' -> ''
+--------------------------------------------------
+[2026-02-19 17:56:57] User: eldhos | Serial: 7014
+Action: Updated License Entry (ID: 91)
+Changes:
+ - created_on: '2026-01-13' -> '20260113'
+ - licensee_amctill: '0000-00-00' -> '20270104'
+ - licensee_validtill: '0000-00-00' -> '20260401'
+ - system_isvm: '0' -> 'false'
+--------------------------------------------------
+[2026-02-27 17:56:14] User: eldhos | Serial: 6194
+Action: Updated License Entry (ID: 95)
+Changes:
+ - created_on: '0000-00-00' -> '-00011130'
+ - licensee_amctill: '2027-02-18' -> '20270218'
+ - licensee_validtill: '2026-04-01' -> '20260401'
+ - system_isvm: '0' -> 'false'
+ - system_build_type: 'sharekhan' -> 'Test'
+ - device_status: 'Testing' -> ''
+--------------------------------------------------
+[2026-03-12 17:49:26] User: Admin | Serial: 6194
+Action: Updated License Entry (ID: 44)
+Changes:
+ - created_on: '0000-00-00' -> '-00011130'
+ - client_name: 'Sharekhan' -> 'Torus'
+ - location_name: 'Kakkanad kerala' -> 'Kakkanad'
+ - location_code: '1234' -> '682030'
+ - licensee_amctill: '2026-12-30' -> '20261230'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> 'false'
+ - system_build_type: 'sharekhan' -> 'Torus'
+ - ports_enabled_deviceid1: '1110000000001111' -> '1000000000000000'
+ - device_id2: '222222' -> ''
+ - ports_enabled_deviceid2: '1111111111111111' -> ''
+ - device_id3: '33333' -> ''
+ - ports_enabled_deviceid3: '1111111111110000' -> ''
+ - device_id4: '44445' -> ''
+ - ports_enabled_deviceid4: '1111111111111111' -> ''
+ - device_id5: '55555' -> ''
+ - ports_enabled_deviceid5: '1111000000000000' -> ''
+ - device_id6: '66666' -> ''
+ - ports_enabled_deviceid6: '1000000000000000' -> ''
+ - system_ipsettings_type: 'DHCP' -> 'Static'
+ - system_ipsettings_ip: '' -> '10.20.40.50/8'
+ - system_ipsettings_gateway: '' -> '10.100.100.1'
+ - system_ipsettings_dns: '' -> '8.8.8.8'
+ - system_passwords_web: 'Xtend123' -> 'admin'
+ - install_updates: '0' -> '1'
+ - centralization_livestatusurl: 'http://103.38.15.2:8063/UploadZip.xbs?UploadXmlData()' -> 'http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()'
+ - centralization_uploadfileurl: 'http://103.38.15.2:8063/UploadZip.xbs?UploadWaveFileToHO()' -> 'http://10.20.20.13:8081/UploadZip.xbs?UploadWaveFileToHO()'
+ - centralization_settingsurl: 'http://103.38.15.2:8063/VersionUpgradation.xbc?UpdateSettings()' -> 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdateSettings'
+ - centralization_usertrunkmappingurl: 'http://103.38.15.2:8063/clientserver.xbc?GenerateStreamutmXML()' -> 'http://10.20.20.13:8081/clientserver.xbc?GenerateStreamutmXML()'
+ - centralization_phonebookurl: 'http://103.38.15.2:8063/VersionUpgradation.xbc?UpdatePhoneBook()' -> 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()'
+ - device_status: 'Serviced_T' -> ''
+--------------------------------------------------

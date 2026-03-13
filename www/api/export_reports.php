@@ -96,6 +96,8 @@ try {
   $sql = "SELECT created_on, client_name, location_name, location_code, board_type, licensee_validtill, system_serialid, system_uniqueid, engine_maxports as total_ports, 
             device_id1, device_id2, device_id3, device_id4,
             ports_enabled_deviceid1, ports_enabled_deviceid2, ports_enabled_deviceid3, ports_enabled_deviceid4,
+            (SELECT status FROM device_status WHERE license_id = license_details.id ORDER BY id DESC LIMIT 1) as latest_device_status,
+            device_status,
             (SELECT GROUP_CONCAT(comment ORDER BY created_at ASC SEPARATOR '|||') FROM comments WHERE license_id = license_details.id) as comments_list
             FROM license_details 
             $whereSql
@@ -129,7 +131,8 @@ try {
     'Total Ports',
     'Ports Enabled',
     'Device ID',
-    'Comments'
+    'Comments',
+    'Device Status'
   ]);
 
   $cnt = 1;
@@ -189,7 +192,8 @@ try {
       $totalPorts,
       $portsEnabledCount,
       $deviceIdStr,
-      $formattedComments
+      $formattedComments,
+      !empty($row['latest_device_status']) ? $row['latest_device_status'] : $row['device_status']
     ]);
   }
 

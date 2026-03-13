@@ -14,6 +14,7 @@ require_once('config/auth_check.php');
   <link rel="stylesheet" href="styles/header-sidebar.css">
   <link rel="stylesheet" href="styles/common.css">
   <link rel="stylesheet" href="styles/licenses.css">
+  <link rel="stylesheet" href="styles/reports.css">
   <style>
     .details-container {
       display: none;
@@ -168,14 +169,36 @@ require_once('config/auth_check.php');
                 your search.</p> -->
     </div>
 
-    <div id="searchResultsList" style="display:none; justify-content:center; margin-bottom: 24px;">
-      <div style="width:100%; max-width:750px; display:flex; flex-direction:column; gap:12px;">
-        <h3 style="margin:0 0 8px 0; font-size:16px; color:#475569; font-weight:600; padding-left:4px;">Select One
-          Record
-        </h3>
-        <div id="resultsItems"
-          style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px;">
-          <!-- Results injected via JS -->
+    <div id="searchResultsList"
+      style="display:none; justify-content:center; margin-bottom: 24px; width: 100%; padding: 0 24px; box-sizing: border-box;">
+      <div style="width:100%; display:flex; flex-direction:column; gap:12px;">
+        <h3 style="margin:0 0 8px 0; font-size:16px; color:#475569; font-weight:600; text-align:center;">Select One
+          Record</h3>
+        <div class="report-card" style="margin: 0; width: 100%;">
+          <div class="table-scroll-wrapper">
+            <div class="table-container" style="overflow-x: auto;">
+              <table id="reportsTable" style="width: 100%; min-width: 1000px;">
+                <thead>
+                  <tr>
+                    <th>Sl No</th>
+                    <th>Date Created</th>
+                    <th>Dealer</th>
+                    <th>Location Code</th>
+                    <th>License Validity</th>
+                    <th>Serial ID</th>
+                    <th>Unique ID</th>
+                    <th>Grace Period</th>
+                    <th>Device Status</th>
+                    <th>Lic. Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsItems">
+                  <!-- Results injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -630,6 +653,27 @@ require_once('config/auth_check.php');
           </div>
         </div>
 
+        <!-- Sales Remarks (Editable) - New Field -->
+        <div style="margin-bottom:24px;">
+          <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Sales
+            Remarks</label>
+          <div style="display:flex; align-items:flex-start; gap:10px;">
+            <textarea name="SalesRemarks" id="SalesRemarksInput" class="form-input" rows="6"
+              style="width:50%; max-width:600px; resize:vertical;"></textarea>
+            <div style="cursor:pointer; color:#64748b; display:flex; align-items:center; margin-top:8px;"
+              onclick="showHistory('sales_remark')" title="View Sales Remarks History">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+          </div>
+        </div>
+
         <div
           style="margin-top:24px; padding-top:20px; border-top:2px solid #f1f5f9; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
           <button type="submit" id="btnSave" class="btn-update">Save Data</button>
@@ -731,7 +775,8 @@ require_once('config/auth_check.php');
           StatusDate: $('#StatusDateInput').val(),
           TestedBy: $('#TestedByInput').val(),
           Comment: $('#CommentInput').val(),
-          SupportRemarks: $('#SupportRemarksInput').val()
+          SupportRemarks: $('#SupportRemarksInput').val(),
+          SalesRemarks: $('#SalesRemarksInput').val()
         };
 
         $.ajax({
@@ -798,7 +843,8 @@ require_once('config/auth_check.php');
             if (response.multiple) {
               renderResultsList(response.data);
             } else {
-              populateForm(response.data);
+              // Even for single result, show as card first
+              renderResultsList([response.data]);
             }
           } else {
             // Ensure details area and list are hidden
@@ -827,42 +873,79 @@ require_once('config/auth_check.php');
       $('#detailsArea').removeClass('visible');
       $('#noResultsMessage').hide();
 
-      const container = $('#searchResultsList #resultsItems');
-      container.empty();
+      const tbody = $('#searchResultsList #resultsItems');
+      tbody.empty();
 
-      items.forEach(item => {
-        const card = `
-                    <div class="result-card" onclick="fetchDetails(${item.id})" 
-                         style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:20px; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.05); display:flex; flex-direction:column; gap:8px;">
-                        
-                        <div style="display:flex; justify-content:space-between; align-items:start;">
-                            <div style="font-weight:700; color:#1e293b; font-size:15px;">${item.client_name || 'Unknown Client'}</div>
-                            <span style="font-size:11px; background:#eff6ff; color:#3b82f6; padding:2px 8px; border-radius:12px; font-weight:600;">${item.system_serialid || 'No Serial'}</span>
-                        </div>
+      // Reset any grid/flex styles previously applied directly in JS
+      tbody.removeAttr('style');
 
-                        <div style="width:100%; height:1px; background:#f1f5f9; margin:4px 0;"></div>
+      items.forEach((item, index) => {
+        // Format date (YYYYMMDD -> DD-MM-YYYY)
+        let dateDisplay = item.created_on;
+        if (dateDisplay && dateDisplay.length === 8) {
+          dateDisplay = `${dateDisplay.substring(6, 8)}-${dateDisplay.substring(4, 6)}-${dateDisplay.substring(0, 4)}`;
+        }
 
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px;">
-                            <div>
-                                <span style="color:#64748b; font-size:11px; display:block;">Location</span>
-                                <span style="color:#334155; font-weight:500;">${item.location_name || '-'}</span>
-                            </div>
-                             <div>
-                                <span style="color:#64748b; font-size:11px; display:block;">Code</span>
-                                <span style="color:#334155; font-weight:500;">${item.location_code || '-'}</span>
-                            </div>
-                            <div>
-                                <span style="color:#64748b; font-size:11px; display:block;">Status</span>
-                                <span style="color:#334155;">${item.device_status || '-'}</span>
-                            </div>
-                             <div>
-                                <span style="color:#64748b; font-size:11px; display:block;">Board</span>
-                                <span style="color:#334155;">${item.board_type || '-'}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-        container.append(card);
+        // Format Validity & Status
+        let validTill = item.licensee_validtill;
+        let statusClass = '';
+        let statusText = '';
+        let formattedValidTill = validTill;
+        let expiryDate = null;
+
+        if (validTill) {
+          if (validTill.includes('-') || validTill.includes('/')) {
+            expiryDate = new Date(validTill);
+            formattedValidTill = validTill;
+          } else if (validTill.length === 8 && !isNaN(validTill)) {
+            const year = parseInt(validTill.substring(0, 4));
+            const month = parseInt(validTill.substring(4, 6)) - 1;
+            const day = parseInt(validTill.substring(6, 8));
+            expiryDate = new Date(year, month, day);
+            formattedValidTill = `${validTill.substring(6, 8)}-${validTill.substring(4, 6)}-${validTill.substring(0, 4)}`;
+          }
+        }
+
+        if (expiryDate && !isNaN(expiryDate.getTime())) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          expiryDate.setHours(0, 0, 0, 0);
+
+          if (expiryDate < today) {
+            statusClass = 'status-expired';
+            statusText = 'Expired';
+          } else {
+            statusClass = 'status-active';
+            statusText = 'Active';
+          }
+        } else {
+          statusClass = 'status-active';
+          statusText = 'Active';
+          formattedValidTill = validTill ? validTill : '-';
+        }
+
+        const uniqueIdDisplay = (item.system_uniqueid && item.system_uniqueid !== 'UNKNOWN') ? item.system_uniqueid : '-';
+
+        const tr = `
+          <tr style="cursor: pointer; transition: all 0.2s ease;" onclick="fetchDetails(${item.id})" onmouseover="this.style.backgroundColor='#fafbfc'" onmouseout="this.style.backgroundColor='transparent'">
+            <td class="text-center">${index + 1}</td>
+            <td>${dateDisplay || '-'}</td>
+            <td>${item.licensee_dealer || '-'}</td>
+            <td>${item.location_code || '-'}</td>
+            <td class="validity-cell">${formattedValidTill}</td>
+            <td class="code-cell">${item.system_serialid || '-'}</td>
+            <td class="code-cell">${uniqueIdDisplay}</td>
+            <td class="text-center">${item.engine_graceperiod || '-'}</td>
+            <td>${item.latest_status_from_history || item.device_status || '-'}</td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            <td class="action-cell">
+              <button type="button" onclick="fetchDetails(${item.id}); event.stopPropagation();" class="btn-search" style="padding: 6px 12px; font-size: 13px; border-radius: 6px; border: none; cursor: pointer;">
+                Select
+              </button>
+            </td>
+          </tr>
+        `;
+        tbody.append(tr);
       });
 
       $('#searchResultsList').css('display', 'flex');
@@ -974,6 +1057,10 @@ require_once('config/auth_check.php');
       // Per user request: Empty by default
       $('#SupportRemarksInput').val('');
 
+      // Sales Remarks
+      // Per user request: Empty by default
+      $('#SalesRemarksInput').val('');
+
       $('#detailsArea').addClass('visible');
     }
 
@@ -997,6 +1084,9 @@ require_once('config/auth_check.php');
       } else if (type === 'remark') {
         apiUrl = 'api/support_remarks.php';
         title = 'Support Remarks History';
+      } else if (type === 'sales_remark') {
+        apiUrl = 'api/sales_remarks.php';
+        title = 'Sales Remarks History';
       }
 
       $('#historyPopupTitle').text(title);
@@ -1031,10 +1121,10 @@ require_once('config/auth_check.php');
 
       let html = `<table style="width:100%; border-collapse:collapse; font-size:14px; text-align:center;">
                         <thead><tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
-                          <th style="padding:10px; text-align:center;">Sl No</th>
-                          <th style="padding:10px; text-align:center;">User</th>
-                          <th style="padding:10px; text-align:center;">Date</th>
-                          <th style="padding:10px; text-align:center;">Valut</th>
+                          <th style="padding:10px; text-align:center; color:#475569;">Sl No</th>
+                          <th style="padding:10px; text-align:center; color:#475569;">User</th>
+                          <th style="padding:10px; text-align:center; color:#475569;">Date</th>
+                          <th style="padding:10px; text-align:center; color:#475569;">Valut</th>
                         </tr></thead><tbody>`;
 
       // Adjust headers based on type if needed
@@ -1044,6 +1134,8 @@ require_once('config/auth_check.php');
       } else if (type === 'comment') {
         html = html.replace('Valut', 'Comment').replace('User', 'Commented By');
       } else if (type === 'remark') {
+        html = html.replace('Valut', 'Remark').replace('User', 'Created By');
+      } else if (type === 'sales_remark') {
         html = html.replace('Valut', 'Remark').replace('User', 'Created By');
       }
 
