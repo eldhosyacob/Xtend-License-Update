@@ -26,8 +26,8 @@ if (!$db) {
 // Check if summary stats are requested
 if (isset($_GET['summary']) && $_GET['summary'] === 'true') {
   try {
-    $today = date('Ymd');
-    $next30Days = date('Ymd', strtotime('+30 days'));
+    $today = date('Y-m-d');
+    $next30Days = date('Y-m-d', strtotime('+30 days'));
 
     // Prepare role-based condition
     $userRole = isset($_SESSION['role']) ? $_SESSION['role'] : '';
@@ -55,11 +55,60 @@ if (isset($_GET['summary']) && $_GET['summary'] === 'true') {
     $stmt->execute();
     $expiringCount = $stmt->fetchColumn();
 
-    // Total Licenses
-    // Note: SELECT COUNT(*) FROM license_details WHERE 1=1 AND ...
     $totalSql = "SELECT COUNT(*) FROM license_details WHERE 1=1" . $roleCondition;
     $stmt = $db->query($totalSql);
     $totalCount = $stmt->fetchColumn();
+
+    // Generate accurate trend data for the current year
+    $currentYear = date('Y');
+
+    // Fetch all dates required to build the trend line
+    $datesSql = "SELECT created_on, licensee_validtill FROM license_details WHERE (created_on != '' OR licensee_validtill != '')" . $roleCondition;
+    $stmt = $db->query($datesSql);
+    $allDates = $stmt->fetchAll();
+
+    $activeTrends = array_fill(0, 12, 0);
+    $expiredTrends = array_fill(0, 12, 0);
+
+    $currentMonth = (int) date('n');
+
+    foreach ($allDates as $row) {
+      $createdDate = trim($row['created_on']);
+      $validTillDate = trim($row['licensee_validtill']);
+
+      $createdTs = strtotime($createdDate);
+      $expiredTs = strtotime($validTillDate);
+
+      for ($m = 1; $m <= 12; $m++) {
+        // Skip future months for active licenses so line chart doesn't flatline across future months
+        if ($m > $currentMonth) {
+          continue;
+        }
+
+        // Month boundaries
+        $monthStr = str_pad($m, 2, '0', STR_PAD_LEFT);
+        $daysInMonth = date('t', strtotime("$currentYear-$monthStr-01"));
+        $monthEndStr = "$currentYear-$monthStr-$daysInMonth";
+        $monthStartStr = "$currentYear-$monthStr-01";
+
+        $monthEndTs = strtotime($monthEndStr . " 23:59:59");
+        $monthStartTs = strtotime($monthStartStr . " 00:00:00");
+
+        // Calculate Active Licenses for this month
+        // Active means: created on or before month end, AND (not yet expired by month end)
+        if ($createdTs && $createdTs <= $monthEndTs) {
+          if (!$expiredTs || $expiredTs >= $monthEndTs) {
+            $activeTrends[$m - 1]++;
+          }
+        }
+
+        // Calculate Expired Licenses for this month
+        // Expiring precisely within this month's boundary
+        if ($expiredTs && $expiredTs >= $monthStartTs && $expiredTs <= $monthEndTs) {
+          $expiredTrends[$m - 1]++;
+        }
+      }
+    }
 
     echo json_encode([
       'success' => true,
@@ -67,7 +116,11 @@ if (isset($_GET['summary']) && $_GET['summary'] === 'true') {
         'active_licenses' => $activeCount,
         'expired_licenses' => $expiredCount,
         'expiring_soon' => $expiringCount,
-        'total_licenses' => $totalCount
+        'total_licenses' => $totalCount,
+        'trends' => [
+          'active' => $activeTrends,
+          'expired' => $expiredTrends
+        ]
       ]
     ]);
     exit;
@@ -115,11 +168,9 @@ try {
   }
 
   if ($fromDate !== '' && $toDate !== '') {
-    $fromDateClean = str_replace('-', '', $fromDate);
-    $toDateClean = str_replace('-', '', $toDate);
     $whereConditions[] = "created_on >= :from_date AND created_on <= :to_date";
-    $params[':from_date'] = $fromDateClean;
-    $params[':to_date'] = $toDateClean;
+    $params[':from_date'] = $fromDate;
+    $params[':to_date'] = $toDate;
   }
 
   if ($clientName !== '') {
@@ -128,7 +179,7 @@ try {
   }
 
   if ($status !== '') {
-    $today = date('Ymd');
+    $today = date('Y-m-d');
     if ($status === 'active') {
       $whereConditions[] = "licensee_validtill >= :today";
       $params[':today'] = $today;
@@ -136,7 +187,7 @@ try {
       $whereConditions[] = "(licensee_validtill < :today AND licensee_validtill != '' AND licensee_validtill IS NOT NULL)";
       $params[':today'] = $today;
     } elseif ($status === 'expiring') {
-      $next30Days = date('Ymd', strtotime('+30 days'));
+      $next30Days = date('Y-m-d', strtotime('+30 days'));
       $whereConditions[] = "(licensee_validtill >= :today AND licensee_validtill <= :next30Days)";
       $params[':today'] = $today;
       $params[':next30Days'] = $next30Days;

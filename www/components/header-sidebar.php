@@ -139,15 +139,37 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
             $is_reports_page = ($current_page == 'reports');
             ?>
             <?php if ($user_role !== 'Limited Access'): ?>
-              <li>
-                <a href="reports.php?client=Sharekhan"
-                  class="<?php echo ($is_reports_page && $client_param == 'Sharekhan') ? 'active' : ''; ?>">
-                  Sharekhan
+              <li class="nested-submenu">
+                <a href="javascript:void(0);" class="nested-submenu-toggle"
+                  style="display: flex; align-items: center; justify-content: space-between;">
+                  <span style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path
+                        d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+                    </svg>
+                    Clients
+                  </span>
+                  <i class="fa-solid fa-chevron-right nested-submenu-arrow" style="font-size: 10px;"></i>
                 </a>
+                <ul class="nested-sidebar-submenu">
+                  <li>
+                    <a href="reports.php?client=Sharekhan"
+                      class="<?php echo ($is_reports_page && $client_param == 'Sharekhan') ? 'active' : ''; ?>">
+                      Sharekhan
+                    </a>
+                  </li>
+                  <li>
+                    <a href="reports.php?client=Torus"
+                      class="<?php echo ($is_reports_page && $client_param == 'Torus') ? 'active' : ''; ?>">
+                      Torus
+                    </a>
+                  </li>
+                </ul>
               </li>
             <?php endif; ?>
             <li>
-              <a href="reports.php" class="<?php echo ($is_reports_page && $client_param == '') ? 'active' : ''; ?>">
+              <a href="reports.php"
+                class="all-reports-item <?php echo ($is_reports_page && $client_param == '') ? 'active' : ''; ?>">
                 All
               </a>
             </li>
@@ -273,6 +295,13 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
     if ($('.has-submenu.active').length > 0) {
       $('.has-submenu.active .sidebar-submenu').show();
       $('.has-submenu.active .submenu-arrow').css('transform', 'rotate(180deg)');
+    }
+
+    // Nested Submenu hover logic is handled via CSS
+
+    // Keep nested submenu parent arrow visible if a child is active
+    if ($('.nested-sidebar-submenu .active').length > 0) {
+      $('.nested-sidebar-submenu:has(.active)').siblings('.nested-submenu-toggle').find('.nested-submenu-arrow').css('opacity', '1');
     }
 
     // Search functionality

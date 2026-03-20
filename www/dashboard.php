@@ -331,11 +331,16 @@ if ($pdo) {
       const ctx = document.getElementById('licenseChart');
       if (ctx && Chart.getChart(ctx)) {
         const chart = Chart.getChart(ctx);
-        // Update last data point for demo purposes or fetch real trend data
-        // For now, we just update the last point of datasets to match current stats
-        const lastIndex = chart.data.labels.length - 1;
-        chart.data.datasets[0].data[lastIndex] = stats.active_licenses;
-        chart.data.datasets[1].data[lastIndex] = stats.expired_licenses;
+
+        if (stats.trends) {
+          chart.data.datasets[0].data = stats.trends.active;
+          chart.data.datasets[1].data = stats.trends.expired;
+        } else {
+          // Fallback for demo purposes if trends not available
+          const lastIndex = chart.data.labels.length - 1;
+          chart.data.datasets[0].data[lastIndex] = stats.active_licenses;
+          chart.data.datasets[1].data[lastIndex] = stats.expired_licenses;
+        }
         chart.update();
       }
     }
@@ -351,14 +356,14 @@ if ($pdo) {
           labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
           datasets: [{
             label: 'Active Licenses',
-            data: [12, 19, 15, 25, 22, 30, 28, 35, 32, 38, 42, 0], // Last point will be updated
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             borderColor: 'rgb(59, 130, 246)',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.4,
             fill: true
           }, {
             label: 'Expired',
-            data: [3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 0], // Last point will be updated
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             borderColor: 'rgb(239, 68, 68)',
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
             tension: 0.4,

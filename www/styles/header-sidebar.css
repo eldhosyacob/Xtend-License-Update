@@ -378,7 +378,8 @@
   /* background-color: #34495e; */
   background-color: #27282a;
   color: #ecf0f1;
-  overflow-y: auto;
+  overflow: visible;
+  /* Changed from overflow-y: auto to allow flyouts to escape */
   transition: transform 0.3s ease;
   z-index: 999;
   display: flex;
@@ -663,7 +664,7 @@
 } */
 
 /* Bullet Point / Icon Indicator */
-.sidebar-submenu li a::before {
+.sidebar-submenu li a:not(.nested-submenu-toggle)::before {
   content: '';
   position: absolute;
   left: 28px;
@@ -678,11 +679,60 @@
   transition: all 0.3s ease;
 }
 
-.sidebar-submenu li a:hover::before,
-.sidebar-submenu li a.active::before {
+.sidebar-submenu li a:not(.nested-submenu-toggle):hover::before,
+.sidebar-submenu li a.active:not(.nested-submenu-toggle)::before {
   background-color: #3498db;
   /* Active dot color */
   transform: translateY(-50%) scale(1.2);
   box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
   /* Glow effect */
+}
+
+/* Override styling for 'All' reports item to align text to 'Clients' and center the dot with the user icon */
+.sidebar-submenu li a.all-reports-item {
+  padding-left: 74px;
+}
+
+.sidebar-submenu li a.all-reports-item:hover {
+  padding-left: 78px;
+}
+
+.sidebar-submenu li a.all-reports-item::before {
+  left: 56px;
+}
+
+/* ===== NESTED (FLYOUT) SUBMENU STYLES ===== */
+.nested-submenu {
+  position: relative;
+}
+
+.nested-sidebar-submenu {
+  display: none;
+  list-style: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 180px;
+  background-color: #2b2e32;
+  /* Slightly different shade to pop out */
+  box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  z-index: 1000;
+  padding: 5px 0;
+  margin: 0;
+}
+
+.nested-submenu-arrow {
+  opacity: 0;
+  transform: rotate(0deg) !important;
+  transition: opacity 0.3s ease;
+}
+
+.nested-submenu:hover .nested-sidebar-submenu {
+  display: block;
+}
+
+.nested-submenu:hover .nested-submenu-toggle .nested-submenu-arrow {
+  opacity: 1;
+  transform: rotate(0deg) !important;
 }
