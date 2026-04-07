@@ -214,3 +214,30 @@ Changes:
  - centralization_phonebookurl: 'http://103.38.15.2:8063/VersionUpgradation.xbc?UpdatePhoneBook()' -> 'http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()'
  - device_status: 'Serviced_T' -> ''
 --------------------------------------------------
+[2026-04-07 10:33:23] User: eldhos | Serial: 283
+Action: Updated License Entry (ID: 94)
+Changes:
+ - created_on: '2026-01-14' -> '20260114'
+ - licensee_amctill: '2027-01-14' -> '20270114'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> 'false'
+ - device_id_pri: '' -> '6523'
+ - ports_enabled_pri: '' -> '111111111111'
+--------------------------------------------------
+[2026-04-07 10:39:38] User: eldhos | Serial: 283
+Action: Updated License Entry (ID: 94)
+Changes:
+ - created_on: '2026-01-14' -> '20260114'
+ - licensee_amctill: '2027-01-14' -> '20270114'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> 'false'
+--------------------------------------------------
+[2026-04-07 10:43:33] User: eldhos | Serial: 283
+Action: Updated License Entry (ID: 94)
+Changes:
+ - created_on: '2026-01-14' -> '20260114'
+ - licensee_amctill: '2027-01-14' -> '20270114'
+ - licensee_validtill: '2026-12-31' -> '20261231'
+ - system_isvm: '0' -> 'false'
+ - ports_enabled_pri: '111111111111' -> '11111111111111111111111111111111'
+--------------------------------------------------

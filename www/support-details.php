@@ -939,7 +939,7 @@ require_once('config/auth_check.php');
             <td>${item.latest_status_from_history || item.device_status || '-'}</td>
             <td><span class="status-badge ${statusClass}">${statusText}</span></td>
             <td class="action-cell">
-              <button type="button" onclick="fetchDetails(${item.id}); event.stopPropagation();" class="btn-search" style="padding: 6px 12px; font-size: 13px; border-radius: 6px; border: none; cursor: pointer;">
+              <button type="button" onclick="fetchDetails(${item.id}); event.stopPropagation();" class="btn-search" style="padding: 6px 10px; margin-top: 5px; font-size: 10px; border-radius: 6px; border: none; cursor: pointer;">
                 Select
               </button>
             </td>

@@ -98,6 +98,8 @@ try {
   $ports_enabled_deviceid5 = getPostVal('ports_enabled_deviceid5');
   $device_id6 = getPostVal('device_id6');
   $ports_enabled_deviceid6 = getPostVal('ports_enabled_deviceid6');
+  $device_id_pri = getPostVal('device_id_pri');
+  $ports_enabled_pri = getPostVal('ports_enabled_pri');
 
   // Features
   $features_script = getNestedPostVal('Features', 'Script');
@@ -173,6 +175,8 @@ try {
           'ports_enabled_deviceid5' => $ports_enabled_deviceid5,
           'device_id6' => $device_id6,
           'ports_enabled_deviceid6' => $ports_enabled_deviceid6,
+          'device_id_pri' => $device_id_pri,
+          'ports_enabled_pri' => $ports_enabled_pri,
           'features_script' => $features_script,
           'device_status' => $device_status,
           'centralization_livestatusurl' => $centralization_livestatusurl,
@@ -212,7 +216,7 @@ try {
         system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug,
         system_passwords_system, system_passwords_web, fetch_updates, install_updates,
         engine_build, engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, engine_validcountries,
-        device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4,device_id5, ports_enabled_deviceid5, device_id6, ports_enabled_deviceid6,
+        device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4,device_id5, ports_enabled_deviceid5, device_id6, ports_enabled_deviceid6, device_id_pri, ports_enabled_pri,
         features_script, device_status,
         centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
         comment,
@@ -224,7 +228,7 @@ try {
         :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug,
         :system_passwords_system, :system_passwords_web, :fetch_updates, :install_updates,
         :engine_build, :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz, :engine_validcountries,
-        :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,:device_id5, :ports_enabled_deviceid5, :device_id6, :ports_enabled_deviceid6,
+        :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,:device_id5, :ports_enabled_deviceid5, :device_id6, :ports_enabled_deviceid6, :device_id_pri, :ports_enabled_pri,
         :features_script, :device_status,
         :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
         :comment,
@@ -275,6 +279,8 @@ try {
     ':ports_enabled_deviceid5' => $ports_enabled_deviceid5,
     ':device_id6' => $device_id6,
     ':ports_enabled_deviceid6' => $ports_enabled_deviceid6,
+    ':device_id_pri' => $device_id_pri,
+    ':ports_enabled_pri' => $ports_enabled_pri,
     ':features_script' => $features_script,
     ':device_status' => $device_status,
     ':centralization_livestatusurl' => $centralization_livestatusurl,

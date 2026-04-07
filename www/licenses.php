@@ -215,6 +215,8 @@ if ($method === 'GET' && $editId) {
           'ports_enabled_deviceid5' => $row['ports_enabled_deviceid5'],
           'device_id6' => $row['device_id6'],
           'ports_enabled_deviceid6' => $row['ports_enabled_deviceid6'],
+          'device_id_pri' => $row['device_id_pri'],
+          'ports_enabled_pri' => $row['ports_enabled_pri'],
           'Features' => [
             'Script' => $row['features_script'],
           ],
@@ -282,6 +284,19 @@ if ($method === 'GET' && $editId) {
                   }
                 } else {
                   $prefill[$key] = $val;
+                }
+              }
+
+              // Map nested Hardware->PRI
+              if (isset($prefill['Hardware']['PRI']) && is_array($prefill['Hardware']['PRI'])) {
+                $prefill["device_id_pri"] = '';
+                $prefill["ports_enabled_pri"] = '';
+                $pri = $prefill['Hardware']['PRI'];
+                foreach ($pri as $dId => $ports) {
+                  $cleanId = preg_replace('/_DUPLICATE_KEY_MARKER_.*$/', '', (string) $dId);
+                  $prefill["device_id_pri"] = $cleanId;
+                  $prefill["ports_enabled_pri"] = $ports;
+                  break;
                 }
               }
 
@@ -471,6 +486,7 @@ function buildLicenseFromPost(array $post, $db = null): array
     ],
     'Hardware' => [
       'Analog' => [],
+      'PRI' => [],
     ],
     'Centralization' => [
       'LiveStatusUrl' => ($postfix = function ($val, $suffix) use ($str) {
@@ -515,6 +531,13 @@ function buildLicenseFromPost(array $post, $db = null): array
     }
     $license['Hardware']['Analog'][$key] = $d['ports'];
   }
+
+  $priId = $str($post['device_id_pri'] ?? '');
+  $priPorts = $str($post['ports_enabled_pri'] ?? '');
+  if ($priId !== '') {
+    $license['Hardware']['PRI'][$priId] = $priPorts;
+  }
+
   return $license;
 }
 
@@ -641,6 +664,8 @@ if ($method === 'POST' && $action === 'send') {
           $ports_enabled_deviceid5 = $getPostVal('ports_enabled_deviceid5');
           $device_id6 = $getPostVal('device_id6');
           $ports_enabled_deviceid6 = $getPostVal('ports_enabled_deviceid6');
+          $device_id_pri = $getPostVal('device_id_pri');
+          $ports_enabled_pri = $getPostVal('ports_enabled_pri');
 
           // New System IPSettings fields
           // Need to fix retrieval for deeper nested keys or just access $_POST directly
@@ -706,6 +731,8 @@ if ($method === 'POST' && $action === 'send') {
             ':ports_enabled_deviceid5' => $ports_enabled_deviceid5,
             ':device_id6' => $device_id6,
             ':ports_enabled_deviceid6' => $ports_enabled_deviceid6,
+            ':device_id_pri' => $device_id_pri,
+            ':ports_enabled_pri' => $ports_enabled_pri,
 
             ':system_ipsettings_type' => $system_ipsettings_type,
             ':system_ipsettings_ip' => $system_ipsettings_ip,
@@ -770,6 +797,7 @@ if ($method === 'POST' && $action === 'send') {
                               device_id4 = :device_id4, ports_enabled_deviceid4 = :ports_enabled_deviceid4,
                               device_id5 = :device_id5, ports_enabled_deviceid5 = :ports_enabled_deviceid5,
                               device_id6 = :device_id6, ports_enabled_deviceid6 = :ports_enabled_deviceid6,
+                              device_id_pri = :device_id_pri, ports_enabled_pri = :ports_enabled_pri,
                               centralization_livestatusurl = :centralization_livestatusurl, centralization_livestatusurlinterval = :centralization_livestatusurlinterval,
                               centralization_uploadfileurl = :centralization_uploadfileurl, centralization_uploadfileurlinterval = :centralization_uploadfileurlinterval,
                               centralization_settingsurl = :centralization_settingsurl, centralization_usertrunkmappingurl = :centralization_usertrunkmappingurl,
@@ -810,7 +838,7 @@ if ($method === 'POST' && $action === 'send') {
                               system_passwords_system, system_passwords_web, fetch_updates, install_updates,
                               engine_build, 
                               engine_graceperiod, engine_maxports, engine_validstarttz, engine_validendtz, 
-                              engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4, device_id5, ports_enabled_deviceid5, device_id6, ports_enabled_deviceid6,
+                              engine_validcountries, device_id1, ports_enabled_deviceid1, device_id2, ports_enabled_deviceid2, device_id3, ports_enabled_deviceid3, device_id4, ports_enabled_deviceid4, device_id5, ports_enabled_deviceid5, device_id6, ports_enabled_deviceid6, device_id_pri, ports_enabled_pri,
                               centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
                               features_script, device_status, comment, tested_by
                           ) VALUES (
@@ -821,7 +849,7 @@ if ($method === 'POST' && $action === 'send') {
                               :system_passwords_system, :system_passwords_web, :fetch_updates, :install_updates,
                               :engine_build,
                               :engine_graceperiod, :engine_maxports, :engine_validstarttz, :engine_validendtz,
-                              :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,:device_id5, :ports_enabled_deviceid5, :device_id6, :ports_enabled_deviceid6,
+                              :engine_validcountries, :device_id1, :ports_enabled_deviceid1, :device_id2, :ports_enabled_deviceid2, :device_id3, :ports_enabled_deviceid3, :device_id4, :ports_enabled_deviceid4,:device_id5, :ports_enabled_deviceid5, :device_id6, :ports_enabled_deviceid6, :device_id_pri, :ports_enabled_pri,
                               :centralization_livestatusurl, :centralization_livestatusurlinterval, :centralization_uploadfileurl, :centralization_uploadfileurlinterval, :centralization_settingsurl, :centralization_usertrunkmappingurl, :centralization_phonebookurl,
                               :features_script, :device_status, :comment, :tested_by
                           )";
@@ -1136,6 +1164,8 @@ header('Content-Type: text/html; charset=utf-8');
     $p5_val = '';
     $d6_val = '';
     $p6_val = '';
+    $dpri_val = '';
+    $ppri_val = '';
 
     // Override from prefill (DB or Remote)
     if (is_array($prefill)) {
@@ -1164,6 +1194,11 @@ header('Content-Type: text/html; charset=utf-8');
         $d6_val = $prefill['device_id6'];
       if (isset($prefill['ports_enabled_deviceid6']))
         $p6_val = $prefill['ports_enabled_deviceid6'];
+
+      if (isset($prefill['device_id_pri']))
+        $dpri_val = $prefill['device_id_pri'];
+      if (isset($prefill['ports_enabled_pri']))
+        $ppri_val = $prefill['ports_enabled_pri'];
 
       // Fallback or override from Hardware structure (e.g. remote fetch calls or legacy structure)
       // If we fetched from remote JSON, we might have keys in Hardware->Analog
@@ -1754,6 +1789,31 @@ header('Content-Type: text/html; charset=utf-8');
                 Must be exactly 16 characters of 0 and 1.
               </div>
             </div>
+
+            <!-- Device PRI -->
+            <div style="grid-column: 1 / -1; margin-top:16px;">
+              <h4 style="margin:0 0 12px 0; font-size:16px; font-weight:600; color:#475569; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">PRI</h4>
+            </div>
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Device ID PRI</label>
+              <input type="number" name="device_id_pri" value="<?php echo h($dpri_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+
+            <div>
+              <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">PRI [PortsEnabled]</label>
+              <input type="text" maxlength="32" name="ports_enabled_pri" id="ports_enabled_pri"
+                value="<?php echo h($ppri_val); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="validatePorts(this); this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+              <div id="error_ports_enabled_pri"
+                style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">
+                Must be exactly 32 characters of 0 and 1.
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2165,6 +2225,9 @@ header('Content-Type: text/html; charset=utf-8');
           errorDiv.innerText = `Must be exactly ${maxLen} characters of 0 and 1.`;
           errorDiv.style.display = 'block';
         }
+        if (maxLen == 32) {
+           alert(`PRI ports must be exactly ${maxLen} characters of 0 and 1.`);
+        }
         return false;
       } else {
         if (errorDiv) errorDiv.style.display = 'none';
@@ -2238,22 +2301,26 @@ header('Content-Type: text/html; charset=utf-8');
           // Validate Ports before submission
           const p1 = document.getElementById('ports_enabled_deviceid1');
           const p2 = document.getElementById('ports_enabled_deviceid2');
-
-          let valid1 = true;
-          let valid2 = true;
-
-          if (p1) valid1 = validatePorts(p1);
-          if (p2) valid2 = validatePorts(p2);
           const p3 = document.getElementById('ports_enabled_deviceid3');
           const p4 = document.getElementById('ports_enabled_deviceid4');
-          let valid3 = true;
-          let valid4 = true;
-          if (p3) valid3 = validatePorts(p3);
-          if (p4) valid4 = validatePorts(p4);
+          const p5 = document.getElementById('ports_enabled_deviceid5');
+          const p6 = document.getElementById('ports_enabled_deviceid6');
+          const pPri = document.getElementById('ports_enabled_pri');
 
-          if (!valid1 || !valid2 || !valid3 || !valid4) {
+          let isValid = true;
+          if (p1 && !validatePorts(p1)) isValid = false;
+          if (p2 && !validatePorts(p2)) isValid = false;
+          if (p3 && !validatePorts(p3)) isValid = false;
+          if (p4 && !validatePorts(p4)) isValid = false;
+          if (p5 && !validatePorts(p5)) isValid = false;
+          if (p6 && !validatePorts(p6)) isValid = false;
+          if (pPri && !validatePorts(pPri)) isValid = false;
+
+          if (!isValid) {
             e.preventDefault();
-            alert('Please correct the errors in Hardware PortsEnabled fields.');
+            // Don't alert here if PRI caused its own alert to prevent double alerting
+            // But we can keep a general submit alert.
+            // alert('Please correct the errors in Hardware PortsEnabled fields.');
             return;
           }
 
