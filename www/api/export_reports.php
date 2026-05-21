@@ -131,8 +131,8 @@ try {
     'Total Ports',
     'Ports Enabled',
     'Device ID',
-    'Comments',
-    'Device Status'
+    'Device Status',
+    'Comments'
   ]);
 
   $cnt = 1;
@@ -192,8 +192,8 @@ try {
       $totalPorts,
       $portsEnabledCount,
       $deviceIdStr,
-      $formattedComments,
-      !empty($row['latest_device_status']) ? $row['latest_device_status'] : $row['device_status']
+      !empty($row['latest_device_status']) ? $row['latest_device_status'] : $row['device_status'],
+      $formattedComments
     ]);
   }
 

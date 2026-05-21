@@ -164,6 +164,12 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                       Torus
                     </a>
                   </li>
+                  <li>
+                    <a href="reports.php?client=SK-Other"
+                      class="<?php echo ($is_reports_page && $client_param == 'SK-Other') ? 'active' : ''; ?>">
+                      SK-Other
+                    </a>
+                  </li>
                 </ul>
               </li>
             <?php endif; ?>
