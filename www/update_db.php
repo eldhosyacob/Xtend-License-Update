@@ -147,8 +147,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['repoType'])) {
                     centralization_uploadfileurl = :centralization_uploadfileurl, centralization_uploadfileurlinterval = :centralization_uploadfileurlinterval,
                     centralization_settingsurl = :centralization_settingsurl, centralization_usertrunkmappingurl = :centralization_usertrunkmappingurl,
                     centralization_phonebookurl = :centralization_phonebookurl,
-                    features_script = :features_script
+                    features_script = :features_script,
+                    device_status = :device_status
                 WHERE id = :id");
+
+                $importStatus = $jsonData['DeviceStatus'] ?? '';
 
                 $updateStmt->execute([
                   ':id' => $row['id'],
@@ -201,8 +204,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['repoType'])) {
                   ':centralization_settingsurl' => $jsonData['Centralization']['SettingsUrl'] ?? '',
                   ':centralization_usertrunkmappingurl' => $jsonData['Centralization']['UserTrunkMappingUrl'] ?? '',
                   ':centralization_phonebookurl' => $jsonData['Centralization']['PhoneBookUrl'] ?? '',
-                  ':features_script' => $jsonData['Features']['Script'] ?? ''
+                  ':features_script' => $jsonData['Features']['Script'] ?? '',
+                  ':device_status' => $importStatus
                 ]);
+
+                // Also update/insert into device_status history table if device_status is in JSON
+                if ($importStatus !== '') {
+                  $histStmt = $db->prepare("SELECT status FROM device_status WHERE license_id = :id ORDER BY id DESC LIMIT 1");
+                  $histStmt->execute([':id' => $row['id']]);
+                  $latestHist = $histStmt->fetch(PDO::FETCH_ASSOC);
+                  if (!$latestHist || $latestHist['status'] !== $importStatus) {
+                    $insertHist = $db->prepare("INSERT INTO device_status (`license_id`, `status`, `date`, `user`) VALUES (:license_id, :status, NOW(), :user)");
+                    $insertHist->execute([
+                      ':license_id' => $row['id'],
+                      ':status' => $importStatus,
+                      ':user' => $_SESSION['full_name'] ?? 'System Sync'
+                    ]);
+                  }
+                }
 
                 $results[] = ["type" => "success", "msg" => "Serial ID {$serialId}: Successfully Synced."];
                 $updatedCount++;

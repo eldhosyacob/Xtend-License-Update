@@ -906,7 +906,8 @@ if ($method === 'POST' && $action === 'send') {
 
           // Insert into device_status table only if values are provided
           // Insert into device_status table only if values are provided
-          if ($licenseId && !empty($device_status) && !empty($status_date_input)) {
+          if ($licenseId && !empty($device_status)) {
+            $status_date = !empty($status_date_input) ? $status_date_input . ' ' . date('H:i:s') : date('Y-m-d H:i:s');
             try {
               $statusStmt = $db->prepare("
                 INSERT INTO device_status (`license_id`, `status`, `date`, `user`) 
@@ -915,7 +916,7 @@ if ($method === 'POST' && $action === 'send') {
               $statusStmt->execute([
                 ':license_id' => $licenseId,
                 ':status' => $device_status,
-                ':date' => $status_date_input . ' ' . date('H:i:s'),
+                ':date' => $status_date,
                 ':user' => $_SESSION['full_name'] ?? 'Unknown'
               ]);
             } catch (PDOException $e) {
@@ -1998,6 +1999,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <option value="Installed">Installed</option>
                 <option value="Serviced">Serviced</option>
                 <option value="Replaced">Replaced</option>
+                <option value="Return Received">Return Received</option>
               </select>
               <?php if ($editId): ?>
                 <div style="font-size:12px; color:#64748b; font-weight:500;">
@@ -2334,6 +2336,17 @@ header('Content-Type: text/html; charset=utf-8');
       const isViewMode = <?php echo $isViewMode ? 'true' : 'false'; ?>;
 
       toggleIPSettings();
+
+      // Auto-fill Licensee[Dealer] based on ClientName selection
+      const clientNameSelect = document.querySelector('select[name="ClientName"]');
+      const dealerInput = document.querySelector('input[name="Licensee[Dealer]"]');
+      if (clientNameSelect && dealerInput && !isViewMode) {
+        clientNameSelect.addEventListener('change', function () {
+          if (this.value) {
+            dealerInput.value = this.value.toUpperCase() + '-';
+          }
+        });
+      }
 
       if (isViewMode) {
         // Disable all form inputs

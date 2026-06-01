@@ -585,6 +585,7 @@ require_once('config/auth_check.php');
                 <option value="Installed">Installed</option>
                 <option value="Serviced">Serviced</option>
                 <option value="Replaced">Replaced</option>
+                <option value="Return Received">Return Received</option>
               </select>
               <div style="font-size:12px; color:#64748b; font-weight:500;">
                 Current Device Status: <span id="currentDeviceStatusText"

@@ -43,6 +43,7 @@ require_once('config/auth_check.php');
           <option value="Installed">Installed</option>
           <option value="Serviced">Serviced</option>
           <option value="Replaced">Replaced</option>
+          <option value="Return Received">Return Received</option>
         </select>
 
         <div id="dateRangeInputs" style="display: none; gap: 8px; align-items: center;">

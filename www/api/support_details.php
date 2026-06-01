@@ -130,9 +130,10 @@ if ($method === 'GET') {
     ]);
 
     // 2. Handle Device Status History
-    if (!empty($deviceStatus) && !empty($statusDate)) {
+    if (!empty($deviceStatus)) {
+      $statusDateVal = !empty($statusDate) ? $statusDate : date('Y-m-d H:i:s');
       // Append current time to date if missing
-      $fullDate = (strpos($statusDate, ':') === false) ? $statusDate . ' ' . date('H:i:s') : $statusDate;
+      $fullDate = (strpos($statusDateVal, ':') === false) ? $statusDateVal . ' ' . date('H:i:s') : $statusDateVal;
 
       $statusStmt = $db->prepare("INSERT INTO device_status (`license_id`, `status`, `date`, `user`) VALUES (:license_id, :status, :date, :user)");
       $statusStmt->execute([

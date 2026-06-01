@@ -1,14 +1,14 @@
 {
     "CreatedOn": "20260114",
     "Client": {
-        "ClientName": "SK-Other",
+        "ClientName": "Torus",
         "LocationName": "TIBBO TEST2",
         "LocationCode": "Test1234"
     },
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
         "Distributor": "Xtend",
-        "Dealer": "TIBBO TEST2",
+        "Dealer": "Torus-Test",
         "Type": "Rental",
         "AMCTill": "20270114",
         "ValidTill": "20261231",
@@ -65,5 +65,5 @@
     "Features": {
         "Script": "TIBBO TEST2"
     },
-    "DeviceStatus": "Testing"
+    "DeviceStatus": "Return Received"
 }

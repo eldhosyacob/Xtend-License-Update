@@ -302,8 +302,9 @@ try {
 
   // Insert device status log
   $licenseId = $db->lastInsertId();
-  // Only insert into device_status history if status and date are provided
-  if ($licenseId && !empty($device_status) && !empty($status_date_input)) {
+  // Only insert into device_status history if status is provided
+  if ($licenseId && !empty($device_status)) {
+    $status_date = !empty($status_date_input) ? $status_date_input . ' ' . date('H:i:s') : date('Y-m-d H:i:s');
     try {
       $statusStmt = $db->prepare("
           INSERT INTO device_status (`license_id`, `status`, `date`, `user`) 
@@ -312,7 +313,7 @@ try {
       $statusStmt->execute([
         ':license_id' => $licenseId,
         ':status' => $device_status,
-        ':date' => $status_date_input . ' ' . date('H:i:s'),
+        ':date' => $status_date,
         ':user' => $_SESSION['full_name'] ?? 'Unknown'
       ]);
     } catch (PDOException $e) {

@@ -736,3 +736,24 @@
   opacity: 1;
   transform: rotate(0deg) !important;
 }
+
+.nested-submenu-header {
+  padding: 8px 15px 6px 15px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+  color: #2fa7cd;
+  letter-spacing: 0.5px;
+  /* border-bottom: 1px solid rgba(255, 255, 255, 0.05); */
+  margin-bottom: 5px;
+  pointer-events: none;
+  border-bottom: 1px solid #5d8174;
+}
+
+/* .header-bottom {
+  margin-bottom: 10px;
+  height: 1px;
+  width: 100%;
+  background-color: #2fa7cd;
+} */
