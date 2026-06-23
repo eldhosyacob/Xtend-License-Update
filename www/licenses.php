@@ -2337,13 +2337,27 @@ header('Content-Type: text/html; charset=utf-8');
 
       toggleIPSettings();
 
-      // Auto-fill Licensee[Dealer] based on ClientName selection
+      // Auto-fill Licensee[Dealer] and System[BuildType] based on ClientName selection
       const clientNameSelect = document.querySelector('select[name="ClientName"]');
       const dealerInput = document.querySelector('input[name="Licensee[Dealer]"]');
-      if (clientNameSelect && dealerInput && !isViewMode) {
+      const buildTypeSelect = document.querySelector('select[name="System[BuildType]"]');
+      if (clientNameSelect && !isViewMode) {
         clientNameSelect.addEventListener('change', function () {
           if (this.value) {
-            dealerInput.value = this.value.toUpperCase() + '-';
+            if (dealerInput) {
+              dealerInput.value = this.value.toUpperCase() + '-';
+            }
+            if (buildTypeSelect) {
+              const mapping = {
+                'Sharekhan': 'sharekhan',
+                'Torus': 'Torus',
+                'Other': 'Test',
+                'SK-Other': 'sharekhan'
+              };
+              if (mapping[this.value]) {
+                buildTypeSelect.value = mapping[this.value];
+              }
+            }
           }
         });
       }
