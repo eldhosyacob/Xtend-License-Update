@@ -584,6 +584,7 @@ require_once('config/auth_check.php');
                 <option value="In Progress">In Progress</option>
                 <option value="Installed">Installed</option>
                 <option value="Serviced">Serviced</option>
+                <option value="Replace Initiated">Replace Initiated</option>
                 <option value="Replaced">Replaced</option>
                 <option value="Return Received">Return Received</option>
               </select>

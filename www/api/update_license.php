@@ -53,6 +53,7 @@ try {
 
   $location_name = getPostVal('LocationName');
   $location_code = getPostVal('LocationCode');
+  $old_device_id = getPostVal('OldDeviceID');
   $board_type = getPostVal('BoardType', 'Lichee Pi');
 
   // Licensee
@@ -141,6 +142,7 @@ try {
           'client_name' => $client_name,
           'location_name' => $location_name,
           'location_code' => $location_code,
+          'old_device_id' => $old_device_id,
           'board_type' => $board_type,
           'licensee_name' => $licensee_name,
           'licensee_distributor' => $licensee_distributor,
@@ -215,7 +217,7 @@ try {
   // Prepare SQL statement
   $sql = "INSERT INTO license_details (
         created_on, 
-        client_name, location_name, location_code, board_type,
+        client_name, location_name, location_code, old_device_id, board_type,
         licensee_name, licensee_distributor, licensee_dealer, licensee_type, licensee_amctill, licensee_validtill, licensee_billno,
         system_type, system_os, system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug,
         system_passwords_system, system_passwords_web, fetch_updates, install_updates,
@@ -227,7 +229,7 @@ try {
         tested_by
     ) VALUES (
         :created_on,
-        :client_name, :location_name, :location_code, :board_type,
+        :client_name, :location_name, :location_code, :old_device_id, :board_type,
         :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type, :licensee_amctill, :licensee_validtill, :licensee_billno,
         :system_type, :system_os, :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug,
         :system_passwords_system, :system_passwords_web, :fetch_updates, :install_updates,
@@ -246,6 +248,7 @@ try {
     ':client_name' => $client_name,
     ':location_name' => $location_name,
     ':location_code' => $location_code,
+    ':old_device_id' => $old_device_id,
     ':board_type' => $board_type,
     ':licensee_name' => $licensee_name,
     ':licensee_distributor' => $licensee_distributor,

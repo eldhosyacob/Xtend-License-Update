@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['repoType'])) {
                 }
 
                 $updateStmt = $db->prepare("UPDATE license_details SET
-                    client_name = :client_name, location_name = :location_name, location_code = :location_code, 
+                    client_name = :client_name, location_name = :location_name, location_code = :location_code, old_device_id = :old_device_id,
                     licensee_name = :licensee_name, licensee_distributor = :licensee_distributor, licensee_dealer = :licensee_dealer, 
                     licensee_type = :licensee_type, licensee_amctill = :licensee_amctill, licensee_validtill = :licensee_validtill, 
                     licensee_billno = :licensee_billno, system_type = :system_type, system_os = :system_os, 
@@ -158,6 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['repoType'])) {
                   ':client_name' => $jsonData['Client']['ClientName'] ?? $jsonData['ClientName'] ?? '',
                   ':location_name' => $jsonData['Client']['LocationName'] ?? $jsonData['LocationName'] ?? '',
                   ':location_code' => $jsonData['Client']['LocationCode'] ?? $jsonData['LocationCode'] ?? '',
+                  ':old_device_id' => $jsonData['Client']['OldDeviceID'] ?? $jsonData['OldDeviceID'] ?? '',
                   ':licensee_name' => $jsonData['Licensee']['Name'] ?? '',
                   ':licensee_distributor' => $jsonData['Licensee']['Distributor'] ?? '',
                   ':licensee_dealer' => $jsonData['Licensee']['Dealer'] ?? '',

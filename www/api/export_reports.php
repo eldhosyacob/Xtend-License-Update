@@ -94,8 +94,8 @@ try {
 
   // Fetch data for export
   $sql = "SELECT created_on, client_name, location_name, location_code, board_type, licensee_validtill, system_serialid, system_uniqueid, engine_maxports as total_ports, 
-            device_id1, device_id2, device_id3, device_id4,
-            ports_enabled_deviceid1, ports_enabled_deviceid2, ports_enabled_deviceid3, ports_enabled_deviceid4,
+            device_id1, device_id2, device_id3, device_id4, device_id5, device_id6,
+            ports_enabled_deviceid1, ports_enabled_deviceid2, ports_enabled_deviceid3, ports_enabled_deviceid4, ports_enabled_deviceid5, ports_enabled_deviceid6,
             (SELECT status FROM device_status WHERE license_id = license_details.id ORDER BY id DESC LIMIT 1) as latest_device_status,
             device_status,
             (SELECT GROUP_CONCAT(comment ORDER BY created_at ASC SEPARATOR '|||') FROM comments WHERE license_id = license_details.id) as comments_list
@@ -130,6 +130,7 @@ try {
     'Unique ID',
     'Total Ports',
     'Ports Enabled',
+    'Port Bit Values',
     'Device ID',
     'Device Status',
     'Comments'
@@ -139,14 +140,11 @@ try {
   while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     // Concatenate Device IDs
     $deviceIds = [];
-    if (!empty($row['device_id1']))
-      $deviceIds[] = $row['device_id1'];
-    if (!empty($row['device_id2']))
-      $deviceIds[] = $row['device_id2'];
-    if (!empty($row['device_id3']))
-      $deviceIds[] = $row['device_id3'];
-    if (!empty($row['device_id4']))
-      $deviceIds[] = $row['device_id4'];
+    for ($i = 1; $i <= 6; $i++) {
+      if (!empty($row["device_id$i"])) {
+        $deviceIds[] = $row["device_id$i"];
+      }
+    }
     $deviceIdStr = implode(', ', $deviceIds);
 
     // Format Total Ports - extract M= value if present
@@ -157,10 +155,19 @@ try {
 
     // Calculate Ports Enabled (count of '1's in ports_enabled_deviceid columns)
     $portsEnabledCount = 0;
-    $portsEnabledCount += substr_count((string) $row['ports_enabled_deviceid1'], '1');
-    $portsEnabledCount += substr_count((string) $row['ports_enabled_deviceid2'], '1');
-    $portsEnabledCount += substr_count((string) $row['ports_enabled_deviceid3'], '1');
-    $portsEnabledCount += substr_count((string) $row['ports_enabled_deviceid4'], '1');
+    for ($i = 1; $i <= 6; $i++) {
+      $portsEnabledCount += substr_count((string) ($row["ports_enabled_deviceid$i"] ?? ''), '1');
+    }
+
+    // Compile Port Bit Values (comma-separated list of ports_enabled_deviceid values maintaining position)
+    $portBitValues = [];
+    for ($i = 1; $i <= 6; $i++) {
+      $portBitValues[] = $row["ports_enabled_deviceid$i"] ?? '';
+    }
+    $portBitValuesStr = rtrim(implode(',', $portBitValues), ',');
+    if ($portBitValuesStr !== '') {
+      $portBitValuesStr = '="' . $portBitValuesStr . '"';
+    }
 
     // Process comments
     $commentsRaw = isset($row['comments_list']) ? $row['comments_list'] : '';
@@ -191,6 +198,7 @@ try {
       $row['system_uniqueid'],
       $totalPorts,
       $portsEnabledCount,
+      $portBitValuesStr,
       $deviceIdStr,
       !empty($row['latest_device_status']) ? $row['latest_device_status'] : $row['device_status'],
       $formattedComments

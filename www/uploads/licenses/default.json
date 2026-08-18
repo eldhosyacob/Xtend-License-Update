@@ -3,7 +3,8 @@
     "Client": {
         "ClientName": "Torus",
         "LocationName": "TIBBO TEST2",
-        "LocationCode": "Test1234"
+        "LocationCode": "Test1234",
+        "OldDeviceID": "7777"
     },
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
@@ -11,7 +12,7 @@
         "Dealer": "Torus-Test",
         "Type": "Rental",
         "AMCTill": "20270114",
-        "ValidTill": "20261231",
+        "ValidTill": "20260901",
         "BillNo": "XT25-1002"
     },
     "System": {
@@ -65,5 +66,5 @@
     "Features": {
         "Script": "TIBBO TEST2"
     },
-    "DeviceStatus": "Return Received"
+    "DeviceStatus": "Replace Initiated"
 }

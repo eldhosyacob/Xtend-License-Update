@@ -142,6 +142,7 @@ if ($method === 'GET' && $editId) {
           'ClientName' => $row['client_name'],
           'LocationName' => $row['location_name'],
           'LocationCode' => $row['location_code'],
+          'OldDeviceID' => $row['old_device_id'] ?? '',
           'BoardType' => $row['board_type'],
           'Licensee' => [
             'Name' => $row['licensee_name'],
@@ -274,6 +275,9 @@ if ($method === 'GET' && $editId) {
                   }
                   if (isset($val['LocationCode'])) {
                     $prefill['LocationCode'] = $val['LocationCode'];
+                  }
+                  if (isset($val['OldDeviceID'])) {
+                    $prefill['OldDeviceID'] = $val['OldDeviceID'];
                   }
                   // Keep the array as well in case it's needed elsewhere, though form uses top-level
                   $prefill[$key] = $val;
@@ -455,6 +459,7 @@ function buildLicenseFromPost(array $post, $db = null): array
       'ClientName' => $str($post['ClientName'] ?? ''),
       'LocationName' => $str($post['LocationName'] ?? ''),
       'LocationCode' => $str($post['LocationCode'] ?? ''),
+      'OldDeviceID' => $str($post['OldDeviceID'] ?? ''),
     ],
     'Licensee' => [
       'Name' => $str($post['Licensee']['Name'] ?? ''),
@@ -649,6 +654,7 @@ if ($method === 'POST' && $action === 'send') {
           $client_name = $getPostVal('ClientName');
           $location_name = $getPostVal('LocationName');
           $location_code = $getPostVal('LocationCode');
+          $old_device_id = $getPostVal('OldDeviceID');
           $board_type = $getPostVal('BoardType', 'Lichee Pi');
           $licensee_name = $getNestedPostVal('Licensee', 'Name');
           $licensee_distributor = $getNestedPostVal('Licensee', 'Distributor');
@@ -722,6 +728,7 @@ if ($method === 'POST' && $action === 'send') {
             ':client_name' => $client_name,
             ':location_name' => $location_name,
             ':location_code' => $location_code,
+            ':old_device_id' => $old_device_id,
             ':licensee_name' => $licensee_name,
             ':licensee_distributor' => $licensee_distributor,
             ':licensee_dealer' => $licensee_dealer,
@@ -800,7 +807,7 @@ if ($method === 'POST' && $action === 'send') {
 
           if ($editId) {
             $sql = "UPDATE license_details SET
-                              created_on = :created_on, client_name = :client_name, location_name = :location_name, location_code = :location_code, licensee_name = :licensee_name, licensee_distributor = :licensee_distributor,
+                              created_on = :created_on, client_name = :client_name, location_name = :location_name, location_code = :location_code, old_device_id = :old_device_id, licensee_name = :licensee_name, licensee_distributor = :licensee_distributor,
                               licensee_dealer = :licensee_dealer, licensee_type = :licensee_type, licensee_amctill = :licensee_amctill,
                               licensee_validtill = :licensee_validtill, licensee_billno = :licensee_billno, system_type = :system_type,
                               system_os = :system_os, system_isvm = :system_isvm, system_serialid = :system_serialid,
@@ -857,7 +864,7 @@ if ($method === 'POST' && $action === 'send') {
             }
 
             $sql = "INSERT INTO license_details (
-                              created_on, client_name, location_name, location_code, licensee_name, licensee_distributor, licensee_dealer, licensee_type, 
+                              created_on, client_name, location_name, location_code, old_device_id, licensee_name, licensee_distributor, licensee_dealer, licensee_type, 
                               licensee_amctill, licensee_validtill, licensee_billno, system_type, system_os, 
                               system_isvm, system_serialid, system_uniqueid, system_build_type, system_debug, board_type,
                               system_ipsettings_type, system_ipsettings_ip, system_ipsettings_gateway, system_ipsettings_dns,
@@ -868,7 +875,7 @@ if ($method === 'POST' && $action === 'send') {
                               centralization_livestatusurl, centralization_livestatusurlinterval, centralization_uploadfileurl, centralization_uploadfileurlinterval, centralization_settingsurl, centralization_usertrunkmappingurl, centralization_phonebookurl,
                               features_script, device_status, comment, tested_by
                           ) VALUES (
-                              :created_on, :client_name, :location_name, :location_code, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
+                              :created_on, :client_name, :location_name, :location_code, :old_device_id, :licensee_name, :licensee_distributor, :licensee_dealer, :licensee_type,
                               :licensee_amctill, :licensee_validtill, :licensee_billno, :system_type, :system_os,
                               :system_isvm, :system_serialid, :system_uniqueid, :system_build_type, :system_debug, :board_type,
                               :system_ipsettings_type, :system_ipsettings_ip, :system_ipsettings_gateway, :system_ipsettings_dns,
@@ -1101,9 +1108,10 @@ header('Content-Type: text/html; charset=utf-8');
     $createdOn = date('Ymd');
     $defaults = [
       'CreatedOn' => $createdOn, // Current date in YYYYMMDD format
-      'ClientName' => 'Sharekhan',
+      'ClientName' => 'Other',
       'LocationName' => '',
       'LocationCode' => '',
+      'OldDeviceID' => '',
       'BoardType' => 'Lichee Pi',
       'Licensee' => [
         'Name' => 'Xtend Technologies Pvt. Ltd.',
@@ -1120,7 +1128,7 @@ header('Content-Type: text/html; charset=utf-8');
         'IsVM' => 'false',
         'SerialID' => '',
         'UniqueID' => '',
-        'BuildType' => 'sharekhan',
+        'BuildType' => 'Test',
         'Debug' => 0,
         'IPSettings' => [
           'Type' => 'DHCP',
@@ -1311,6 +1319,15 @@ header('Content-Type: text/html; charset=utf-8');
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">LocationCode</label>
               <input type="text" name="LocationCode" required
                 value="<?php echo h($val(['LocationCode'], $defaults['LocationCode'])); ?>"
+                style="width:75%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">ReplacedID[OldDeviceID]</label>
+              <input type="number" name="OldDeviceID"
+                value="<?php echo h($val(['OldDeviceID'], $defaults['OldDeviceID'])); ?>"
                 style="width:75%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -1998,6 +2015,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <option value="In Progress">In Progress</option>
                 <option value="Installed">Installed</option>
                 <option value="Serviced">Serviced</option>
+                <option value="Replace Initiated">Replace Initiated</option>
                 <option value="Replaced">Replaced</option>
                 <option value="Return Received">Return Received</option>
               </select>
