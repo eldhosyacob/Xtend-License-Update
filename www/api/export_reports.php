@@ -81,11 +81,7 @@ try {
     $params[':device_status_val'] = $deviceStatusVal;
   }
 
-  // Restrict Limited Access users from viewing Sharekhan clients
-  $userRole = isset($_SESSION['role']) ? $_SESSION['role'] : '';
-  if ($userRole === 'Limited Access') {
-    $whereConditions[] = "client_name != 'Sharekhan'";
-  }
+
 
   $whereSql = '';
   if (!empty($whereConditions)) {

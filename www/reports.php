@@ -78,6 +78,7 @@ require_once('config/auth_check.php');
                 <th>License Validity</th>
                 <th>Serial ID</th>
                 <th>Unique ID</th>
+                <th>Ports Enabled</th>
                 <th>Grace Period</th>
                 <th>Device Status</th>
                 <th>Lic. Status</th>
@@ -378,7 +379,7 @@ require_once('config/auth_check.php');
       if (data.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="11">
+            <td colspan="12">
               <div class="empty-state">
                 <svg width="64" height="64" viewBox="0 0 16 16" fill="currentColor">
                   <path
@@ -480,16 +481,9 @@ require_once('config/auth_check.php');
         `;
 
         let actionButtons = viewBtn;
-        // userRole is defined globally in the script tag below/above
-        if (typeof userRole !== 'undefined') {
-          if (userRole === 'Administrator') {
-            actionButtons += ' ' + editBtn;
-          } else if (userRole === 'Limited Access') {
-            // Only show edit if NOT Sharekhan
-            if (row.client_name !== 'Sharekhan') {
-              actionButtons += ' ' + editBtn;
-            }
-          }
+        // Only show edit button for Administrator role in reports
+        if (typeof userRole !== 'undefined' && userRole === 'Administrator') {
+          actionButtons += ' ' + editBtn;
         }
 
         tr.innerHTML = `
@@ -500,6 +494,7 @@ require_once('config/auth_check.php');
           <td class="validity-cell">${formattedValidTill}</td>
           <td class="code-cell">${row.system_serialid || '-'}</td>
           <td class="code-cell">${uniqueIdDisplay}</td>
+          <td class="text-center">${row.ports_enabled !== undefined && row.ports_enabled !== null ? row.ports_enabled : 0}</td>
           <td class="text-center">${row.engine_graceperiod || '-'}</td>
           <td>${row.device_status || '-'}</td>
           <td><span class="status-badge ${statusClass}">${statusText}</span></td>

@@ -41,12 +41,13 @@ try {
   // Extract data from POST
   $created_on = getPostVal('CreatedOn');
   $client_name = getPostVal('ClientName');
-  // Check permission for Limited Access users
+  // Check permission for Limited Access users: Editing existing licenses is restricted
   $userRole = $_SESSION['role'] ?? '';
-  if ($userRole === 'Limited Access' && $client_name === 'Sharekhan') {
+  $license_id = getPostVal('license_id');
+  if ($userRole === 'Limited Access' && !empty($license_id)) {
     echo json_encode([
       'success' => false,
-      'message' => 'Unauthorized: You cannot create Sharekhan licenses'
+      'message' => 'Unauthorized: Limited Access users are not allowed to edit existing licenses'
     ]);
     exit;
   }

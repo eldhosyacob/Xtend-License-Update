@@ -32,9 +32,6 @@ if (isset($_GET['summary']) && $_GET['summary'] === 'true') {
     // Prepare role-based condition
     $userRole = isset($_SESSION['role']) ? $_SESSION['role'] : '';
     $roleCondition = "";
-    if ($userRole === 'Limited Access') {
-      $roleCondition = " AND client_name != 'Sharekhan'";
-    }
 
     // Active Licenses (valid_till >= today)
     $stmt = $db->prepare("SELECT COUNT(*) FROM license_details WHERE licensee_validtill >= :today" . $roleCondition);
@@ -201,11 +198,7 @@ try {
     $params[':device_status_val'] = $deviceStatusVal;
   }
 
-  // Restrict Limited Access users from viewing Sharekhan clients
-  $userRole = isset($_SESSION['role']) ? $_SESSION['role'] : '';
-  if ($userRole === 'Limited Access') {
-    $whereConditions[] = "client_name != 'Sharekhan'";
-  }
+
 
   $whereSql = '';
   if (!empty($whereConditions)) {
@@ -222,6 +215,7 @@ try {
 
   // Fetch required fields with pagination
   $sql = "SELECT id, created_on, client_name, licensee_dealer, location_name, location_code, licensee_validtill, system_serialid, system_uniqueid, engine_graceperiod, 
+            ports_enabled_deviceid1, ports_enabled_deviceid2, ports_enabled_deviceid3, ports_enabled_deviceid4, ports_enabled_deviceid5, ports_enabled_deviceid6,
             COALESCE(
                 (SELECT status FROM device_status WHERE license_id = license_details.id ORDER BY id DESC LIMIT 1),
                 device_status
@@ -240,6 +234,15 @@ try {
   $stmt->execute();
 
   $licenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($licenses as &$row) {
+    $portsEnabledCount = 0;
+    for ($i = 1; $i <= 6; $i++) {
+      $portsEnabledCount += substr_count((string) ($row["ports_enabled_deviceid$i"] ?? ''), '1');
+    }
+    $row['ports_enabled'] = $portsEnabledCount;
+  }
+  unset($row);
 
   echo json_encode([
     'success' => true,

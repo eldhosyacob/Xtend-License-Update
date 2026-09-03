@@ -98,7 +98,7 @@ $testedByValue = isset($_POST['TestedBy']) ? (string) $_POST['TestedBy'] : '';
 $editId = $_GET['edit_id'] ?? null;
 $userRole = $_SESSION['role'] ?? 'Limited Access';
 $mode = $_GET['mode'] ?? '';
-$isViewMode = ($mode === 'view') || ($userRole !== 'Administrator' && $userRole !== 'Limited Access');
+$isViewMode = ($mode === 'view') || ($userRole === 'Limited Access' && !empty($editId)) || ($userRole !== 'Administrator' && $userRole !== 'Limited Access');
 
 // Block POST requests for unauthorized roles
 if ($method === 'POST' && $userRole !== 'Administrator' && $userRole !== 'Limited Access') {
@@ -116,10 +116,7 @@ if ($method === 'GET' && $editId) {
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
       if ($row) {
-        // Restrict Limited Access users from viewing Sharekhan licenses
-        if ($userRole === 'Limited Access' && $row['client_name'] === 'Sharekhan') {
-          die('Unauthorized access: You are not allowed to view or edit Sharekhan licenses.');
-        }
+
 
         // Fetch latest status from history if available
         $latestDeviceStatus = $row['device_status'];
@@ -844,24 +841,10 @@ if ($method === 'POST' && $action === 'send') {
 
             // Security check for Limited Access users during Edit
             if ($userRole === 'Limited Access') {
-              // Check if the creating/updating to Sharekhan
-              if ($client_name === 'Sharekhan') {
-                throw new Exception("Unauthorized: You cannot set Client Name to Sharekhan.");
-              }
-
-              // If updating, check if the original record was Sharekhan (Double check)
-              $checkStmt = $db->prepare("SELECT client_name FROM license_details WHERE id = :id");
-              $checkStmt->execute([':id' => $editId]);
-              $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
-              if ($existing && $existing['client_name'] === 'Sharekhan') {
-                throw new Exception("Unauthorized: You cannot edit Sharekhan licenses.");
-              }
+              throw new Exception("Unauthorized: Limited Access users are not allowed to edit existing licenses.");
             }
           } else {
-            // Security check for Limited Access users during Create
-            if ($userRole === 'Limited Access' && $client_name === 'Sharekhan') {
-              throw new Exception("Unauthorized: You cannot create Sharekhan licenses.");
-            }
+            // Limited Access users are allowed to create licenses for all clients
 
             $sql = "INSERT INTO license_details (
                               created_on, client_name, location_name, location_code, old_device_id, licensee_name, licensee_distributor, licensee_dealer, licensee_type, 
@@ -1297,9 +1280,7 @@ header('Content-Type: text/html; charset=utf-8');
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
                 <?php $clientName = (string) $val(['ClientName'], $defaults['ClientName']); ?>
-                <?php if ($userRole !== 'Limited Access' || $clientName === 'Sharekhan'): ?>
-                  <option value="Sharekhan" <?php echo ($clientName === 'Sharekhan') ? 'selected' : ''; ?>>Sharekhan</option>
-                <?php endif; ?>
+                <option value="Sharekhan" <?php echo ($clientName === 'Sharekhan') ? 'selected' : ''; ?>>Sharekhan</option>
                 <option value="Torus" <?php echo ($clientName === 'Torus') ? 'selected' : ''; ?>>Torus</option>
                 <option value="Other" <?php echo ($clientName === 'Other') ? 'selected' : ''; ?>>Other</option>
                 <option value="SK-Other" <?php echo ($clientName === 'SK-Other') ? 'selected' : ''; ?>>SK-Other</option>
@@ -2053,7 +2034,7 @@ header('Content-Type: text/html; charset=utf-8');
         <div style="margin-bottom:24px;">
           <label style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Comment</label>
           <div style="display:flex; align-items:center; gap:10px;">
-            <input type="text" name="comment" value=""
+            <input type="text" name="comment" value="" required
               style="width:25%; max-width:500px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
               onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
               onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">

@@ -616,7 +616,7 @@ require_once('config/auth_check.php');
           <label
             style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Comment</label>
           <div style="display:flex; align-items:center; gap:10px;">
-            <input type="text" name="Comment" id="CommentInput" class="form-input" style="width:25%; max-width:500px;">
+            <input type="text" name="Comment" id="CommentInput" class="form-input" style="width:25%; max-width:500px;" required>
             <div style="cursor:pointer; color:#64748b; display:flex; align-items:center;"
               onclick="showHistory('comment')" title="View Previous Comments">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
