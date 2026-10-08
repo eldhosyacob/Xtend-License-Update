@@ -580,6 +580,23 @@ if ($method === 'POST' && $action === 'generate') {
 if ($method === 'POST' && $action === 'send') {
   require_once('config/database.php');
   $db = getDatabaseConnection();
+
+  $system_serialid = isset($_POST['System']['SerialID']) ? trim($_POST['System']['SerialID']) : '';
+  $editId = $_POST['edit_id'] ?? '';
+  if ($system_serialid !== '' && $db) {
+    if ($editId !== '') {
+      $stmtCheck = $db->prepare("SELECT COUNT(*) FROM license_details WHERE system_serialid = :serial_id AND id != :edit_id");
+      $stmtCheck->execute([':serial_id' => $system_serialid, ':edit_id' => $editId]);
+    } else {
+      $stmtCheck = $db->prepare("SELECT COUNT(*) FROM license_details WHERE system_serialid = :serial_id");
+      $stmtCheck->execute([':serial_id' => $system_serialid]);
+    }
+    if ($stmtCheck->fetchColumn() > 0) {
+      echo "<script>alert('Serial Id already exists check serial ID'); window.history.back();</script>";
+      exit;
+    }
+  }
+
   $license = buildLicenseFromPost($_POST, $db);
   $encoded = json_encode($license, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
   $encoded = preg_replace('/_DUPLICATE_KEY_MARKER_\d+_\"/', '"', $encoded);
@@ -1282,6 +1299,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <?php $clientName = (string) $val(['ClientName'], $defaults['ClientName']); ?>
                 <option value="Sharekhan" <?php echo ($clientName === 'Sharekhan') ? 'selected' : ''; ?>>Sharekhan</option>
                 <option value="Torus" <?php echo ($clientName === 'Torus') ? 'selected' : ''; ?>>Torus</option>
+                <option value="Indusind" <?php echo ($clientName === 'Indusind') ? 'selected' : ''; ?>>Indusind</option>
                 <option value="Other" <?php echo ($clientName === 'Other') ? 'selected' : ''; ?>>Other</option>
                 <option value="SK-Other" <?php echo ($clientName === 'SK-Other') ? 'selected' : ''; ?>>SK-Other</option>
               </select>
@@ -1508,6 +1526,8 @@ header('Content-Type: text/html; charset=utf-8');
                 <option value="sharekhan" <?php echo ($systemBuildType === 'sharekhan') ? 'selected' : ''; ?>>sharekhan
                 </option>
                 <option value="Torus" <?php echo ($systemBuildType === 'Torus') ? 'selected' : ''; ?>>Torus</option>
+                <option value="Indusind" <?php echo ($systemBuildType === 'Indusind') ? 'selected' : ''; ?>>Indusind
+                </option>
                 <option value="Test" <?php echo ($systemBuildType === 'Test') ? 'selected' : ''; ?>>Test</option>
               </select>
             </div>
@@ -2350,6 +2370,7 @@ header('Content-Type: text/html; charset=utf-8');
               const mapping = {
                 'Sharekhan': 'sharekhan',
                 'Torus': 'Torus',
+                'Indusind': 'Indusind',
                 'Other': 'Test',
                 'SK-Other': 'sharekhan'
               };
@@ -2378,6 +2399,8 @@ header('Content-Type: text/html; charset=utf-8');
 
       const form = document.getElementById('licenseForm');
       if (form) {
+        let isSerialVerified = false;
+
         form.addEventListener('submit', function (e) {
           // Validate Ports before submission
           const p1 = document.getElementById('ports_enabled_deviceid1');
@@ -2401,36 +2424,90 @@ header('Content-Type: text/html; charset=utf-8');
 
           if (!isValid) {
             e.preventDefault();
-            // Don't alert here if PRI caused its own alert to prevent double alerting
-            // But we can keep a general submit alert.
-            // alert('Please correct the errors in Hardware PortsEnabled fields.');
             return;
           }
 
-          const btn = e.submitter;
-          // Check if the submitter is the 'Submit' button (name='action', value='send')
-          if (btn && btn.name === 'action' && btn.value === 'send') {
-            btn.innerText = 'Submitting...';
-            // Disable the button after a microtask to ensure the form submission includes the button's value
-            setTimeout(() => {
-              btn.disabled = true;
-              btn.style.opacity = '0.7';
-              btn.style.cursor = 'not-allowed';
-            }, 0);
+          if (isSerialVerified) {
+            isSerialVerified = false;
+            return;
           }
+
+          e.preventDefault();
+
+          const serialInput = document.getElementById('SystemSerialID');
+          const serialId = serialInput ? serialInput.value.trim() : '';
+          const editIdInput = document.querySelector('input[name="edit_id"]');
+          const editId = editIdInput ? editIdInput.value : '';
+
+          if (!serialId) {
+            alert('Please enter a Serial ID');
+            return;
+          }
+
+          const btn = e.submitter || document.querySelector('button[type="submit"][name="action"][value="send"]');
+
+          fetch('api/check_serial.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ serial_id: serialId, edit_id: editId })
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success && data.exists) {
+                alert('Serial Id already exists check serial ID');
+                const resultDiv = document.getElementById('serialIdCheckResult');
+                if (resultDiv) {
+                  resultDiv.style.display = 'block';
+                  resultDiv.style.color = '#ef4444';
+                  resultDiv.textContent = 'Serial ID already exists.';
+                }
+              } else if (data.success) {
+                if (btn && btn.name === 'action' && btn.value === 'send') {
+                  btn.innerText = 'Submitting...';
+                  setTimeout(() => {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.7';
+                    btn.style.cursor = 'not-allowed';
+                  }, 0);
+                }
+
+                let hiddenAction = form.querySelector('input[name="action"][type="hidden"]');
+                if (!hiddenAction) {
+                  hiddenAction = document.createElement('input');
+                  hiddenAction.type = 'hidden';
+                  hiddenAction.name = 'action';
+                  hiddenAction.value = 'send';
+                  form.appendChild(hiddenAction);
+                }
+
+                isSerialVerified = true;
+                form.submit();
+              } else {
+                alert('Error checking Serial ID: ' + (data.message || 'Unknown error'));
+              }
+            })
+            .catch(error => {
+              console.error('Error checking Serial ID:', error);
+              alert('An error occurred while checking Serial ID');
+            });
         });
       }
-    }
-    );
+    });
+
     function checkSerialID() {
       const input = document.getElementById('SystemSerialID');
       const resultDiv = document.getElementById('serialIdCheckResult');
-      const serialId = input.value.trim();
+      const serialId = input ? input.value.trim() : '';
 
       if (!serialId) {
         alert('Please enter a Serial ID');
         return;
       }
+
+      const editIdInput = document.querySelector('input[name="edit_id"]');
+      const editId = editIdInput ? editIdInput.value : '';
 
       resultDiv.style.display = 'none';
       resultDiv.className = '';
@@ -2440,7 +2517,7 @@ header('Content-Type: text/html; charset=utf-8');
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ serial_id: serialId })
+        body: JSON.stringify({ serial_id: serialId, edit_id: editId })
       })
         .then(response => response.json())
         .then(data => {

@@ -1,54 +1,58 @@
 {
-    "CreatedOn": "20260820",
+    "CreatedOn": "20260114",
     "Client": {
-        "ClientName": "Sharekhan",
-        "LocationName": "Kochi5",
-        "LocationCode": "682016",
-        "OldDeviceID": ""
+        "ClientName": "Indusind",
+        "LocationName": "TIBBO TEST2",
+        "LocationCode": "Test123",
+        "OldDeviceID": "7777"
     },
     "Licensee": {
         "Name": "Xtend Technologies Pvt. Ltd.",
-        "Distributor": "Xtend Technologies Pvt. Ltd.",
-        "Dealer": "SHAREKHAN-Kochi5",
+        "Distributor": "Xtend",
+        "Dealer": "INDUSIND-Test",
         "Type": "Rental",
-        "AMCTill": "20270820",
-        "ValidTill": "20260401",
-        "BillNo": "NA"
+        "AMCTill": "20261101",
+        "ValidTill": "20261101",
+        "BillNo": "XT25-1002"
     },
     "System": {
         "Type": "Standalone",
         "OS": "Linux",
         "IsVM": false,
-        "SerialID": "223",
-        "UniqueID": "7A7L-YQP2-PAUV-8HHC",
-        "BuildType": "sharekhan",
+        "SerialID": "283",
+        "UniqueID": "MJM4-6NF4-GCJJ-862F",
+        "BuildType": "Indusind",
         "Debug": 0,
         "IPSettings": {
-            "Type": "DHCP",
-            "IP": "",
-            "Gateway": "",
-            "Dns": ""
+            "Type": "Static",
+            "IP": "10.20.40.72/8",
+            "Gateway": "10.100.100.1",
+            "Dns": "8.8.8.8"
         },
         "Passwords": {
-            "System": "Xtend123",
-            "Web": "admin"
+            "System": "xtend",
+            "Web": "xtend"
         },
-        "FetchUpdates": 0,
-        "InstallUpdates": 0
+        "FetchUpdates": 1,
+        "InstallUpdates": 1
     },
     "Engine": {
         "Build": "Xtend IVR",
         "GracePeriod": 30,
-        "MaxPorts": "M=16,*=16",
+        "MaxPorts": "M=32,*=32",
         "ValidStartTZ": 330,
         "ValidEndTZ": 330,
         "ValidCountries": 65
     },
     "Hardware": {
         "Analog": {
-            "33333": "1111111111111111"
+            "82816": "1111111111111111",
+            "82815": "1111100000000000"
         },
-        "PRI": []
+        "PRI": {
+            "6523": "11111111111111111111111111111111",
+            "6524": "11111111111111111111111111111111"
+        }
     },
     "Centralization": {
         "LiveStatusUrl": "http://10.20.20.13:8081/UploadZip.xbs?UploadXmlData()",
@@ -60,7 +64,7 @@
         "PhoneBookUrl": "http://10.20.20.13:8081/VersionUpgradation.xbc?UpdatePhoneBook()"
     },
     "Features": {
-        "Script": "682016"
+        "Script": "TIBBO TEST2"
     },
-    "DeviceStatus": "Testing"
+    "DeviceStatus": "Replace Initiated"
 }

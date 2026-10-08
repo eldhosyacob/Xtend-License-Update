@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $serialId = isset($input['serial_id']) ? trim($input['serial_id']) : '';
+$editId = isset($input['edit_id']) ? trim($input['edit_id']) : '';
 
 if ($serialId === '') {
     echo json_encode(['success' => false, 'message' => 'Serial ID is required']);
@@ -30,8 +31,13 @@ if (!$db) {
 }
 
 try {
-    $stmt = $db->prepare("SELECT COUNT(*) FROM license_details WHERE system_serialid = :serial_id");
-    $stmt->execute([':serial_id' => $serialId]);
+    if (!empty($editId)) {
+        $stmt = $db->prepare("SELECT COUNT(*) FROM license_details WHERE system_serialid = :serial_id AND id != :edit_id");
+        $stmt->execute([':serial_id' => $serialId, ':edit_id' => $editId]);
+    } else {
+        $stmt = $db->prepare("SELECT COUNT(*) FROM license_details WHERE system_serialid = :serial_id");
+        $stmt->execute([':serial_id' => $serialId]);
+    }
     $count = $stmt->fetchColumn();
 
     if ($count > 0) {

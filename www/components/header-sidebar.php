@@ -166,6 +166,12 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                   </a>
                 </li>
                 <li>
+                  <a href="reports.php?client=Indusind"
+                    class="<?php echo ($is_reports_page && $client_param == 'Indusind') ? 'active' : ''; ?>">
+                    Indusind
+                  </a>
+                </li>
+                <li>
                   <a href="reports.php?client=SK-Other"
                     class="<?php echo ($is_reports_page && $client_param == 'SK-Other') ? 'active' : ''; ?>">
                     SK-Other
