@@ -200,6 +200,8 @@ if ($method === 'GET' && $editId) {
             'SettingsUrl' => $row['centralization_settingsurl'],
             'UserTrunkMappingUrl' => $row['centralization_usertrunkmappingurl'],
             'PhoneBookUrl' => $row['centralization_phonebookurl'],
+            'LicenseProxyUrl' => $row['centralization_licenseproxyurl'] ?? '',
+            'LicenseUpgradeUrl' => $row['centralization_licenseupgradeurl'] ?? '',
           ],
           'device_id1' => $row['device_id1'],
           'ports_enabled_deviceid1' => $row['ports_enabled_deviceid1'],
@@ -515,6 +517,10 @@ function buildLicenseFromPost(array $post, $db = null): array
       'SettingsUrl' => $postfix($post['Centralization']['SettingsUrl'] ?? '', '/VersionUpgradation.xbc?UpdateSettings'),
       'UserTrunkMappingUrl' => $postfix($post['Centralization']['UserTrunkMappingUrl'] ?? '', '/clientserver.xbc?GenerateStreamutmXML()'),
       'PhoneBookUrl' => $postfix($post['Centralization']['PhoneBookUrl'] ?? '', '/VersionUpgradation.xbc?UpdatePhoneBook()'),
+      'LicenseProxyUrl' => $str($post['Centralization']['LicenseProxyUrl'] ?? ''),
+      'LicenseUpgradeUrl' => $str($post['Centralization']['LicenseUpgradeUrl'] ?? ''),
+      // 'LicenseProxyUrl' => $postfix($post['Centralization']['LicenseProxyUrl'] ?? '', '/clientserver.xbc?LicenseProxy()'),
+      // 'LicenseUpgradeUrl' => $postfix($post['Centralization']['LicenseUpgradeUrl'] ?? '', '/clientserver.xbc?LicenseUpgrade()'),
     ],
     'Features' => [
       'Script' => $str($post['Features']['Script'] ?? ''),
@@ -1162,6 +1168,8 @@ header('Content-Type: text/html; charset=utf-8');
         'SettingsUrl' => '',
         'UserTrunkMappingUrl' => '',
         'PhoneBookUrl' => '',
+        'LicenseProxyUrl' => '',
+        'LicenseUpgradeUrl' => '',
       ],
       'Features' => [
         'Script' => '',
@@ -1900,7 +1908,7 @@ header('Content-Type: text/html; charset=utf-8');
             <!-- IP/Domain Helper Field -->
             <div style="grid-column: 1 / -1;">
               <label
-                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">IP/Domain</label>
+                style="display:block; font-weight:600; margin-bottom:6px; color:#475569; font-size:14px;">IP/Domain</label>
               <div style="display:flex; align-items:center; gap:12px;">
                 <input type="text" id="centralization_ip_domain" placeholder="Enter IP or Domain"
                   style="width:50%; max-width: 300px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
@@ -1973,6 +1981,43 @@ header('Content-Type: text/html; charset=utf-8');
                 style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[PhoneBookUrl]</label>
               <input type="text" name="Centralization[PhoneBookUrl]" required
                 value="<?php echo h($val(['Centralization', 'PhoneBookUrl'], $defaults['Centralization']['PhoneBookUrl'])); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+
+            <!-- Proxy IP/Domain Helper Field -->
+            <div style="grid-column: 1 / -1;">
+              <label
+                style="display:block; font-weight:600; margin-bottom:6px; color:#475569; font-size:14px;">Proxy IP/Domain</label>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <input type="text" id="centralization_proxy_domain" placeholder="Enter Proxy IP or Domain"
+                  style="width:50%; max-width: 300px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                  onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                  onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+
+                <label style="display:flex; align-items:center; cursor:pointer; gap:6px; user-select:none;">
+                  <input type="checkbox" id="centralization_apply_proxy_checkbox" onchange="applyProxyUrls(this)"
+                    style="width:16px; height:16px; cursor:pointer;">
+                  <span style="font-size:14px; color:#475569;">Apply for below fields</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[LicenseProxyUrl]</label>
+              <input type="text" name="Centralization[LicenseProxyUrl]" 
+                value="<?php echo h($val(['Centralization', 'LicenseProxyUrl'], $defaults['Centralization']['LicenseProxyUrl'] ?? '')); ?>"
+                style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
+            </div>
+            <div>
+              <label
+                style="display:block; font-weight:500; margin-bottom:6px; color:#475569; font-size:14px;">Centralization[LicenseUpgradeUrl]</label>
+              <input type="text" name="Centralization[LicenseUpgradeUrl]"
+                value="<?php echo h($val(['Centralization', 'LicenseUpgradeUrl'], $defaults['Centralization']['LicenseUpgradeUrl'] ?? '')); ?>"
                 style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s; box-sizing:border-box;"
                 onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
@@ -2274,6 +2319,41 @@ header('Content-Type: text/html; charset=utf-8');
         const input = document.querySelector(`input[name="${name}"]`);
         if (input) {
           input.value = newIP;
+        }
+      });
+
+      // Uncheck to show it was a one-time action
+      setTimeout(() => { checkBox.checked = false; }, 300);
+    }
+    
+
+    function applyProxyUrls(triggerCheckbox) {
+      const proxyInput = document.getElementById('centralization_proxy_domain');
+      const checkBox = triggerCheckbox || document.getElementById('centralization_apply_proxy_checkbox');
+
+      if (!checkBox || !checkBox.checked) return;
+
+      if (!proxyInput) {
+        checkBox.checked = false;
+        return;
+      }
+
+      const newProxy = proxyInput.value.trim();
+      if (!newProxy) {
+        alert("Please enter a Proxy IP or Domain first.");
+        checkBox.checked = false;
+        return;
+      }
+
+      const urlInputs = [
+        'Centralization[LicenseProxyUrl]',
+        'Centralization[LicenseUpgradeUrl]'
+      ];
+
+      urlInputs.forEach(name => {
+        const input = document.querySelector(`input[name="${name}"]`);
+        if (input) {
+          input.value = newProxy;
         }
       });
 
